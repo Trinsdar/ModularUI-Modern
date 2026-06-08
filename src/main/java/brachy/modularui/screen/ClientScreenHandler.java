@@ -15,6 +15,7 @@ import brachy.modularui.core.mixins.client.ScreenAccessor;
 import brachy.modularui.drawable.GuiDraw;
 import brachy.modularui.drawable.text.FontRenderHelper;
 import brachy.modularui.integration.recipeviewer.handlers.RecipeViewerHandler;
+import brachy.modularui.integration.recipeviewer.util.RecipeViewerUtil;
 import brachy.modularui.network.ModularNetwork;
 import brachy.modularui.overlay.OverlayStack;
 import brachy.modularui.screen.viewport.GuiContext;
@@ -371,7 +372,7 @@ public class ClientScreenHandler {
         }
         if (!hasLevel) return false; // E only closes in world
         if (Minecraft.getInstance().options.keyInventory
-                .isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
+                .isActiveAndMatches(InputConstants.getKey(keyCode, scanCode)) && !RecipeViewerUtil.isSearchFocused()) {
             dropOrClosePanel();
             return true;
         }
