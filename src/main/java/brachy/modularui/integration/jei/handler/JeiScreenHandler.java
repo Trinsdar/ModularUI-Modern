@@ -107,7 +107,12 @@ public class JeiScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
         }
     }
 
-
+    public static boolean isSearchFocused(){
+        if (ModularUIJeiPlugin.getRuntime().getIngredientListOverlay() instanceof IngredientListOverlayAccessor accessor){
+            return accessor.getSearchField().isFocused();
+        }
+        return false;
+    }
 
     @Override
     public @Nullable Object getCurrentlyDragged() {

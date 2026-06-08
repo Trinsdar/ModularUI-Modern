@@ -1,11 +1,8 @@
 package brachy.modularui.integration.jei;
 
 import brachy.modularui.ModularUI;
-import brachy.modularui.core.mixins.jei.IngredientListOverlayAccessor;
-import brachy.modularui.integration.jei.handler.JeiContainerHandler;
 import brachy.modularui.integration.jei.handler.JeiScreenHandler;
 import brachy.modularui.screen.ContainerScreenWrapper;
-import brachy.modularui.screen.ModularContainerMenu;
 import brachy.modularui.screen.ScreenWrapper;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -65,10 +62,4 @@ public class ModularUIJeiPlugin implements IModPlugin {
         //JeiContainerHandler.register(ModularContainerMenu.class, registration);
     }
 
-    public static boolean isSearchFocused(){
-        if (runtime != null && runtime.getIngredientListOverlay() instanceof IngredientListOverlayAccessor accessor){
-            return accessor.getSearchField().isFocused();
-        }
-        return false;
-    }
 }

@@ -4,8 +4,6 @@ import brachy.modularui.integration.rei.handler.REIScreenHandler;
 import brachy.modularui.screen.ContainerScreenWrapper;
 import brachy.modularui.screen.ScreenWrapper;
 
-import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
@@ -26,9 +24,4 @@ public class ModularUIREIPlugin implements REIClientPlugin {
         REIScreenHandler.register(ContainerScreenWrapper.class, registry);
     }
 
-    public static boolean isSearchFocused(){
-        TextField searchField = REIRuntime.getInstance().getSearchTextField();
-        if (searchField != null) return searchField.isFocused();
-        return false;
-    }
 }

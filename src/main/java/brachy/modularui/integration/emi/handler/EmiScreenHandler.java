@@ -120,6 +120,10 @@ public class EmiScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
         EmiScreenManager.search.setFocused(focused);
     }
 
+    public static boolean isSearchFocused(){
+        return EmiScreenManager.search.isFocused();
+    }
+
     @Override
     public @Nullable Object getCurrentlyDragged() {
         if (currentIngredient == null || currentIngredient.isEmpty()) return null;

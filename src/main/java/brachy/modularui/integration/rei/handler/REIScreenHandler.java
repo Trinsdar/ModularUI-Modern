@@ -134,6 +134,12 @@ public class REIScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
         if (searchField != null) searchField.setFocused(focused);
     }
 
+    public static boolean isSearchFocused(){
+        TextField searchField = REIRuntime.getInstance().getSearchTextField();
+        if (searchField != null) return searchField.isFocused();
+        return false;
+    }
+
     @Override
     public @Nullable Object getCurrentlyDragged() {
         if (currentIngredient == null) return null;

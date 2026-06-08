@@ -10,7 +10,6 @@ import brachy.modularui.test.TestMachine;
 import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
-import dev.emi.emi.screen.EmiScreenManager;
 
 @EmiEntrypoint
 public class ModularUIEmiPlugin implements EmiPlugin {
@@ -24,7 +23,4 @@ public class ModularUIEmiPlugin implements EmiPlugin {
         }
     }
 
-    public static boolean isSearchFocused(){
-        return EmiScreenManager.search.isFocused();
-    }
 }
