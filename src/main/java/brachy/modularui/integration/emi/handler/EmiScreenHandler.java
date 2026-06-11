@@ -7,6 +7,8 @@ import brachy.modularui.integration.recipeviewer.handlers.GhostIngredientSlot;
 import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.integration.recipeviewer.handlers.RecipeViewerHandler;
 
+import dev.emi.emi.api.EmiApi;
+
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluid;
@@ -122,7 +124,7 @@ public class EmiScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
 
     @Override
     public boolean isSearchFocused(){
-        return EmiScreenManager.search.isFocused();
+        return EmiApi.isSearchFocused();
     }
 
     @Override
