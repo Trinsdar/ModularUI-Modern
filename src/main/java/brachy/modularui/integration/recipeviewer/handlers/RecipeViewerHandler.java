@@ -36,6 +36,8 @@ public abstract class RecipeViewerHandler {
 
     public abstract void setSearchFocused(boolean focused);
 
+    public abstract boolean isSearchFocused();
+
     public abstract @Nullable Object getCurrentlyDragged();
 
     public boolean isHoveringOver(GhostIngredientSlot<?> slot) {

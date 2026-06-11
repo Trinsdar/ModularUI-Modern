@@ -120,7 +120,8 @@ public class EmiScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
         EmiScreenManager.search.setFocused(focused);
     }
 
-    public static boolean isSearchFocused(){
+    @Override
+    public boolean isSearchFocused(){
         return EmiScreenManager.search.isFocused();
     }
 
