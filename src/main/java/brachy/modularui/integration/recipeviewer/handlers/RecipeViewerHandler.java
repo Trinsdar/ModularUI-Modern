@@ -62,6 +62,11 @@ public abstract class RecipeViewerHandler {
         public void setSearchFocused(boolean focused) {}
 
         @Override
+        public boolean isSearchFocused() {
+            return false;
+        }
+
+        @Override
         public @Nullable Object getCurrentlyDragged() {
             return null;
         }
