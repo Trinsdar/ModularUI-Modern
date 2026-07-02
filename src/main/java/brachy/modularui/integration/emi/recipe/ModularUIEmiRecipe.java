@@ -56,9 +56,15 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
     public ModularUIEmiRecipe(ResourceLocation recipeId, Supplier<IWidget> recipeUI) {
         this.id = recipeId;
         this.recipeUI = recipeUI;
-        ModularScreen screen = createScreen();
-        this.displayWidth = EmbedHandler.getEmbedWidth(screen);
-        this.displayHeight = EmbedHandler.getEmbedHeight(screen);
+        IWidget ui = recipeUI.get();
+        int w = ui.resizer().getFixedPixelWidth(), h = ui.resizer().getFixedPixelHeight();
+        if (w < 0 || h < 0) {
+            ModularScreen screen = createScreen(ui, this.id.getNamespace(), "emi_recipe_" + this.id.getPath());
+            w = EmbedHandler.getEmbedWidth(screen);
+            h = EmbedHandler.getEmbedHeight(screen);
+        }
+        this.displayWidth = w;
+        this.displayHeight = h;
         this.bounds = new Bounds(0, 0, this.displayWidth, this.displayHeight);
     }
 

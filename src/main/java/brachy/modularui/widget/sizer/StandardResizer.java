@@ -538,6 +538,14 @@ public class StandardResizer extends WidgetResizeNode implements IPositioned<Sta
         return axis.isHorizontal() ? this.x.hasEnd() : this.y.hasEnd();
     }
 
+    public int getFixedPixelWidth() {
+        return this.x.getFixedPixelSize();
+    }
+
+    public int getFixedPixelHeight() {
+        return this.y.getFixedPixelSize();
+    }
+
     @Override
     public boolean widthDependsOnParent() {
         return this.x.sizeDependsOnParent();
