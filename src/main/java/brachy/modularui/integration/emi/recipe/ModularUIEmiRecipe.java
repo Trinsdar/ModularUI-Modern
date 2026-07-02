@@ -12,7 +12,6 @@ import brachy.modularui.screen.ModularScreen;
 import brachy.modularui.screen.RichTooltip;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -27,8 +26,8 @@ import dev.emi.emi.api.widget.SlotWidget;
 import dev.emi.emi.api.widget.Widget;
 import dev.emi.emi.api.widget.WidgetHolder;
 import dev.emi.emi.screen.widget.SizedButtonWidget;
+import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Iterator;
@@ -48,49 +47,31 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
                 }
             });
 
-    private final ResourceLocation recipeId;
+    @Getter private final ResourceLocation id;
     private final Supplier<IWidget> recipeUI;
 
-    private boolean sizeCalculated = false;
-    private Bounds bounds;
-    private int displayWidth, displayHeight;
+    @Getter private final Bounds bounds;
+    @Getter private final int displayWidth, displayHeight;
 
     public ModularUIEmiRecipe(ResourceLocation recipeId, Supplier<IWidget> recipeUI) {
-        this.recipeId = recipeId;
+        this.id = recipeId;
         this.recipeUI = recipeUI;
-    }
-
-    public void onSizeCalculated(ModularScreen screen) {}
-
-    private synchronized void requireSize() {
-        if (this.sizeCalculated) return;
-        ModularScreen screen = SCREEN_CACHE.getUnchecked(this);
-        onSizeCalculated(screen);
+        ModularScreen screen = createScreen();
         this.displayWidth = EmbedHandler.getEmbedWidth(screen);
         this.displayHeight = EmbedHandler.getEmbedHeight(screen);
         this.bounds = new Bounds(0, 0, this.displayWidth, this.displayHeight);
-        this.sizeCalculated = true;
     }
 
-    @Override
-    public int getDisplayWidth() {
-        requireSize();
-        return displayWidth;
-    }
-
-    @Override
-    public int getDisplayHeight() {
-        requireSize();
-        return displayHeight;
-    }
-
-    public Bounds getBounds() {
-        requireSize();
-        return bounds;
+    public ModularUIEmiRecipe(ResourceLocation recipeId, int width, int height, Supplier<IWidget> recipeUI) {
+        this.id = recipeId;
+        this.recipeUI = recipeUI;
+        this.displayWidth = width;
+        this.displayHeight = height;
+        this.bounds = new Bounds(0, 0, this.displayWidth, this.displayHeight);
     }
 
     private ModularScreen createScreen() {
-        return createScreen(this.recipeUI.get(), this.recipeId.getNamespace(), "emi_recipe_" + this.recipeId.getPath());
+        return createScreen(this.recipeUI.get(), this.id.getNamespace(), "emi_recipe_" + this.id.getPath());
     }
 
     public ModularScreen createScreen(IWidget recipeUI, String owner, String name) {
@@ -116,7 +97,6 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
     }
 
     public IWidget transformWidget(IWidget widget, Iterator<EmiIngredient> in, Iterator<EmiStack> out) {
-
         if (!(widget instanceof EmiRecipeViewerSlot recipeViewerSlot)) return widget;
 
         if (recipeViewerSlot.recipeSlotRole() == RecipeSlotRole.OUTPUT) {
@@ -131,11 +111,6 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
         // emi complains when it cant find an output slot
         widgets.add(new SlotWidget(EmiStack.EMPTY, -1000, -1000).drawBack(false).recipeContext(this));
         widgets.add(new UIWrapperWidget(this));
-    }
-
-    @Override
-    public @Nullable ResourceLocation getId() {
-        return recipeId;
     }
 
     public static class UIWrapperWidget extends Widget {
