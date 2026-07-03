@@ -38,7 +38,7 @@ import java.util.function.Supplier;
 public abstract class ModularUIEmiRecipe implements EmiRecipe {
 
     private static final LoadingCache<ModularUIEmiRecipe, ModularScreen> SCREEN_CACHE = CacheBuilder.newBuilder()
-            .expireAfterAccess(Duration.ofSeconds(5))
+            .expireAfterAccess(Duration.ofSeconds(1))
             .maximumSize(20)
             .build(new CacheLoader<>() {
                 @Override
@@ -90,7 +90,10 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
                     .invisible()
                     .child(recipeUI);
         }
-        ModularScreen screen = ModularScreen.createEmbed(owner, transform(panel));
+        if (getInputs() != null && getOutputs() != null) {
+            panel = transform(panel);
+        }
+        ModularScreen screen = ModularScreen.createEmbed(owner, panel);
         screen.getContext().getUISettings().drawTooltipExternally(true);
         return screen;
     }
@@ -133,10 +136,9 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             ModularScreen screen = SCREEN_CACHE.getUnchecked(this.recipe);
-            EmbedHandler.drawEmbed(screen, guiGraphics, mouseX, mouseY, partialTick, r -> !(r instanceof SizedButtonWidget));
-            EmbedHandler.drawEmbedForeground(screen, guiGraphics);
+            EmbedHandler.drawEmbed(screen, graphics, partialTick, r -> !(r instanceof SizedButtonWidget));
         }
 
         @Override

@@ -11,6 +11,7 @@ import net.minecraftforge.items.wrapper.EmptyHandler;
 
 import org.jetbrains.annotations.ApiStatus;
 
+@Deprecated
 @ApiStatus.Experimental
 public class RecipeScreenRenderingUtil {
 

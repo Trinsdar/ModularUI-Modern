@@ -126,7 +126,7 @@ public class DimensionSizer {
     }
 
     public boolean hasFixedPixelSize() {
-        return this.size != null && this.size.getMeasure() == Unit.Measure.PIXEL;
+        return this.size != null && this.size.getMeasure() != Unit.Measure.RELATIVE && !dependsOnChildren();
     }
 
     public int getFixedPixelSize() {
