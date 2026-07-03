@@ -22,8 +22,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidTank;
@@ -267,6 +269,10 @@ public class FluidSlot extends AbstractFluidDisplayWidget<FluidSlot>
     @Override
     public void setGhostIngredient(@NotNull FluidStack ingredient) {
         if (this.syncHandler.phantom()) {
+            if (ingredient.getRawFluid() != Fluids.EMPTY) {
+                ingredient.setAmount(this.syncHandler.controlsAmount() ? 1000 : 1);
+                this.syncHandler.playSound(Minecraft.getInstance().player, ingredient, SoundActions.BUCKET_FILL);
+            }
             this.syncHandler.setValue(ingredient);
         }
     }

@@ -13,7 +13,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import dev.emi.emi.api.forge.ForgeEmiStack;
 import dev.emi.emi.api.stack.EmiIngredient;
@@ -71,10 +73,16 @@ public class EmiStackConverter {
         @Override
         public @Nullable FluidStack convertFrom(EmiStack stack) {
             Fluid key = stack.getKeyOfType(Fluid.class);
-            if (key == null || key == Fluids.EMPTY) {
-                return null;
+            if (key != null && key != Fluids.EMPTY) {
+                return new FluidStack(key, MathUtils.saturatedCast(stack.getAmount()), stack.getNbt());
             }
-            return new FluidStack(key, MathUtils.saturatedCast(stack.getAmount()), stack.getNbt());
+            var item = ITEM.convertFrom(stack);
+            if (item != null) {
+                return item.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM)
+                        .filter(f -> f.getTanks() == 1)
+                        .map(f -> f.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE)).orElse(null);
+            }
+            return null;
         }
 
         private static EmiIngredient toEMIIngredient(Stream<FluidStack> stream) {
