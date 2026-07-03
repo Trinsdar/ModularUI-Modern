@@ -71,8 +71,8 @@ jobs:
         run: |
           MAVEN_METADATA_URL="https://maven.gtceu.com/brachy/modularui/modularui-mc${{ steps.ci.outputs.mc_version }}/${{ steps.version.outputs.mod_ver }}-SNAPSHOT/maven-metadata.xml"
           METADATA=$(curl -s "$MAVEN_METADATA_URL")
-          TIMESTAMP=$(echo "$METADATA" | xmllint --xpath 'string(//snapshot/timestamp)' -)
-          BUILD_NUMBER=$(echo "$METADATA" | xmllint --xpath 'string(//snapshot/buildNumber)' -)
+          TIMESTAMP=$(echo "$METADATA" | grep -oP '(?<=<timestamp>).*?(?=</timestamp>)')
+          BUILD_NUMBER=$(echo "$METADATA" | grep -oP '(?<=<buildNumber>).*?(?=</buildNumber>)')
           SNAPSHOT_VERSION="${TIMESTAMP}-${BUILD_NUMBER}"
           echo "snapshot_ver=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
 
@@ -87,3 +87,5 @@ jobs:
             Maven version: `${{ steps.version.outputs.mod_ver }}-${{ steps.maven_version.outputs.snapshot_ver }}`
             Last commit: `${{ steps.version.outputs.last_commit }}`
           color: 0x8E24AA
+          username: Bot that notifies discord for a new snapshot on maven
+          avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
