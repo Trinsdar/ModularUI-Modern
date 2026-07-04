@@ -348,14 +348,14 @@ public class TestMachine {
         public static class RecipeDisplay extends ModularUIEmiRecipe {
 
             private final Recipe recipe;
-            @Getter private final List<EmiIngredient> inputs;
-            @Getter private final List<EmiStack> outputs;
+            @Getter private final List<EmiIngredient> inputs = new ArrayList<>();
+            @Getter private final List<EmiStack> outputs = new ArrayList<>();
 
             public RecipeDisplay(Supplier<IWidget> widgetSupplier, Recipe recipe) {
                 super(recipe.resloc, widgetSupplier);
                 this.recipe = recipe;
-                this.inputs = recipe.in.stream().map(EmiStack::of).map(s -> (EmiIngredient) s).toList();
-                this.outputs = recipe.out.stream().map(EmiStack::of).toList();
+                recipe.in.stream().map(EmiStack::of).map(s -> (EmiIngredient) s).forEach(inputs::add);
+                recipe.out.stream().map(EmiStack::of).forEach(outputs::add);
             }
 
             @Override
