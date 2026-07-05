@@ -50,13 +50,32 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
     @Getter private final ResourceLocation id;
     private final Supplier<IWidget> recipeUI;
 
-    @Getter private final Bounds bounds;
-    @Getter private final int displayWidth, displayHeight;
+    private boolean sizeCalculated = false;
+    private Bounds bounds;
+    private int displayWidth, displayHeight;
 
     public ModularUIEmiRecipe(ResourceLocation recipeId, Supplier<IWidget> recipeUI) {
         this.id = recipeId;
         this.recipeUI = recipeUI;
-        IWidget ui = recipeUI.get();
+    }
+
+    public ModularUIEmiRecipe(ResourceLocation recipeId, int width, int height, Supplier<IWidget> recipeUI) {
+        this.id = recipeId;
+        this.recipeUI = recipeUI;
+        this.displayWidth = width;
+        this.displayHeight = height;
+        this.bounds = new Bounds(0, 0, this.displayWidth, this.displayHeight);
+        this.sizeCalculated = true;
+    }
+
+    /**
+     * Calculates the size of the recipe, if not already done. This should be called in the constructor of sub-classes.
+     * Otherwise, the size of ALL the recipes in the same category are calculated all at once, which can make the game for a few seconds.
+     */
+    protected void calculateSize() {
+        if (this.sizeCalculated) return;
+        this.sizeCalculated = true;
+        IWidget ui = this.recipeUI.get();
         int w = ui.resizer().getFixedPixelWidth(), h = ui.resizer().getFixedPixelHeight();
         if (w < 0 || h < 0) {
             ModularScreen screen = createScreen(ui, this.id.getNamespace(), "emi_recipe_" + this.id.getPath());
@@ -68,12 +87,21 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
         this.bounds = new Bounds(0, 0, this.displayWidth, this.displayHeight);
     }
 
-    public ModularUIEmiRecipe(ResourceLocation recipeId, int width, int height, Supplier<IWidget> recipeUI) {
-        this.id = recipeId;
-        this.recipeUI = recipeUI;
-        this.displayWidth = width;
-        this.displayHeight = height;
-        this.bounds = new Bounds(0, 0, this.displayWidth, this.displayHeight);
+    public Bounds getBounds() {
+        calculateSize();
+        return bounds;
+    }
+
+    @Override
+    public int getDisplayHeight() {
+        calculateSize();
+        return displayHeight;
+    }
+
+    @Override
+    public int getDisplayWidth() {
+        calculateSize();
+        return displayWidth;
     }
 
     private ModularScreen createScreen() {

@@ -356,6 +356,7 @@ public class TestMachine {
                 this.recipe = recipe;
                 recipe.in.stream().map(EmiStack::of).map(s -> (EmiIngredient) s).forEach(inputs::add);
                 recipe.out.stream().map(EmiStack::of).forEach(outputs::add);
+                calculateSize();
             }
 
             @Override
