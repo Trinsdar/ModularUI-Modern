@@ -333,4 +333,8 @@ public class ModularSlot extends SlotItemHandler {
                     ". Valid index range is [0," + itemHandler.getSlots() + ")");
         }
     }
+
+    public static boolean onlyAmountChanged(ItemStack a, ItemStack b) {
+        return ItemStack.isSameItemSameTags(a, b) && a.getCount() != b.getCount();
+    }
 }

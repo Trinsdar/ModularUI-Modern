@@ -40,7 +40,7 @@ public class PhantomItemSlotSyncHandler extends ItemSlotSyncHandler {
 
     @Override
     protected void onSlotUpdate(ItemStack oldStack, ItemStack newStack, boolean client, boolean init) {
-        if (!ItemStack.isSameItem(oldStack, newStack) && !newStack.isEmpty()) {
+        if (!ItemStack.isSameItemSameTags(oldStack, newStack) && !newStack.isEmpty()) {
             // store last non-empty stack for later
             this.lastStoredPhantomItem = newStack.copy();
             this.lastStoredPhantomItem.setCount(1);
