@@ -227,9 +227,8 @@ public class FluidSlot extends AbstractFluidDisplayWidget<FluidSlot>
         return this.alwaysShowFull ? 0 : getFluidTank().getCapacity();
     }
 
-    @Nullable
     public FluidStack getFluidStack() {
-        return this.syncHandler == null ? null : this.syncHandler.getValue();
+        return this.syncHandler == null ? FluidStack.EMPTY : this.syncHandler.getOrDefault(FluidStack.EMPTY);
     }
 
     public IFluidTank getFluidTank() {
