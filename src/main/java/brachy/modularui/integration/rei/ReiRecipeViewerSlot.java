@@ -1,31 +1,104 @@
 package brachy.modularui.integration.rei;
 
+import brachy.modularui.drawable.GuiTextures;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.integration.recipeviewer.entry.EntryList;
+import brachy.modularui.screen.viewport.ModularGuiContext;
+import brachy.modularui.theme.WidgetThemeEntry;
 
-import org.apache.commons.lang3.NotImplementedException;
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
+
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fluids.FluidStack;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.ApiStatus;
+
+import java.util.function.UnaryOperator;
 
 @ApiStatus.Experimental
 public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerSlot> {
 
+    @ApiStatus.Internal
+    @Getter
+    private Slot slotWidget;
+    private int x, y;
+
+    @Accessors(fluent = true)
+    @Getter
+    private RecipeSlotRole recipeSlotRole;
+    @Getter
+    private EntryList<?> value;
+    @Accessors(fluent = true)
+    @Getter
+    @Setter
+    private float chance = 1f;
+
     public ReiRecipeViewerSlot() {
-        throw new NotImplementedException();
+        super();
+        slotWidget = Widgets.createSlot(new Point()).disableBackground();
+        recipeSlotRole = RecipeSlotRole.RENDER_ONLY;
+
+        size(18, 18);
     }
 
     @Override
     public ReiRecipeViewerSlot recipeSlotRole(RecipeSlotRole recipeSlotRole) {
+        this.recipeSlotRole = recipeSlotRole;
+        rebuildReiSlot();
         return getThis();
     }
 
     @Override
     public <T> ReiRecipeViewerSlot value(EntryList<T> entryList) {
+        this.value = entryList;
+        rebuildReiSlot();
+        if (this.value.getType() == FluidStack.class) {
+            background(GuiTextures.SLOT_FLUID);
+        } else {
+            background(GuiTextures.SLOT_ITEM); // TODO other types
+        }
         return getThis();
     }
 
+    @SuppressWarnings("unchecked")
+    private void rebuildReiSlot() {
+        slotWidget = Widgets.createSlot(new Point()).disableBackground();
+        if (this.value.getType() == ItemStack.class) {
+            slotWidget.entries(REIStackConverter.ITEM.convertTo((EntryList<ItemStack>) this.value, chance, UnaryOperator.identity()));
+        } else if (this.value.getType() == FluidStack.class) {
+            slotWidget.entries(REIStackConverter.FLUID.convertTo((EntryList<FluidStack>) this.value, chance, UnaryOperator.identity()));
+        }
+        if (recipeSlotRole == RecipeSlotRole.INPUT) {
+            slotWidget.markInput();
+        } else if (recipeSlotRole == RecipeSlotRole.OUTPUT) {
+            slotWidget.markOutput();
+        } else {
+            slotWidget.unmarkInputOrOutput();
+        }
+    }
+
     @Override
-    public ReiRecipeViewerSlot chance(float chance) {
-        return getThis();
+    public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
+        context.getGraphics().pose().translate(-this.x, -this.y, 0);
+        this.slotWidget.render(context.getGraphics(), context.getMouseX(), context.getMouseY(), context.getRenderPartialTicks());
+        context.getGraphics().pose().translate(this.x, this.y, 0);
+    }
+
+    @Override
+    public Result onMousePressed(int button) {
+        this.slotWidget.mouseClicked(getContext().getMouseX(), getContext().getAbsMouseY(), button);
+        return Result.SUCCESS;
+    }
+
+    @Override
+    public Result onKeyPressed(int keyCode, int scanCode, int modifiers) {
+        return this.slotWidget.keyPressed(keyCode, scanCode, modifiers) ? Result.SUCCESS : Result.ACCEPT;
     }
 }

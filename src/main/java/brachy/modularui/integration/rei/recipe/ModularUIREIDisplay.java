@@ -9,6 +9,7 @@ import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.integration.recipeviewer.handlers.fluid.EmptyFluidTank;
 import brachy.modularui.integration.recipeviewer.util.RecipeScreenRenderingUtil;
 import brachy.modularui.integration.rei.REIStackConverter;
+import brachy.modularui.integration.rei.ReiRecipeViewerSlot;
 import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.screen.ModularScreen;
 import brachy.modularui.utils.memoization.MemoizedSupplier;
@@ -17,6 +18,8 @@ import brachy.modularui.widget.WidgetTree;
 import brachy.modularui.widget.sizer.Area;
 import brachy.modularui.widgets.slot.FluidSlot;
 import brachy.modularui.widgets.slot.ItemSlot;
+
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -72,16 +75,16 @@ public class ModularUIREIDisplay implements Display {
         }, Duration.ofSeconds(10));
 
         WidgetTree.foreachChildBFS(widgetSupplier.get(), widget -> {
-            if (!(widget instanceof IngredientProvider<?> provider)) return true;
+            if (!(widget instanceof ReiRecipeViewerSlot provider)) return true;
 
-            RecipeSlotRole role = provider.getRecipeRole();
+            RecipeSlotRole role = provider.recipeSlotRole();
             if (role == RecipeSlotRole.RENDER_ONLY) return true;
 
-            REIStackConverter.Converter<?> converter = REIStackConverter.getForNullable(provider.ingredientClass());
+            REIStackConverter.Converter<?> converter = REIStackConverter.getForNullable(provider.getValue().getType());
             if (converter == null) return true;
 
             @SuppressWarnings({"rawtypes", "unchecked"})
-            EntryIngredient ingredient = ((REIStackConverter.Converter) converter).convertTo(provider);
+            EntryIngredient ingredient = EntryIngredient.of(provider.getSlotWidget().getEntries());
 
             switch (role) {
                 case INPUT -> inputEntries.add(ingredient);
@@ -102,37 +105,22 @@ public class ModularUIREIDisplay implements Display {
         widgets.add(new UIWrapperWidget());
 
         WidgetTree.foreachChildBFS(this.screen.get().getMainPanel(), widget -> {
-            if (!(widget instanceof IngredientProvider<?> provider)) return true;
+            if (!(widget instanceof ReiRecipeViewerSlot provider)) return true;
 
-            RecipeSlotRole role = provider.getRecipeRole();
+            RecipeSlotRole role = provider.recipeSlotRole();
             if (role == RecipeSlotRole.RENDER_ONLY) return true;
 
-            REIStackConverter.Converter<?> converter = REIStackConverter.getForNullable(provider.ingredientClass());
+            REIStackConverter.Converter<?> converter = REIStackConverter.getForNullable(provider.getValue().getType());
             if (converter == null) return true;
 
             @SuppressWarnings({"rawtypes", "unchecked"})
-            EntryIngredient ingredient = ((REIStackConverter.Converter) converter).convertTo(provider);
+            EntryIngredient ingredient = EntryIngredient.of(provider.getSlotWidget().getEntries());
             Area area = widget.getArea();
 
-            EntryWidget entryWidget = new EntryWidget(new Rectangle(area.x(), area.y(), area.w(), area.h()));
-            // Clear the MUI slots and add EMI slots based on them.
-            if (provider instanceof ItemSlot itemSlot) {
-                itemSlot.slot(RecipeScreenRenderingUtil.EMPTY_ITEM_HANDLER, 0).invisible();
-            } else if (provider instanceof FluidSlot fluidSlot) {
-                fluidSlot.syncHandler(EmptyFluidTank.INSTANCE).invisible();
-            }
-
-            entryWidget.background(false)
-                    .entries(ingredient.castAsList());
-            if (role == RecipeSlotRole.INPUT) {
-                entryWidget.markIsInput();
-            } else if (role == RecipeSlotRole.OUTPUT) {
-                entryWidget.markIsOutput();
-            } else {
-                entryWidget.unmarkInputOrOutput();
-            }
-            if (widget instanceof ITooltip<?> tooltip && tooltip.hasTooltip()) {
-                if (tooltip.tooltip().getRichText() instanceof RichText richText) {
+            Slot entryWidget = provider.getSlotWidget();
+/*
+            if (provider.hasTooltip()) {
+                if (provider.tooltip().getRichText() instanceof RichText richText) {
                     var textList = richText.getAsText();
                     entryWidget.tooltipProcessor(text -> {
                         textList.forEach(line -> line.map(t -> text.add((Component) t), text::add));
@@ -140,6 +128,7 @@ public class ModularUIREIDisplay implements Display {
                     });
                 }
             }
+*/
             widgets.add(entryWidget);
             return true;
         }, true);
