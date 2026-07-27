@@ -2,6 +2,7 @@ package brachy.modularui.integration.jei;
 
 import brachy.modularui.api.drawable.IDrawable;
 import brachy.modularui.api.widget.IWidget;
+import brachy.modularui.drawable.GuiTextures;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.integration.recipeviewer.entry.EntryList;
@@ -13,6 +14,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
+
+import net.minecraftforge.fluids.FluidStack;
+
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -38,6 +42,11 @@ public class JeiRecipeViewerSlot extends RecipeViewerSlotWidget<JeiRecipeViewerS
     @Override
     public <T> JeiRecipeViewerSlot value(EntryList<T> entryList) {
         this.value = entryList;
+        if (this.value.getType() == FluidStack.class) {
+            background(GuiTextures.SLOT_FLUID);
+        } else {
+            background(GuiTextures.SLOT_ITEM); // TODO other types
+        }
         return getThis();
     }
 }
