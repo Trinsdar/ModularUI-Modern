@@ -1,8 +1,10 @@
 package brachy.modularui.integration.jei.recipe;
 
 import brachy.modularui.api.widget.IWidget;
+import brachy.modularui.integration.jei.JeiRecipeViewerSlot;
 import brachy.modularui.integration.jei.ModularUIJeiPlugin;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
+import brachy.modularui.integration.recipeviewer.entry.EntryList;
 import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.integration.recipeviewer.util.RecipeScreenRenderingUtil;
 import brachy.modularui.screen.ModularPanel;
@@ -68,10 +70,10 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         return this.modularScreenCache.getUnchecked(recipe);
     }
 
-    private static <T> void addJEISlot(IRecipeLayoutBuilder builder, IngredientProvider<T> widget,
+    private static <T> void addJEISlot(IRecipeLayoutBuilder builder, EntryList<T> entries, JeiRecipeViewerSlot widget,
                                        RecipeIngredientRole role, int index) {
         var type = ModularUIJeiPlugin.getRuntime().getIngredientManager()
-                .getIngredientTypeChecked(widget.ingredientClass());
+                .getIngredientTypeChecked(entries.getType());
         if (type.isEmpty()) {
             return;
         }
@@ -79,7 +81,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         Area widgetArea = widget.getArea();
         IRecipeSlotBuilder slotBuilder = builder.addSlot(role, widgetArea.x, widgetArea.y);
 
-        slotBuilder.addIngredients(type.get(), widget.getIngredients().getStacks());
+        slotBuilder.addIngredients(type.get(), entries.getStacks());
         slotBuilder.setCustomRenderer(type.get(), new IIngredientRenderer<>() {
 
             @Override
@@ -111,11 +113,11 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
         MutableInt i = new MutableInt(0);
         WidgetTree.foreachChildBFS(screen.getMainPanel(), widget -> {
-            if (!(widget instanceof IngredientProvider<?> provider)) {
+            if (!(widget instanceof JeiRecipeViewerSlot provider)) {
                 return true;
             }
-            RecipeIngredientRole role = mapToRole(provider.getRecipeRole());
-            addJEISlot(builder, provider, role, i.getAndIncrement());
+            RecipeIngredientRole role = mapToRole(provider.recipeSlotRole());
+            addJEISlot(builder, provider.getValue(), provider, role, i.getAndIncrement());
             return true;
         }, true);
     }
