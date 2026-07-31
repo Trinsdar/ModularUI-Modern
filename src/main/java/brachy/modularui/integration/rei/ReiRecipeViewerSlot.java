@@ -7,17 +7,15 @@ import brachy.modularui.integration.recipeviewer.entry.EntryList;
 import brachy.modularui.screen.viewport.ModularGuiContext;
 import brachy.modularui.theme.WidgetThemeEntry;
 
-import me.shedaniel.math.Point;
-import me.shedaniel.rei.api.client.gui.widgets.Slot;
-
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.UnaryOperator;
@@ -70,12 +68,8 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
     @SuppressWarnings("unchecked")
     private void rebuildReiSlot() {
         slotWidget = Widgets.createSlot(new Point()).disableBackground();
-        if (this.value.getType() == ItemStack.class) {
-            slotWidget.entries(REIStackConverter.ITEM.convertTo((EntryList<ItemStack>) this.value, chance, UnaryOperator.identity()));
-        } else if (this.value.getType() == FluidStack.class) {
-            slotWidget.entries(REIStackConverter.FLUID.convertTo((EntryList<FluidStack>) this.value, chance, UnaryOperator.identity()));
-        }
-        if (recipeSlotRole == RecipeSlotRole.INPUT) {
+        slotWidget.entries(convertToReiEntry(this.value, chance));
+        if (recipeSlotRole == RecipeSlotRole.INPUT || recipeSlotRole == RecipeSlotRole.CATALYST) {
             slotWidget.markInput();
         } else if (recipeSlotRole == RecipeSlotRole.OUTPUT) {
             slotWidget.markOutput();
@@ -83,12 +77,20 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
             slotWidget.unmarkInputOrOutput();
         }
     }
+    private static <T> EntryIngredient convertToReiEntry(EntryList<T> entries, float chance) {
+        REIStackConverter.Converter<T> converter = REIStackConverter.getForNullable(entries.getType());
+        if (converter != null){
+            return converter.convertTo(entries, chance, UnaryOperator.identity());
+        }
+        return EntryIngredient.empty();
+    }
 
     @Override
     public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
+        context.getGraphics().pose().pushPose();
         context.getGraphics().pose().translate(-this.x, -this.y, 0);
         this.slotWidget.render(context.getGraphics(), context.getMouseX(), context.getMouseY(), context.getRenderPartialTicks());
-        context.getGraphics().pose().translate(this.x, this.y, 0);
+        context.getGraphics().pose().popPose();
     }
 
     @Override

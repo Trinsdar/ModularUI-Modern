@@ -1,23 +1,15 @@
 package brachy.modularui.integration.jei;
 
-import brachy.modularui.api.drawable.IDrawable;
-import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.GuiTextures;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.integration.recipeviewer.entry.EntryList;
 
-import brachy.modularui.widget.Widget;
+import net.minecraftforge.fluids.FluidStack;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
-import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
-
-import net.minecraftforge.fluids.FluidStack;
-
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental
@@ -25,7 +17,7 @@ public class JeiRecipeViewerSlot extends RecipeViewerSlotWidget<JeiRecipeViewerS
     @Accessors(fluent = true)
     @Getter
     @Setter
-    private RecipeSlotRole recipeSlotRole;
+    private RecipeSlotRole recipeSlotRole = RecipeSlotRole.RENDER_ONLY;
     @Getter
     private EntryList<?> value;
     @Accessors(fluent = true)
@@ -34,8 +26,6 @@ public class JeiRecipeViewerSlot extends RecipeViewerSlotWidget<JeiRecipeViewerS
     private float chance = 1f;
 
     public JeiRecipeViewerSlot() {
-        recipeSlotRole = RecipeSlotRole.RENDER_ONLY;
-
         size(18, 18);
     }
 

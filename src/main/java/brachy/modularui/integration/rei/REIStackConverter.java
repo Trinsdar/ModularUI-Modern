@@ -119,6 +119,7 @@ public class REIStackConverter {
         return (Converter<T>) CONVERTERS.get(clazz);
     }
 
+
     public static <T> Optional<Converter<T>> getFor(Class<T> clazz) {
         return Optional.ofNullable(getForNullable(clazz));
     }
