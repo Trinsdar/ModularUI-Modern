@@ -2,6 +2,7 @@ package brachy.modularui.integration.jei;
 
 import brachy.modularui.ModularUI;
 import brachy.modularui.integration.jei.handler.JeiScreenHandler;
+import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.screen.ContainerScreenWrapper;
 import brachy.modularui.screen.ScreenWrapper;
 
@@ -12,6 +13,7 @@ import lombok.Getter;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
@@ -62,4 +64,12 @@ public class ModularUIJeiPlugin implements IModPlugin {
         //JeiContainerHandler.register(ModularContainerMenu.class, registration);
     }
 
+    public static RecipeIngredientRole mapToJeiRole(RecipeSlotRole slotRole) {
+        return switch (slotRole) {
+            case INPUT -> RecipeIngredientRole.INPUT;
+            case OUTPUT -> RecipeIngredientRole.OUTPUT;
+            case CATALYST -> RecipeIngredientRole.CATALYST;
+            case RENDER_ONLY -> RecipeIngredientRole.RENDER_ONLY;
+        };
+    }
 }

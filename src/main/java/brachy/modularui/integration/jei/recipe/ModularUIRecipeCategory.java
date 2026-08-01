@@ -1,67 +1,65 @@
 package brachy.modularui.integration.jei.recipe;
 
+import brachy.modularui.api.drawable.IRichTextBuilder;
+import brachy.modularui.api.widget.ITooltip;
 import brachy.modularui.api.widget.IWidget;
+import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.jei.JeiRecipeViewerSlot;
 import brachy.modularui.integration.jei.ModularUIJeiPlugin;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
-import brachy.modularui.integration.recipeviewer.entry.EntryList;
-import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
-import brachy.modularui.integration.recipeviewer.util.RecipeScreenRenderingUtil;
+import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.screen.ModularScreen;
-import brachy.modularui.widget.WidgetTree;
-import brachy.modularui.widget.sizer.Area;
+import brachy.modularui.screen.RichTooltip;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.TooltipFlag;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
-import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
+import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.inputs.IJeiGuiEventListener;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
-import mezz.jei.api.gui.widgets.IRecipeWidget;
-import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collections;
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 @ApiStatus.Experimental
 public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
+    public static final String SCREEN_NAME_PREFIX = "jei_recipe_";
+
     private final LoadingCache<T, ModularScreen> modularScreenCache;
 
-    protected ModularUIRecipeCategory(Function<T, IWidget> wrapperFunction, Function<T, ResourceLocation> recipeIdGetter) {
+    private final Function<T, IWidget> recipeUI;
+    private final Function<T, ResourceLocation> recipeIdGetter;
+
+    private boolean sizeCalculated = false;
+    private int displayWidth, displayHeight;
+
+    protected ModularUIRecipeCategory(Function<T, IWidget> recipeUI, Function<T, ResourceLocation> recipeIdGetter) {
+        this.recipeUI = recipeUI;
+        this.recipeIdGetter = recipeIdGetter;
+
         this.modularScreenCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(10, TimeUnit.SECONDS)
-                .maximumSize(10)
+                .expireAfterAccess(Duration.ofSeconds(1))
+                .maximumSize(20)
                 .build(new CacheLoader<>() {
 
                     @Override
                     public ModularScreen load(T recipe) {
-                        IWidget widget = wrapperFunction.apply(recipe);
-                        ResourceLocation recipeId = recipeIdGetter.apply(recipe);
-
-                        ModularPanel<?> panel = ModularPanel.defaultPanel(recipeId.toString(),
-                                widget.getArea().width, widget.getArea().height);
-                        panel.child(widget);
-                        return new ModularScreen(recipeId.getNamespace(), panel);
+                        return ModularUIRecipeCategory.this.createScreen(recipe);
                     }
                 });
     }
@@ -70,84 +68,151 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         return this.modularScreenCache.getUnchecked(recipe);
     }
 
-    private static <T> void addJEISlot(IRecipeLayoutBuilder builder, EntryList<T> entries, JeiRecipeViewerSlot widget,
-                                       RecipeIngredientRole role, int index) {
-        var type = ModularUIJeiPlugin.getRuntime().getIngredientManager()
-                .getIngredientTypeChecked(entries.getType());
-        if (type.isEmpty()) {
-            return;
+    /**
+     * Calculates the size of the recipe if not already done.<br>
+     * This should be called in subclasses' {@link #setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup) setRecipe} methods.
+     * Otherwise, the size of ALL the recipes in the same category are calculated at once, which can make the game lag for a few seconds.
+     */
+    protected void calculateSize(T recipe) {
+        if (this.sizeCalculated) return;
+        this.sizeCalculated = true;
+        IWidget ui = this.recipeUI.apply(recipe);
+        ResourceLocation id = this.recipeIdGetter.apply(recipe);
+        int w = ui.resizer().getFixedPixelWidth(), h = ui.resizer().getFixedPixelHeight();
+        if (w < 0 || h < 0) {
+            ModularScreen screen = createScreen(ui, id.getNamespace(), SCREEN_NAME_PREFIX + id.getPath());
+            w = EmbedHandler.getEmbedWidth(screen);
+            h = EmbedHandler.getEmbedHeight(screen);
+        }
+        this.displayWidth = w;
+        this.displayHeight = h;
+    }
+
+    /**
+     * Return the maximum expected display width here.<br>
+     * You should also return a per-category display width that's at most this value in {@link #getWidth(Object)}.
+     * @return The maximum expected display width
+     */
+    @ApiStatus.OverrideOnly
+    @Override
+    public abstract int getWidth();
+
+    public int getWidth(T recipe) {
+        calculateSize(recipe);
+        return this.displayWidth;
+    }
+
+    /**
+     * Return the maximum expected display height here.<br>
+     * You should also return a per-category display height that's at most this value in {@link #getHeight(Object)}.
+     * @return The maximum expected display height
+     */
+    @ApiStatus.OverrideOnly
+    @Override
+    public abstract int getHeight();
+
+    public int getHeight(T recipe) {
+        calculateSize(recipe);
+        return this.displayHeight;
+    }
+
+    private ModularScreen createScreen(T recipe) {
+        ResourceLocation id = this.recipeIdGetter.apply(recipe);
+        return createScreen(this.recipeUI.apply(recipe), id.getNamespace(), SCREEN_NAME_PREFIX + id.getPath());
+    }
+
+    public ModularScreen createScreen(IWidget recipeUI, String owner, String name) {
+        ModularPanel<?> panel;
+        if (recipeUI instanceof ModularPanel<?> panel1) {
+            panel = panel1;
+        } else {
+            panel = new ModularPanel<>(name);
+            panel.coverChildren(60, 40)
+                    .invisible()
+                    .child(recipeUI);
+        }
+        ModularScreen screen = ModularScreen.createEmbed(owner, panel);
+        screen.getContext().getUISettings().drawTooltipExternally(true);
+        return screen;
+    }
+
+    @ApiStatus.OverrideOnly
+    public IWidget transformWidget(IRecipeExtrasBuilder builder, IWidget widget) {
+        if (!(widget instanceof JeiRecipeViewerSlot recipeViewerSlot)) return widget;
+
+        String name = recipeViewerSlot.getName();
+        assert name != null; // the slots should always have a name assigned in createRecipeSlotForWidget()
+        // the JEI slot should also always exist as it's created in the same method
+        IRecipeSlotDrawable slot = builder.getRecipeSlots().findSlotByName(name).orElseThrow();
+
+        recipeViewerSlot.setSlotWidget(slot);
+        builder.addSlottedWidget(recipeViewerSlot, List.of(slot));
+
+        if (recipeViewerSlot.recipeSlotRole() == RecipeSlotRole.OUTPUT) {
+            // recipeViewerSlot.getSlotWidget().recipeContext(this);
         }
 
-        Area widgetArea = widget.getArea();
-        IRecipeSlotBuilder slotBuilder = builder.addSlot(role, widgetArea.x, widgetArea.y);
+        return recipeViewerSlot;
+    }
 
-        slotBuilder.addIngredients(type.get(), entries.getStacks());
-        slotBuilder.setCustomRenderer(type.get(), new IIngredientRenderer<>() {
+    @ApiStatus.OverrideOnly
+    public IWidget createRecipeSlotForWidget(IRecipeLayoutBuilder builder, IWidget widget, T recipe, IFocusGroup focuses, int index) {
+        if (!(widget instanceof JeiRecipeViewerSlot recipeViewerSlot)) return widget;
 
-            @Override
-            public void render(GuiGraphics guiGraphics, T ingredient) {}
+        recipeViewerSlot.setFocuses(focuses);
+        if (recipeViewerSlot.getName() == null) {
+            recipeViewerSlot.name("jei_slot_" + index);
+        }
 
-            @SuppressWarnings("removal")
-            @Override
-            public List<Component> getTooltip(T ingredient, TooltipFlag tooltipFlag) {
-                return Collections.emptyList();
-            }
+        builder.addSlot(ModularUIJeiPlugin.mapToJeiRole(recipeViewerSlot.recipeSlotRole()))
+                .setSlotName(recipeViewerSlot.getName());
 
-            @Override
-            public int getWidth() {
-                return widgetArea.width;
-            }
-
-            @Override
-            public int getHeight() {
-                return widgetArea.height;
-            }
-        });
-        // set slot name
-        slotBuilder.setSlotName("slot_" + index);
+        return recipeViewerSlot;
     }
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
         ModularScreen screen = getModularScreen(recipe);
-
         MutableInt i = new MutableInt(0);
-        WidgetTree.foreachChildBFS(screen.getMainPanel(), widget -> {
-            if (!(widget instanceof JeiRecipeViewerSlot provider)) {
-                return true;
-            }
-            RecipeIngredientRole role = mapToRole(provider.recipeSlotRole());
-            addJEISlot(builder, provider.getValue(), provider, role, i.getAndIncrement());
-            return true;
-        }, true);
+        screen.getMainPanel().visitTransformAllChildren(widget -> createRecipeSlotForWidget(builder, widget, recipe, focuses, i.getAndIncrement()));
     }
 
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder builder, T recipe, IFocusGroup focuses) {
-        builder.addGuiEventListener(new ModularUIGuiEventListener(recipe));
-        builder.addWidget(new UIForegroundRenderWidget(recipe));
-    }
-
-    @Override
-    public void draw(T recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
         ModularScreen screen = getModularScreen(recipe);
 
-        RecipeScreenRenderingUtil.drawScreenBackground(guiGraphics, screen, (int) mouseX, (int) mouseY,
-                Minecraft.getInstance().getPartialTick());
+        screen.getMainPanel().visitTransformAllChildren(widget -> transformWidget(builder, widget));
+        builder.addGuiEventListener(new ModularUIGuiEventListener(recipe));
     }
 
     @Override
-    public void getTooltip(ITooltipBuilder tooltip, T recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
-        // tooltip.clear();
+    public void getTooltip(ITooltipBuilder tooltipBuilder, T recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
+        ModularScreen screen = getModularScreen(recipe);
+        if (!screen.getContext().getUISettings().drawTooltipExternally()) {
+            IRecipeCategory.super.getTooltip(tooltipBuilder, recipe, recipeSlotsView, mouseX, mouseY);
+            return;
+        }
+
+        IWidget hovered = screen.getContext().getTopHovered();
+        if (hovered instanceof ITooltip<?> tooltip && tooltip.getTooltip() != null) {
+            RichTooltip richTooltip = tooltip.getTooltip();
+            if (richTooltip.autoUpdate()) richTooltip.markDirty();
+            richTooltip.isEmpty(); // causes the tooltip to rebuild if necessary
+
+            IRichTextBuilder<?> richTextBuilder = richTooltip.getRichText();
+            if (richTextBuilder instanceof RichText richText) {
+                for (var line : richText.getAsText()) {
+                    // scuffed conversion, but it mostly works
+                    line.ifLeft(tooltipBuilder::add).ifRight(tooltipBuilder::add);
+                }
+            }
+        }
     }
 
-    public static RecipeIngredientRole mapToRole(RecipeSlotRole slotRole) {
-        return switch (slotRole) {
-            case INPUT -> RecipeIngredientRole.INPUT;
-            case OUTPUT -> RecipeIngredientRole.OUTPUT;
-            case CATALYST -> RecipeIngredientRole.CATALYST;
-            case RENDER_ONLY -> RecipeIngredientRole.RENDER_ONLY;
-        };
+    @Override
+    public void draw(T recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
+        ModularScreen screen = getModularScreen(recipe);
+        EmbedHandler.drawEmbed(screen, graphics, Minecraft.getInstance().getPartialTick());
     }
 
     public class ModularUIGuiEventListener implements IJeiGuiEventListener {
@@ -193,24 +258,4 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         }
     }
 
-    public class UIForegroundRenderWidget implements IRecipeWidget {
-
-        private final T recipe;
-
-        public UIForegroundRenderWidget(T recipe) {
-            this.recipe = recipe;
-        }
-
-        @Override
-        public ScreenPosition getPosition() {
-            return new ScreenPosition(0, 0);
-        }
-
-        @Override
-        public void drawWidget(GuiGraphics guiGraphics, double mouseX, double mouseY) {
-            ModularScreen screen = getModularScreen(this.recipe);
-            RecipeScreenRenderingUtil.drawScreenForeground(guiGraphics, screen, (int) mouseX, (int) mouseY,
-                    Minecraft.getInstance().getPartialTick());
-        }
-    }
 }

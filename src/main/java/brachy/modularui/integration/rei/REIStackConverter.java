@@ -124,6 +124,14 @@ public class REIStackConverter {
         return Optional.ofNullable(getForNullable(clazz));
     }
 
+    public static <T> EntryIngredient convertToReiEntry(EntryList<T> entries, float chance) {
+        REIStackConverter.Converter<T> converter = REIStackConverter.getForNullable(entries.getType());
+        if (converter != null) {
+            return converter.convertTo(entries, chance, UnaryOperator.identity());
+        }
+        return EntryIngredient.empty();
+    }
+
     public interface Converter<T> {
 
         @Nullable

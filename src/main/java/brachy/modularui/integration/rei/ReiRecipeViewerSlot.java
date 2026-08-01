@@ -65,10 +65,9 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
         return getThis();
     }
 
-    @SuppressWarnings("unchecked")
     private void rebuildReiSlot() {
         slotWidget = Widgets.createSlot(new Point()).disableBackground();
-        slotWidget.entries(convertToReiEntry(this.value, chance));
+        slotWidget.entries(REIStackConverter.convertToReiEntry(this.value, chance));
         if (recipeSlotRole == RecipeSlotRole.INPUT || recipeSlotRole == RecipeSlotRole.CATALYST) {
             slotWidget.markInput();
         } else if (recipeSlotRole == RecipeSlotRole.OUTPUT) {
@@ -76,13 +75,6 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
         } else {
             slotWidget.unmarkInputOrOutput();
         }
-    }
-    private static <T> EntryIngredient convertToReiEntry(EntryList<T> entries, float chance) {
-        REIStackConverter.Converter<T> converter = REIStackConverter.getForNullable(entries.getType());
-        if (converter != null){
-            return converter.convertTo(entries, chance, UnaryOperator.identity());
-        }
-        return EntryIngredient.empty();
     }
 
     @Override
