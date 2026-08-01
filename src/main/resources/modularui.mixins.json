@@ -4,6 +4,7 @@
     "refmap": "modularui.refmap.json",
     "package": "brachy.modularui.core.mixins",
     "compatibilityLevel": "JAVA_17",
+    "plugin": "brachy.modularui.core.ModularUIMixinPlugin",
     "client": [
         "client.AbstractContainerScreenAccessor",
         "client.AbstractContainerScreenMixin",
@@ -11,7 +12,8 @@
         "client.ScreenAccessor",
         "client.StringSplitterAccessor",
         "emi.RecipeScreenMixin",
-        "jei.IngredientListOverlayAccessor"
+        "jei.IngredientListOverlayAccessor",
+        "rei.DefaultDisplayViewingScreenMixin"
     ],
     "mixins": [
         "common.AbstractContainerMenuAccessor",
@@ -19,7 +21,9 @@
         "common.ComponentMixin",
         "common.ComponentSerializerMixin",
         "common.SlotAccessor",
-        "common.TextColorMixin"
+        "common.TextColorMixin",
+        "jei.RecipeLayoutBuilderMixin",
+        "jei.RecipeLayoutMixin"
     ],
     "injectors": {
         "defaultRequire": 1,
