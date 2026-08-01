@@ -295,20 +295,25 @@ public class BaseSchemaRenderer implements IDrawable {
 
     @SuppressWarnings("deprecation")
     public void renderWorld(MultiBufferSource.BufferSource bufferSource, float partialTick) {
+        LevelLightEngine lightEngine = this.renderLevel.getLightEngine();
+        while (lightEngine.hasLightWork()) {
+            lightEngine.runLightUpdates();
+        }
+
         var renderResult = checkRecompile();
         if (renderResult == null) return;
 
-        // Essentially disable level fog
+        float[] prevFogColor = RenderSystem.getShaderFogColor().clone(); // note: this is the live array, so we clone it
+        float prevFogStart = RenderSystem.getShaderFogStart();
+        float prevFogEnd = RenderSystem.getShaderFogEnd();
+        FogShape prevFogShape = RenderSystem.getShaderFogShape();
+
         RenderSystem.setShaderFogColor(1, 1, 1, 0);
         RenderSystem.setShaderFogStart(0);
         RenderSystem.setShaderFogEnd(1000);
         RenderSystem.setShaderFogShape(FogShape.SPHERE);
 
         lightTexture.update(this.renderLevel);
-        LevelLightEngine lightEngine = this.renderLevel.getLightEngine();
-        while (lightEngine.hasLightWork()) {
-            lightEngine.runLightUpdates();
-        }
 
         Lighting.setupLevel(RenderSystem.getModelViewMatrix());
 
@@ -356,11 +361,15 @@ public class BaseSchemaRenderer implements IDrawable {
         RenderSystem.enableDepthTest();
 
         Lighting.setupFor3DItems();
+
+        RenderSystem.setShaderFogColor(prevFogColor[0], prevFogColor[1], prevFogColor[2], prevFogColor[3]);
+        RenderSystem.setShaderFogStart(prevFogStart);
+        RenderSystem.setShaderFogEnd(prevFogEnd);
+        RenderSystem.setShaderFogShape(prevFogShape);
     }
 
     protected void renderBlocks(RenderCompileResults renderResult, RenderType renderType) {
         renderType.setupRenderState();
-        ModelBlockRenderer.enableCaching();
 
         // set up shader uniforms
         ShaderInstance shader = RenderSystem.getShader();
@@ -436,10 +445,14 @@ public class BaseSchemaRenderer implements IDrawable {
             VertexBuffer vertexBuffer = renderResult.getOrCreateChunkBuffers().get(renderType);
             // check if the buffer is invalid in case someone breaks it
             // noinspection ConstantValue
-            if (vertexBuffer.isInvalid() || vertexBuffer.getFormat() == null) return;
+            if (!vertexBuffer.isInvalid() && vertexBuffer.getFormat() != null) {
+                vertexBuffer.bind();
+                vertexBuffer.draw();
+            }
+        }
 
-            vertexBuffer.bind();
-            vertexBuffer.draw();
+        if (shader.CHUNK_OFFSET != null) {
+            shader.CHUNK_OFFSET.set(0f, 0f, 0f);
         }
 
         shader.clear();
