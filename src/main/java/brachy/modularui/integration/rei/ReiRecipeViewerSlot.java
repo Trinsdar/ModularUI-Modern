@@ -15,10 +15,7 @@ import lombok.experimental.Accessors;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import org.jetbrains.annotations.ApiStatus;
-
-import java.util.function.UnaryOperator;
 
 @ApiStatus.Experimental
 public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerSlot> {
@@ -26,11 +23,10 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
     @ApiStatus.Internal
     @Getter
     private Slot slotWidget;
-    private int x, y;
 
     @Accessors(fluent = true)
     @Getter
-    private RecipeSlotRole recipeSlotRole;
+    private RecipeSlotRole recipeSlotRole = RecipeSlotRole.RENDER_ONLY;
     @Getter
     private EntryList<?> value;
     @Accessors(fluent = true)
@@ -41,7 +37,6 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
     public ReiRecipeViewerSlot() {
         super();
         slotWidget = Widgets.createSlot(new Point()).disableBackground();
-        recipeSlotRole = RecipeSlotRole.RENDER_ONLY;
 
         size(18, 18);
     }
@@ -80,7 +75,7 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
     @Override
     public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
         context.getGraphics().pose().pushPose();
-        context.getGraphics().pose().translate(-this.x, -this.y, 0);
+        context.getGraphics().pose().translate(-this.getArea().x, -this.getArea().y, 0);
         this.slotWidget.render(context.getGraphics(), context.getMouseX(), context.getMouseY(), context.getRenderPartialTicks());
         context.getGraphics().pose().popPose();
     }

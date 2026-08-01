@@ -18,9 +18,9 @@ public class ModularUIEmiPlugin implements EmiPlugin {
     public void register(EmiRegistry registry) {
         EmiScreenHandler.register(ScreenWrapper.class, registry);
         EmiScreenHandler.register(ContainerScreenWrapper.class, registry);
+
         if (ModularUI.isDev()) {
             TestMachine.EMI.register(registry);
         }
     }
-
 }

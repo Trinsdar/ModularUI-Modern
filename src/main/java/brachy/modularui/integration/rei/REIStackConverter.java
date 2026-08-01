@@ -44,14 +44,11 @@ public class REIStackConverter {
         }
 
         private static EntryIngredient toREIIngredient(Stream<ItemStack> stream) {
-            return EntryIngredient.of(stream
-                    .map(EntryStacks::of)
-                    .toList());
+            return EntryIngredient.of(stream.map(EntryStacks::of).toList());
         }
 
         @Override
-        public EntryIngredient convertTo(EntryList<ItemStack> stack, float chance,
-                                         UnaryOperator<ItemStack> mapper) {
+        public EntryIngredient convertTo(EntryList<ItemStack> stack, float chance, UnaryOperator<ItemStack> mapper) {
             if (stack.isEmpty()) {
                 return EntryIngredient.empty();
             }
@@ -91,8 +88,7 @@ public class REIStackConverter {
         }
 
         @Override
-        public EntryIngredient convertTo(EntryList<FluidStack> stack, float chance,
-                                         UnaryOperator<FluidStack> mapper) {
+        public EntryIngredient convertTo(EntryList<FluidStack> stack, float chance, UnaryOperator<FluidStack> mapper) {
             if (stack.isEmpty()) {
                 return EntryIngredient.empty();
             }
@@ -101,7 +97,7 @@ public class REIStackConverter {
             } else if (stack instanceof FluidTagList tagList) {
                 return EntryIngredient.of(tagList.getEntries().stream()
                         .map(FluidTagList.FluidTagEntry::stacks)
-                        .flatMap(val -> toREIIngredient(val.map(mapper)).stream())
+                        .flatMap(stream -> toREIIngredient(stream.map(mapper)).stream())
                         .collect(Collectors.toList()));
             }
             return EntryIngredient.empty();

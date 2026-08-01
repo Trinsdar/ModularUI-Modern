@@ -1,6 +1,5 @@
 package brachy.modularui.integration.emi.recipe;
 
-import brachy.modularui.api.drawable.IRichTextBuilder;
 import brachy.modularui.api.widget.ITooltip;
 import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.text.RichText;
@@ -37,6 +36,7 @@ import java.util.function.Supplier;
 @ApiStatus.Experimental
 public abstract class ModularUIEmiRecipe implements EmiRecipe {
 
+    private static final String SCREEN_NAME_PREFIX = "emi_recipe_";
     private static final LoadingCache<ModularUIEmiRecipe, ModularScreen> SCREEN_CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(Duration.ofSeconds(1))
             .maximumSize(20)
@@ -46,6 +46,10 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
                     return key.createScreen();
                 }
             });
+
+    private static ModularScreen getModularScreen(ModularUIEmiRecipe recipe) {
+        return SCREEN_CACHE.getUnchecked(recipe);
+    }
 
     @Getter private final ResourceLocation id;
     private final Supplier<IWidget> recipeUI;
@@ -69,8 +73,9 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
     }
 
     /**
-     * Calculates the size of the recipe, if not already done. This should be called in the constructor of sub-classes.
-     * Otherwise, the size of ALL the recipes in the same category are calculated all at once, which can make the game for a few seconds.
+     * Calculates the size of the recipe if not already done.<br>
+     * This should be called in subclasses' constructors. Otherwise, the size of ALL the recipes in the same category are calculated
+     * at once, which can make the game lag for a few seconds.
      */
     protected void calculateSize() {
         if (this.sizeCalculated) return;
@@ -78,7 +83,7 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
         IWidget ui = this.recipeUI.get();
         int w = ui.resizer().getFixedPixelWidth(), h = ui.resizer().getFixedPixelHeight();
         if (w < 0 || h < 0) {
-            ModularScreen screen = createScreen(ui, this.id.getNamespace(), "emi_recipe_" + this.id.getPath());
+            ModularScreen screen = createScreen(ui, this.id.getNamespace(), SCREEN_NAME_PREFIX + this.id.getPath());
             w = EmbedHandler.getEmbedWidth(screen);
             h = EmbedHandler.getEmbedHeight(screen);
         }
@@ -89,23 +94,23 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
 
     public Bounds getBounds() {
         calculateSize();
-        return bounds;
-    }
-
-    @Override
-    public int getDisplayHeight() {
-        calculateSize();
-        return displayHeight;
+        return this.bounds;
     }
 
     @Override
     public int getDisplayWidth() {
         calculateSize();
-        return displayWidth;
+        return this.displayWidth;
+    }
+
+    @Override
+    public int getDisplayHeight() {
+        calculateSize();
+        return this.displayHeight;
     }
 
     private ModularScreen createScreen() {
-        return createScreen(this.recipeUI.get(), this.id.getNamespace(), "emi_recipe_" + this.id.getPath());
+        return createScreen(this.recipeUI.get(), this.id.getNamespace(), SCREEN_NAME_PREFIX + this.id.getPath());
     }
 
     public ModularScreen createScreen(IWidget recipeUI, String owner, String name) {
@@ -165,51 +170,51 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
 
         @Override
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            ModularScreen screen = SCREEN_CACHE.getUnchecked(this.recipe);
+            ModularScreen screen = getModularScreen(this.recipe);
             EmbedHandler.drawEmbed(screen, graphics, partialTick, r -> !(r instanceof SizedButtonWidget));
         }
 
         @Override
         public List<ClientTooltipComponent> getTooltip(int mouseX, int mouseY) {
-            ModularScreen screen = SCREEN_CACHE.getUnchecked(this.recipe);
+            ModularScreen screen = getModularScreen(this.recipe);
             if (!screen.getContext().getUISettings().drawTooltipExternally()) {
                 return super.getTooltip(mouseX, mouseY);
             }
+
             IWidget hovered = screen.getContext().getTopHovered();
             if (hovered instanceof ITooltip<?> tooltip && tooltip.getTooltip() != null) {
                 RichTooltip richTooltip = tooltip.getTooltip();
                 if (richTooltip.autoUpdate()) richTooltip.markDirty();
                 richTooltip.isEmpty(); // causes the tooltip to rebuild if necessary
-                IRichTextBuilder<?> richTextBuilder = richTooltip.getRichText();
-                if (richTextBuilder instanceof RichText richText) {
+
+                if (richTooltip.getRichText() instanceof RichText richText) {
                     // scuffed conversion, but it mostly works
                     return richText.getAsText().toClientTooltipComponents();
                 }
-                return List.of();
             }
             return List.of();
         }
 
         @Override
         public boolean mouseClicked(int mouseX, int mouseY, int button) {
-            return SCREEN_CACHE.getUnchecked(this.recipe).mousePressed(button);
+            return getModularScreen(this.recipe).mousePressed(button);
         }
 
         @Override
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-            return SCREEN_CACHE.getUnchecked(this.recipe).keyPressed(keyCode, scanCode, modifiers);
+            return getModularScreen(this.recipe).keyPressed(keyCode, scanCode, modifiers);
         }
 
         public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-            return SCREEN_CACHE.getUnchecked(this.recipe).mouseScrolled(delta);
+            return getModularScreen(this.recipe).mouseScrolled(delta);
         }
 
         public boolean mouseDragged(int button, double dragX, double dragY) {
-            return SCREEN_CACHE.getUnchecked(this.recipe).mouseDragged(button, dragX, dragY);
+            return getModularScreen(this.recipe).mouseDragged(button, dragX, dragY);
         }
 
         public boolean mouseReleased(int button) {
-            return SCREEN_CACHE.getUnchecked(this.recipe).mouseReleased(button);
+            return getModularScreen(this.recipe).mouseReleased(button);
         }
     }
 }

@@ -9,7 +9,6 @@ import brachy.modularui.screen.viewport.ModularGuiContext;
 import brachy.modularui.theme.WidgetThemeEntry;
 
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -21,17 +20,18 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.function.UnaryOperator;
+
 @ApiStatus.Experimental
 public class EmiRecipeViewerSlot extends RecipeViewerSlotWidget<EmiRecipeViewerSlot> {
 
     @ApiStatus.Internal
     @Getter
     private SlotWidget slotWidget;
-    private int x, y;
 
     @Accessors(fluent = true)
     @Getter
-    private RecipeSlotRole recipeSlotRole;
+    private RecipeSlotRole recipeSlotRole = RecipeSlotRole.RENDER_ONLY;
     private EntryList<?> value;
     @Accessors(fluent = true)
     @Getter
@@ -41,7 +41,6 @@ public class EmiRecipeViewerSlot extends RecipeViewerSlotWidget<EmiRecipeViewerS
     public EmiRecipeViewerSlot() {
         super();
         slotWidget = new SlotWidget(EmiIngredient.of(Ingredient.EMPTY), 0, 0);
-        recipeSlotRole = RecipeSlotRole.RENDER_ONLY;
 
         size(18, 18);
 
@@ -56,7 +55,7 @@ public class EmiRecipeViewerSlot extends RecipeViewerSlotWidget<EmiRecipeViewerS
     @Override
     public EmiRecipeViewerSlot recipeSlotRole(RecipeSlotRole recipeSlotRole) {
         this.recipeSlotRole = recipeSlotRole;
-        slotWidget.catalyst(recipeSlotRole == RecipeSlotRole.CATALYST);
+        rebuildEmiSlot();
         return getThis();
     }
 
@@ -74,19 +73,23 @@ public class EmiRecipeViewerSlot extends RecipeViewerSlotWidget<EmiRecipeViewerS
 
     @SuppressWarnings("unchecked")
     private void rebuildEmiSlot() {
-        if (this.value.getType() == ItemStack.class) {
-            slotWidget = new SlotWidget(EmiStackConverter.ITEM.convertTo((EntryList<ItemStack>) this.value, chance), 0, 0);
-        } else if (this.value.getType() == FluidStack.class) {
-            slotWidget = new TankWidget(EmiStackConverter.FLUID.convertTo((EntryList<FluidStack>) this.value, chance), 0, 0, 18, 18, 1);
+        if (this.value.getType() == FluidStack.class) {
+            // special case fluid slots
+            EmiIngredient ingredient = EmiStackConverter.FLUID.convertTo((EntryList<FluidStack>) this.value, chance, UnaryOperator.identity());
+            slotWidget = new TankWidget(ingredient, 0, 0, 18, 18, 1);
+        } else {
+            slotWidget = new SlotWidget(EmiStackConverter.convertToEmiEntry(this.value, chance), 0, 0);
         }
         slotWidget.drawBack(false);
+        slotWidget.catalyst(recipeSlotRole == RecipeSlotRole.CATALYST);
     }
 
     @Override
     public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
-        context.getGraphics().pose().translate(-this.x, -this.y, 0);
+        context.graphicsPose().pushPose();
+        context.getGraphics().pose().translate(-this.getArea().x, -this.getArea().y, 0);
         this.slotWidget.render(context.getGraphics(), context.getMouseX(), context.getMouseY(), context.getRenderPartialTicks());
-        context.getGraphics().pose().translate(this.x, this.y, 0);
+        context.graphicsPose().popPose();
     }
 
     @Override
