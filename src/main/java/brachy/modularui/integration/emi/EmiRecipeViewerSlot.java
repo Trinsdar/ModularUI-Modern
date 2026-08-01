@@ -94,8 +94,7 @@ public class EmiRecipeViewerSlot extends RecipeViewerSlotWidget<EmiRecipeViewerS
 
     @Override
     public Result onMousePressed(int button) {
-        this.slotWidget.mouseClicked(getContext().getMouseX(), getContext().getAbsMouseY(), button);
-        return Result.SUCCESS;
+        return this.slotWidget.mouseClicked(getContext().getMouseX(), getContext().getMouseY(), button) ? Result.SUCCESS : Result.ACCEPT;
     }
 
     @Override
