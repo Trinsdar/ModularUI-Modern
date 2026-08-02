@@ -1,10 +1,8 @@
 package brachy.modularui.integration.rei;
 
 import brachy.modularui.integration.recipeviewer.entry.EntryList;
-import brachy.modularui.integration.recipeviewer.entry.fluid.FluidStackList;
-import brachy.modularui.integration.recipeviewer.entry.fluid.FluidTagList;
-import brachy.modularui.integration.recipeviewer.entry.item.ItemStackList;
-import brachy.modularui.integration.recipeviewer.entry.item.ItemTagList;
+import brachy.modularui.integration.recipeviewer.entry.fluid.*;
+import brachy.modularui.integration.recipeviewer.entry.item.*;
 import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.utils.math.MathUtils;
 
@@ -59,6 +57,11 @@ public class REIStackConverter {
                         .map(ItemTagList.ItemTagEntry::stacks)
                         .flatMap(stream -> toREIIngredient(stream.map(mapper)).stream())
                         .collect(Collectors.toList()));
+            } else if (stack instanceof ItemHolderSetList holderSetList) {
+                return EntryIngredient.of(holderSetList.getEntries().stream()
+                        .map(ItemHolderSetList.ItemHolderSetEntry::stacks)
+                        .flatMap(stream -> toREIIngredient(stream.map(mapper)).stream())
+                        .collect(Collectors.toList()));
             }
             return EntryIngredient.empty();
         }
@@ -97,6 +100,11 @@ public class REIStackConverter {
             } else if (stack instanceof FluidTagList tagList) {
                 return EntryIngredient.of(tagList.getEntries().stream()
                         .map(FluidTagList.FluidTagEntry::stacks)
+                        .flatMap(stream -> toREIIngredient(stream.map(mapper)).stream())
+                        .collect(Collectors.toList()));
+            } else if (stack instanceof FluidHolderSetList holderSetList) {
+                return EntryIngredient.of(holderSetList.getEntries().stream()
+                        .map(FluidHolderSetList.FluidHolderSetEntry::stacks)
                         .flatMap(stream -> toREIIngredient(stream.map(mapper)).stream())
                         .collect(Collectors.toList()));
             }
