@@ -30,7 +30,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,16 +59,12 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
     }
 
     /**
-     * Instead of creating a new slot, the JEI implementation (this class) overwrites most of the {@linkplain mezz.jei.library.gui.ingredients.RecipeSlot JEI recipe slot's} values with new ones.<br>
+     * Instead of creating a new slot, the JEI implementation of {@code RecipeViewerSlotWidget} (this class) overwrites most of the {@linkplain mezz.jei.library.gui.ingredients.RecipeSlot JEI recipe slot's} values with new ones.<br>
      * It does this because JEI keeps track of all recipe slots & it's easier to replace existing slots' data than it is to replace the slots themselves.
      */
     @Override
     protected void rebuildRealSlot() {
-        if (slotWidget == null && ModularUIJeiPlugin.hasRuntime()) {
-            // it won't matter that this slot has wholly invalid data because we overwrite all of it anyway.
-            slotWidget = ModularUIJeiPlugin.getRuntime().getRecipeManager()
-                    .createRecipeSlotDrawable(mapToJeiRole(this.recipeSlotRole), Collections.emptyList(), Collections.emptySet(), 0);
-        }
+        // only assign all of these values once the slot has been created from JEI's side.
         if (!(slotWidget instanceof RecipeSlotAccessor recipeSlot)) {
             // null check and cast in one!
             return;
@@ -94,13 +89,20 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
 
     @ApiStatus.Internal
     public void configureJeiSlotBuilder(IRecipeSlotBuilder builder) {
-        builder.addIngredientsUnsafe(this.entries.getStacks().stream()
-                .map(this.renderMappingFunction)
-                .toList());
+        if (this.entries != null && !this.entries.isEmpty()) {
+            builder.addIngredientsUnsafe(this.entries.getStacks().stream()
+                    .map(this.renderMappingFunction)
+                    .toList());
+        }
     }
 
     // Mostly copied from RecipeSlotBuilder#build
     private void replaceSlotIngredients(RecipeSlotAccessor recipeSlot) {
+        if (this.entries == null || this.entries.isEmpty()) {
+            recipeSlot.modularui$setAllIngredients(List.of());
+            return;
+        }
+
         final DisplayIngredientAcceptor ingredients = new DisplayIngredientAcceptor(this.ingredientManager);
         ingredients.addIngredientsUnsafe(this.entries.getStacks().stream()
                 .map(this.renderMappingFunction)
