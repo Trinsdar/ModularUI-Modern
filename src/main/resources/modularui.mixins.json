@@ -22,8 +22,11 @@
         "common.ComponentSerializerMixin",
         "common.SlotAccessor",
         "common.TextColorMixin",
+        "jei.RecipeLayoutAccessor",
+        "jei.RecipeLayoutBuilderAccessor",
         "jei.RecipeLayoutBuilderMixin",
-        "jei.RecipeLayoutMixin"
+        "jei.RecipeLayoutMixin",
+        "jei.RecipeSlotAccessor"
     ],
     "injectors": {
         "defaultRequire": 1,

@@ -1,27 +1,40 @@
 package brachy.modularui.integration.jei;
 
+import brachy.modularui.core.mixins.jei.RecipeSlotAccessor;
+import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
-import brachy.modularui.integration.recipeviewer.entry.EntryList;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenPosition;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.resources.ResourceLocation;
 
 import brachy.modularui.screen.viewport.ModularGuiContext;
 
+import it.unimi.dsi.fastutil.ints.IntSet;
 import lombok.Getter;
 import lombok.Setter;
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
 import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.library.gui.ingredients.ICycler;
-import mezz.jei.library.gui.recipes.layout.builder.RecipeSlotBuilder;
+import mezz.jei.library.gui.recipes.OutputSlotTooltipCallback;
+import mezz.jei.library.ingredients.DisplayIngredientAcceptor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+
+import static brachy.modularui.integration.jei.ModularUIJeiPlugin.mapToJeiRole;
 
 @ApiStatus.Internal
 public class JeiRecipeViewerSlot<R> extends RecipeViewerSlotWidget<JeiRecipeViewerSlot<R>> implements ISlottedRecipeWidget {
@@ -30,42 +43,89 @@ public class JeiRecipeViewerSlot<R> extends RecipeViewerSlotWidget<JeiRecipeView
     @Setter private IFocusGroup focuses;
     @Setter private ICycler cycler;
 
+    @Setter private IRecipeCategory<R> recipeCategory;
+    @Setter private R recipe;
+
+    @Setter private IIngredientManager ingredientManager;
+
     public JeiRecipeViewerSlot() {
         super();
 
         size(18, 18);
     }
 
-    // TODO make sure this doesn't break everything (for example: search). It shouldn't but I'm not 100% on that.
-    @Override
-    protected void rebuildRealSlot() {
-        IIngredientManager ingredientManager = ModularUIJeiPlugin.getRuntime().getIngredientManager();
-
-        // kinda meh solution. this isn't API, but I can't find a good way to do this within the API.
-        RecipeSlotBuilder builder = new RecipeSlotBuilder(ingredientManager, 0, ModularUIJeiPlugin.mapToJeiRole(this.recipeSlotRole));
-        JeiRecipeViewerSlot.addTypedIngredients(this.entries, builder);
-        builder.setPosition(this.getArea().x, this.getArea().y);
-
-        if (this.entries.getType() == FluidStack.class) {
-            // special case fluid slots (this is why we can't have nice things.)
-            builder.setFluidRenderer(1, false, 18, 18);
-        }
-
-        slotWidget = builder.build(this.focuses, this.cycler).second();
+    public void setSlotWidget(IRecipeSlotDrawable slotWidget) {
+        this.slotWidget = slotWidget;
+        rebuildRealSlot();
     }
 
-    private static <T> void addTypedIngredients(EntryList<T> entries, RecipeSlotBuilder builder) {
-        IIngredientManager ingredientManager = ModularUIJeiPlugin.getRuntime().getIngredientManager();
-        var ingredientType = ingredientManager.getIngredientTypeChecked(entries.getType());
-        if (ingredientType.isEmpty()) {
+    /**
+     * Instead of creating a new slot, the JEI implementation (this class) overwrites most of the {@linkplain mezz.jei.library.gui.ingredients.RecipeSlot JEI recipe slot's} values with new ones.<br>
+     * It does this because JEI keeps track of all recipe slots & it's easier to replace existing slots' data than it is to replace the slots themselves.
+     */
+    @Override
+    protected void rebuildRealSlot() {
+        if (slotWidget == null && ModularUIJeiPlugin.hasRuntime()) {
+            // it won't matter that this slot has wholly invalid data because we overwrite all of it anyway.
+            slotWidget = ModularUIJeiPlugin.getRuntime().getRecipeManager()
+                    .createRecipeSlotDrawable(mapToJeiRole(this.recipeSlotRole), Collections.emptyList(), Collections.emptySet(), 0);
+        }
+        if (!(slotWidget instanceof RecipeSlotAccessor recipeSlot)) {
+            // null check and cast in one!
             return;
         }
-        builder.addIngredients(ingredientType.get(), entries.getStacks());
+
+        // only update the slot's role if it's out of date
+        RecipeIngredientRole jeiRole = mapToJeiRole(this.recipeSlotRole);
+        if (slotWidget.getRole() != jeiRole) {
+            // add/remove the output slot tooltip callback depending on if this is now an output slot or not
+            if (this.recipeSlotRole == RecipeSlotRole.OUTPUT) {
+                addOutputSlotTooltipCallback(recipeSlot);
+            } else {
+                recipeSlot.modularui$getTooltipCallbacks().removeIf(callback -> callback instanceof OutputSlotTooltipCallback);
+            }
+            recipeSlot.modularui$setRole(jeiRole);
+        }
+        slotWidget.setPosition(this.getArea().x, this.getArea().y);
+
+        replaceSlotIngredients(recipeSlot);
+        recipeSlot.modularui$setCycler(this.cycler);
+    }
+
+    @ApiStatus.Internal
+    public void configureJeiSlotBuilder(IRecipeSlotBuilder builder) {
+        builder.addIngredientsUnsafe(this.entries.getStacks());
+    }
+
+    // Mostly copied from RecipeSlotBuilder#build
+    private void replaceSlotIngredients(RecipeSlotAccessor recipeSlot) {
+        final DisplayIngredientAcceptor ingredients = new DisplayIngredientAcceptor(this.ingredientManager);
+        ingredients.addIngredientsUnsafe(this.entries.getStacks());
+
+        List<Optional<ITypedIngredient<?>>> allIngredients = ingredients.getAllIngredients();
+
+        IntSet focusMatches = ingredients.getMatches(this.focuses, mapToJeiRole(this.recipeSlotRole));
+        List<Optional<ITypedIngredient<?>>> focusedIngredients = null;
+
+        if (!focusMatches.isEmpty()) {
+            focusedIngredients = new ArrayList<>();
+            for (Integer i : focusMatches) {
+                if (i < allIngredients.size()) {
+                    Optional<ITypedIngredient<?>> ingredient = allIngredients.get(i);
+                    focusedIngredients.add(ingredient);
+                }
+            }
+        }
+
+        recipeSlot.modularui$setAllIngredients(allIngredients);
+        recipeSlot.modularui$setDisplayIngredients(focusedIngredients);
     }
 
     @Override
     public void drawRealSlot(ModularGuiContext context) {
-        this.slotWidget.draw(context.getGraphics());
+        if (slotWidget != null) {
+            slotWidget.draw(context.getGraphics());
+        }
     }
 /*
     @Override
@@ -80,8 +140,8 @@ public class JeiRecipeViewerSlot<R> extends RecipeViewerSlotWidget<JeiRecipeView
 */
     @Override
     public Optional<RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
-        if (isHovering()) {
-            return Optional.of(new RecipeSlotUnderMouse(this.slotWidget, this.getPosition()));
+        if (isHovering() && slotWidget != null) {
+            return Optional.of(new RecipeSlotUnderMouse(slotWidget, this.getPosition()));
         }
         return Optional.empty();
     }
@@ -91,6 +151,17 @@ public class JeiRecipeViewerSlot<R> extends RecipeViewerSlotWidget<JeiRecipeView
         return new ScreenPosition(getArea().x, getArea().y);
     }
 
+    // disable JEI draw functionality
     @Override
     public void drawWidget(GuiGraphics guiGraphics, double mouseX, double mouseY) {}
+
+    // copied from RecipeLayoutBuilder#addOutputSlotTooltipCallback
+    private void addOutputSlotTooltipCallback(RecipeSlotAccessor slot) {
+        ResourceLocation recipeName = recipeCategory.getRegistryName(recipe);
+        if (recipeName != null) {
+            RecipeType<R> recipeType = recipeCategory.getRecipeType();
+            OutputSlotTooltipCallback callback = new OutputSlotTooltipCallback(recipeName, recipeType);
+            slot.modularui$getTooltipCallbacks().add(callback);
+        }
+    }
 }

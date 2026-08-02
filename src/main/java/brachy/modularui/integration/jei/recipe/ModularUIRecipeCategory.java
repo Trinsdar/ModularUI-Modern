@@ -3,10 +3,11 @@ package brachy.modularui.integration.jei.recipe;
 import brachy.modularui.api.drawable.IRichTextBuilder;
 import brachy.modularui.api.widget.ITooltip;
 import brachy.modularui.api.widget.IWidget;
+import brachy.modularui.core.mixins.jei.RecipeLayoutAccessor;
+import brachy.modularui.core.mixins.jei.RecipeLayoutBuilderAccessor;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.jei.JeiRecipeViewerSlot;
 import brachy.modularui.integration.jei.ModularUIJeiPlugin;
-import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.screen.ModularScreen;
@@ -21,6 +22,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -138,7 +140,11 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
     @ApiStatus.OverrideOnly
     public IWidget transformWidget(IRecipeExtrasBuilder builder, IWidget widget) {
-        if (!(widget instanceof JeiRecipeViewerSlot recipeViewerSlot)) return widget;
+        if (!(widget instanceof JeiRecipeViewerSlot<?> recipeViewerSlot)) return widget;
+
+        if (builder instanceof RecipeLayoutAccessor accessor) {
+            recipeViewerSlot.setCycler(accessor.modularui$getCycleTicker());
+        }
 
         String name = recipeViewerSlot.getName();
         assert name != null; // the slots should always have a name assigned in createRecipeSlotForWidget()
@@ -148,24 +154,30 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         recipeViewerSlot.setSlotWidget(slot);
         builder.addSlottedWidget(recipeViewerSlot, List.of(slot));
 
-        if (recipeViewerSlot.recipeSlotRole() == RecipeSlotRole.OUTPUT) {
-            // recipeViewerSlot.getSlotWidget().recipeContext(this);
-        }
-
         return recipeViewerSlot;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @ApiStatus.OverrideOnly
     public IWidget createRecipeSlotForWidget(IRecipeLayoutBuilder builder, IWidget widget, T recipe, IFocusGroup focuses, int index) {
+        // guard against JEMI issues
+        if (!(builder instanceof RecipeLayoutBuilderAccessor recipeLayoutBuilder)) return widget;
         if (!(widget instanceof JeiRecipeViewerSlot recipeViewerSlot)) return widget;
 
+        recipeViewerSlot.setIngredientManager(recipeLayoutBuilder.modularui$getIngredientManager());
+        recipeViewerSlot.setRecipeCategory(this);
+        recipeViewerSlot.setRecipe(recipe);
         recipeViewerSlot.setFocuses(focuses);
         if (recipeViewerSlot.getName() == null) {
             recipeViewerSlot.name("jei_slot_" + index);
         }
 
-        builder.addSlot(ModularUIJeiPlugin.mapToJeiRole(recipeViewerSlot.recipeSlotRole()))
+        IRecipeSlotBuilder slotBuilder = builder.addSlot(ModularUIJeiPlugin.mapToJeiRole(recipeViewerSlot.recipeSlotRole()))
                 .setSlotName(recipeViewerSlot.getName());
+        recipeViewerSlot.configureJeiSlotBuilder(slotBuilder);
+
+        // always configure a fluid renderer (it's only used if a fluid is in the slot)
+        slotBuilder.setFluidRenderer(1, false, 16, 16);
 
         return recipeViewerSlot;
     }
