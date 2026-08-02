@@ -9,13 +9,17 @@ import brachy.modularui.screen.ScreenWrapper;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 
+import brachy.modularui.test.TestRecipeViewerGuis;
+
 import lombok.Getter;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
+import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
 
@@ -34,6 +38,15 @@ public class ModularUIJeiPlugin implements IModPlugin {
         return runtime != null;
     }
 
+    public static RecipeIngredientRole mapToJeiRole(RecipeSlotRole slotRole) {
+        return switch (slotRole) {
+            case INPUT -> RecipeIngredientRole.INPUT;
+            case OUTPUT -> RecipeIngredientRole.OUTPUT;
+            case CATALYST -> RecipeIngredientRole.CATALYST;
+            case RENDER_ONLY -> RecipeIngredientRole.RENDER_ONLY;
+        };
+    }
+
     @Override
     public ResourceLocation getPluginUid() {
         return ModularUI.id("jei_plugin");
@@ -47,6 +60,10 @@ public class ModularUIJeiPlugin implements IModPlugin {
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
         jeiHelpers = registration.getJeiHelpers();
+
+        if (ModularUI.isDev()) {
+            TestRecipeViewerGuis.JEI.registerCategory(registration);
+        }
     }
 
     @Override
@@ -64,12 +81,17 @@ public class ModularUIJeiPlugin implements IModPlugin {
         //JeiContainerHandler.register(ModularContainerMenu.class, registration);
     }
 
-    public static RecipeIngredientRole mapToJeiRole(RecipeSlotRole slotRole) {
-        return switch (slotRole) {
-            case INPUT -> RecipeIngredientRole.INPUT;
-            case OUTPUT -> RecipeIngredientRole.OUTPUT;
-            case CATALYST -> RecipeIngredientRole.CATALYST;
-            case RENDER_ONLY -> RecipeIngredientRole.RENDER_ONLY;
-        };
+    @Override
+    public void registerRecipes(IRecipeRegistration registration) {
+        if (ModularUI.isDev()) {
+            TestRecipeViewerGuis.JEI.registerRecipes(registration);
+        }
+    }
+
+    @Override
+    public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        if (ModularUI.isDev()) {
+            TestRecipeViewerGuis.JEI.registerRecipeCatalyst(registration);
+        }
     }
 }

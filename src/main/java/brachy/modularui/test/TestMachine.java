@@ -10,14 +10,11 @@ import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.GuiTextures;
 import brachy.modularui.drawable.progress.ProgressDrawable;
 import brachy.modularui.factory.PosGuiData;
-import brachy.modularui.integration.emi.recipe.ModularUIEmiRecipe;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
-import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.screen.ModularScreen;
 import brachy.modularui.screen.UISettings;
 import brachy.modularui.utils.Color;
-import brachy.modularui.value.DoubleValue;
 import brachy.modularui.value.StringValue;
 import brachy.modularui.value.sync.BooleanSyncValue;
 import brachy.modularui.value.sync.DoubleSyncValue;
@@ -48,30 +45,16 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
-import net.minecraftforge.items.wrapper.EmptyHandler;
 
-import dev.emi.emi.api.EmiRegistry;
-import dev.emi.emi.api.recipe.EmiRecipeCategory;
-import dev.emi.emi.api.stack.EmiIngredient;
-import dev.emi.emi.api.stack.EmiStack;
-import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 @ApiStatus.Experimental
 public class TestMachine {
-
-    private static final IItemHandler EMPTY_INFINITE_ITEM_HANDLER = new EmptyHandler() {
-        @Override
-        public int getSlots() {
-            return Integer.MAX_VALUE; // pls don't iterate UwU
-        }
-    };
 
     public static class BE extends AbstractBlockEntity implements IUIHolder<PosGuiData> {
 
@@ -179,12 +162,12 @@ public class TestMachine {
 
     public static class Recipe {
 
-        private final ResourceLocation resloc;
-        private final List<ItemStack> in = new ArrayList<>(), out = new ArrayList<>();
+        protected final ResourceLocation id;
+        protected final List<ItemStack> in = new ArrayList<>(), out = new ArrayList<>();
         private int ticks = 80;
 
-        public Recipe(String resloc) {
-            this.resloc = ModularUI.id(resloc);
+        public Recipe(String name) {
+            this.id = ModularUI.id(name);
         }
 
         public Recipe in(ItemStack stack) {
@@ -310,59 +293,6 @@ public class TestMachine {
                             .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
                                     .slot(new ModularSlot(out, i).canPut(false))
                                     .recipeRole(RecipeSlotRole.OUTPUT))));
-        }
-
-        public static IWidget buildViewerUI(Recipe recipe) {
-            var panel = new ModularPanel<>("recipe_viewer_recipe")
-                    .coverChildren(60, 40)
-                    .invisible();
-            IWidget recipeUI = buildMachineUI(panel, EMPTY_INFINITE_ITEM_HANDLER, EMPTY_INFINITE_ITEM_HANDLER, DoubleValue.simulateProgress(5000));
-            recipeUI.visitTransformAllChildren(w -> {
-                if (w instanceof ItemSlot slot) {
-                    List<ItemStack> l = slot.getRecipeRole() == RecipeSlotRole.INPUT ? recipe.in : recipe.out;
-                    int index = slot.getSlot().getSlotIndex();
-                    ItemStack item = index >= l.size() ? ItemStack.EMPTY : l.get(index);
-                    return RecipeViewerSlotWidget.create()
-                            .recipeSlotRole(slot.getRecipeRole())
-                            .value(item)
-                            .copyResizerOf(w);
-                }
-                return w;
-            });
-            return panel.child(recipeUI);
-            //return recipeUI;
-        }
-    }
-
-    public static class EMI {
-
-        public static final EmiRecipeCategory CATEGORY = new EmiRecipeCategory(ModularUI.id("machine"), EmiStack.of(TestRegistration.TEST_MACHINE_BLOCK_ITEM.get()));
-
-        public static void register(EmiRegistry registry) {
-            registry.addCategory(CATEGORY);
-            Recipes.list.stream()
-                    .map(r -> new RecipeDisplay(() -> Recipes.buildViewerUI(r), r))
-                    .forEach(registry::addRecipe);
-        }
-
-        public static class RecipeDisplay extends ModularUIEmiRecipe {
-
-            private final Recipe recipe;
-            @Getter private final List<EmiIngredient> inputs = new ArrayList<>();
-            @Getter private final List<EmiStack> outputs = new ArrayList<>();
-
-            public RecipeDisplay(Supplier<IWidget> widgetSupplier, Recipe recipe) {
-                super(recipe.resloc, widgetSupplier);
-                this.recipe = recipe;
-                recipe.in.stream().map(EmiStack::of).map(s -> (EmiIngredient) s).forEach(inputs::add);
-                recipe.out.stream().map(EmiStack::of).forEach(outputs::add);
-                calculateSize();
-            }
-
-            @Override
-            public EmiRecipeCategory getCategory() {
-                return CATEGORY;
-            }
         }
     }
 }

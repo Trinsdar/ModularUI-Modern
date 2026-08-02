@@ -59,7 +59,7 @@ public abstract class ModularUIREIDisplay implements Display {
 
     private final ResourceLocation recipeId;
     private final Supplier<IWidget> recipeUI;
-    @Getter protected final CategoryIdentifier<?> categoryId;
+    @Getter protected final CategoryIdentifier<?> categoryIdentifier;
 
     private boolean sizeCalculated = false;
     private Rectangle bounds;
@@ -68,7 +68,7 @@ public abstract class ModularUIREIDisplay implements Display {
     public ModularUIREIDisplay(ResourceLocation recipeId, Supplier<IWidget> recipeUI, CategoryIdentifier<?> categoryId) {
         this.recipeId = recipeId;
         this.recipeUI = recipeUI;
-        this.categoryId = categoryId;
+        this.categoryIdentifier = categoryId;
     }
 
     /**
