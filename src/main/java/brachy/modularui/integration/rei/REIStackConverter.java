@@ -120,10 +120,10 @@ public class REIStackConverter {
         return Optional.ofNullable(getForNullable(clazz));
     }
 
-    public static <T> EntryIngredient convertToReiEntry(EntryList<T> entries, float chance) {
+    public static <T> EntryIngredient convertToReiEntry(EntryList<T> entries, float chance, UnaryOperator<T> renderMappingFunction) {
         REIStackConverter.Converter<T> converter = REIStackConverter.getForNullable(entries.getType());
         if (converter != null) {
-            return converter.convertTo(entries, chance, UnaryOperator.identity());
+            return converter.convertTo(entries, chance, renderMappingFunction);
         }
         return EntryIngredient.empty();
     }

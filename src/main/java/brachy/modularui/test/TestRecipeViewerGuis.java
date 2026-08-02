@@ -11,7 +11,6 @@ import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.integration.emi.recipe.ModularUIEmiRecipe;
 import brachy.modularui.integration.jei.recipe.ModularUIRecipeCategory;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
-import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.integration.rei.recipe.ModularUIREIDisplay;
 import brachy.modularui.integration.rei.recipe.ModularUIREIDisplayCategory;
 import brachy.modularui.screen.ModularPanel;
@@ -63,10 +62,8 @@ public class TestRecipeViewerGuis {
                 List<ItemStack> l = slot.getRecipeRole() == RecipeSlotRole.INPUT ? recipe.in : recipe.out;
                 int index = slot.getSlot().getSlotIndex();
                 ItemStack item = index >= l.size() ? ItemStack.EMPTY : l.get(index);
-                return RecipeViewerSlotWidget.create()
-                        .recipeSlotRole(slot.getRecipeRole())
-                        .value(item)
-                        .copyResizerOf(w);
+                return slot.toRecipeViewerSlot()
+                        .value(item);
             }
             return w;
         });

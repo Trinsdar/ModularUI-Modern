@@ -126,10 +126,10 @@ public class EmiStackConverter {
         return Optional.ofNullable(getForNullable(clazz));
     }
 
-    public static <T> EmiIngredient convertToEmiEntry(EntryList<T> entries, float chance) {
+    public static <T> EmiIngredient convertToEmiEntry(EntryList<T> entries, float chance, UnaryOperator<T> renderMappingFunction) {
         Converter<T> converter = getForNullable(entries.getType());
         if (converter != null) {
-            return converter.convertTo(entries, chance, UnaryOperator.identity());
+            return converter.convertTo(entries, chance, renderMappingFunction);
         }
         return EmiStack.EMPTY;
     }

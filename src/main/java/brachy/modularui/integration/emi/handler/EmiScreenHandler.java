@@ -4,7 +4,6 @@ import brachy.modularui.api.IMuiScreen;
 import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.integration.emi.EmiRecipeViewerSlot;
 import brachy.modularui.integration.emi.EmiStackConverter;
-import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.integration.recipeviewer.handlers.GhostIngredientSlot;
 import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.integration.recipeviewer.handlers.RecipeViewerHandler;
@@ -141,7 +140,7 @@ public class EmiScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
     }
 
     @Override
-    public RecipeViewerSlotWidget<?> createRecipeViewerSlot() {
-        return new EmiRecipeViewerSlot();
+    public <I> EmiRecipeViewerSlot<I> createRecipeViewerSlot(Class<I> ingredientClass) {
+        return new EmiRecipeViewerSlot<>(ingredientClass);
     }
 }

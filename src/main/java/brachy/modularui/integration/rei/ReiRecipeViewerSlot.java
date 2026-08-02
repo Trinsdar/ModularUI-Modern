@@ -11,12 +11,12 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerSlot> {
+public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeViewerSlot<I>> {
 
     @Getter private Slot slotWidget;
 
-    public ReiRecipeViewerSlot() {
-        super();
+    public ReiRecipeViewerSlot(Class<I> ingredientClass) {
+        super(ingredientClass);
         this.slotWidget = Widgets.createSlot(new Point()).disableBackground();
 
         size(18, 18);
@@ -25,7 +25,8 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
     @Override
     protected void rebuildRealSlot() {
         slotWidget = Widgets.createSlot(new Point()).disableBackground();
-        slotWidget.entries(REIStackConverter.convertToReiEntry(this.entries, chance));
+        slotWidget.entries(REIStackConverter.convertToReiEntry(this.entries, this.chance, this.renderMappingFunction));
+
         if (recipeSlotRole == RecipeSlotRole.INPUT || recipeSlotRole == RecipeSlotRole.CATALYST) {
             slotWidget.markInput();
         } else if (recipeSlotRole == RecipeSlotRole.OUTPUT) {

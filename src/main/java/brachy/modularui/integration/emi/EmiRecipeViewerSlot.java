@@ -3,7 +3,6 @@ package brachy.modularui.integration.emi;
 import brachy.modularui.drawable.ClientTooltipComponentIcon;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
-import brachy.modularui.integration.recipeviewer.entry.EntryList;
 import brachy.modularui.screen.viewport.ModularGuiContext;
 
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -16,15 +15,13 @@ import dev.emi.emi.api.widget.TankWidget;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.function.UnaryOperator;
-
 @ApiStatus.Internal
-public class EmiRecipeViewerSlot extends RecipeViewerSlotWidget<EmiRecipeViewerSlot> {
+public class EmiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, EmiRecipeViewerSlot<I>> {
 
     @Getter private SlotWidget slotWidget;
 
-    public EmiRecipeViewerSlot() {
-        super();
+    public EmiRecipeViewerSlot(Class<I> ingredientClass) {
+        super(ingredientClass);
         this.slotWidget = new SlotWidget(EmiIngredient.of(Ingredient.EMPTY), 0, 0);
 
         size(18, 18);
@@ -37,15 +34,14 @@ public class EmiRecipeViewerSlot extends RecipeViewerSlotWidget<EmiRecipeViewerS
         });
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void rebuildRealSlot() {
-        if (this.entries.getType() == FluidStack.class) {
+        EmiIngredient ingredient = EmiStackConverter.convertToEmiEntry(this.entries, this.chance, this.renderMappingFunction);
+        if (this.ingredientClass == FluidStack.class) {
             // special case fluid slots
-            EmiIngredient ingredient = EmiStackConverter.FLUID.convertTo((EntryList<FluidStack>) this.entries, chance, UnaryOperator.identity());
             slotWidget = new TankWidget(ingredient, 0, 0, 18, 18, 1);
         } else {
-            slotWidget = new SlotWidget(EmiStackConverter.convertToEmiEntry(this.entries, chance), 0, 0);
+            slotWidget = new SlotWidget(ingredient, 0, 0);
         }
         slotWidget.drawBack(false);
         slotWidget.catalyst(recipeSlotRole == RecipeSlotRole.CATALYST);

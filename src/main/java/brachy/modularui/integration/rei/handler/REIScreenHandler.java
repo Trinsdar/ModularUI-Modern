@@ -2,7 +2,6 @@ package brachy.modularui.integration.rei.handler;
 
 import brachy.modularui.api.IMuiScreen;
 import brachy.modularui.api.widget.IWidget;
-import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.integration.recipeviewer.handlers.RecipeViewerHandler;
 import brachy.modularui.integration.rei.REIStackConverter;
@@ -150,7 +149,7 @@ public class REIScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
     }
 
     @Override
-    public RecipeViewerSlotWidget<?> createRecipeViewerSlot() {
-        return new ReiRecipeViewerSlot();
+    public <I> ReiRecipeViewerSlot<I> createRecipeViewerSlot(Class<I> ingredientClass) {
+        return new ReiRecipeViewerSlot<>(ingredientClass);
     }
 }

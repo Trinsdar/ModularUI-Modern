@@ -7,7 +7,6 @@ import brachy.modularui.integration.jei.GhostIngredientTarget;
 import brachy.modularui.integration.jei.JeiRecipeViewerSlot;
 import brachy.modularui.integration.jei.ModularUIJeiPlugin;
 import brachy.modularui.integration.jei.ModularUIJeiProperties;
-import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.integration.recipeviewer.handlers.GhostIngredientSlot;
 import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.integration.recipeviewer.handlers.RecipeViewerHandler;
@@ -124,8 +123,8 @@ public class JeiScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
     }
 
     @Override
-    public RecipeViewerSlotWidget<?> createRecipeViewerSlot() {
-        return new JeiRecipeViewerSlot();
+    public <I> JeiRecipeViewerSlot<I, ?> createRecipeViewerSlot(Class<I> ingredientClass) {
+        return new JeiRecipeViewerSlot<>(ingredientClass);
     }
 
     public static class ContainerScreen<T extends AbstractContainerMenu, T1 extends AbstractContainerScreen<T> & IMuiScreen>

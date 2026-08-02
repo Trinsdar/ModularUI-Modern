@@ -37,7 +37,7 @@ import java.util.Optional;
 import static brachy.modularui.integration.jei.ModularUIJeiPlugin.mapToJeiRole;
 
 @ApiStatus.Internal
-public class JeiRecipeViewerSlot<R> extends RecipeViewerSlotWidget<JeiRecipeViewerSlot<R>> implements ISlottedRecipeWidget {
+public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiRecipeViewerSlot<I, R>> implements ISlottedRecipeWidget {
 
     @Getter private @UnknownNullability IRecipeSlotDrawable slotWidget;
     @Setter private IFocusGroup focuses;
@@ -48,8 +48,8 @@ public class JeiRecipeViewerSlot<R> extends RecipeViewerSlotWidget<JeiRecipeView
 
     @Setter private IIngredientManager ingredientManager;
 
-    public JeiRecipeViewerSlot() {
-        super();
+    public JeiRecipeViewerSlot(Class<I> ingredientClass) {
+        super(ingredientClass);
 
         size(18, 18);
     }
@@ -94,13 +94,17 @@ public class JeiRecipeViewerSlot<R> extends RecipeViewerSlotWidget<JeiRecipeView
 
     @ApiStatus.Internal
     public void configureJeiSlotBuilder(IRecipeSlotBuilder builder) {
-        builder.addIngredientsUnsafe(this.entries.getStacks());
+        builder.addIngredientsUnsafe(this.entries.getStacks().stream()
+                .map(this.renderMappingFunction)
+                .toList());
     }
 
     // Mostly copied from RecipeSlotBuilder#build
     private void replaceSlotIngredients(RecipeSlotAccessor recipeSlot) {
         final DisplayIngredientAcceptor ingredients = new DisplayIngredientAcceptor(this.ingredientManager);
-        ingredients.addIngredientsUnsafe(this.entries.getStacks());
+        ingredients.addIngredientsUnsafe(this.entries.getStacks().stream()
+                .map(this.renderMappingFunction)
+                .toList());
 
         List<Optional<ITypedIngredient<?>>> allIngredients = ingredients.getAllIngredients();
 

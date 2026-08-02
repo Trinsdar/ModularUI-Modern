@@ -139,7 +139,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
     @ApiStatus.OverrideOnly
     public IWidget transformWidget(IRecipeExtrasBuilder builder, IWidget widget) {
-        if (!(widget instanceof JeiRecipeViewerSlot<?> recipeViewerSlot)) return widget;
+        if (!(widget instanceof JeiRecipeViewerSlot<?, ?> recipeViewerSlot)) return widget;
 
         if (builder instanceof RecipeLayoutAccessor accessor) {
             recipeViewerSlot.setCycler(accessor.modularui$getCycleTicker());

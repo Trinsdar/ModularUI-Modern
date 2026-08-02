@@ -43,7 +43,7 @@ public abstract class RecipeViewerHandler {
 
     public abstract @Nullable Object getCurrentlyDragged();
 
-    public abstract RecipeViewerSlotWidget<?> createRecipeViewerSlot();
+    public abstract <I> RecipeViewerSlotWidget<I, ?> createRecipeViewerSlot(Class<I> ingredientClass);
 
     public boolean isHoveringOver(GhostIngredientSlot<?> slot) {
         Object currentlyDragged = getCurrentlyDragged();
@@ -77,15 +77,20 @@ public abstract class RecipeViewerHandler {
         }
 
         @Override
-        public RecipeViewerSlotWidget<?> createRecipeViewerSlot() {
-            class DummyRecipeViewerSlot extends RecipeViewerSlotWidget<DummyRecipeViewerSlot> {
+        public <I> RecipeViewerSlotWidget<I, ?> createRecipeViewerSlot(Class<I> ingredientClass) {
+            class DummyRecipeViewerSlot extends RecipeViewerSlotWidget<I, DummyRecipeViewerSlot> {
+
+                DummyRecipeViewerSlot(Class<I> ingredientClass) {
+                    super(ingredientClass);
+                }
+
                 @Override
                 protected void rebuildRealSlot() {}
 
                 @Override
                 protected void drawRealSlot(ModularGuiContext context) {}
             }
-            return new DummyRecipeViewerSlot();
+            return new DummyRecipeViewerSlot(ingredientClass);
         }
     };
 }

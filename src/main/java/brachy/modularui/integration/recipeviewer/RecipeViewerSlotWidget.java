@@ -5,6 +5,7 @@ import brachy.modularui.drawable.GuiTextures;
 import brachy.modularui.integration.recipeviewer.entry.EntryList;
 import brachy.modularui.integration.recipeviewer.entry.fluid.FluidStackList;
 import brachy.modularui.integration.recipeviewer.entry.item.ItemStackList;
+import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.integration.recipeviewer.handlers.RecipeViewerHandler;
 import brachy.modularui.screen.viewport.ModularGuiContext;
 import brachy.modularui.theme.WidgetThemeEntry;
@@ -18,15 +19,22 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.function.UnaryOperator;
+
+@Accessors(fluent = true)
 @ApiStatus.Experimental
-public abstract class RecipeViewerSlotWidget<W extends RecipeViewerSlotWidget<W>> extends Widget<W> implements Interactable {
+public abstract class RecipeViewerSlotWidget<I, W extends RecipeViewerSlotWidget<I, W>> extends Widget<W> implements Interactable {
 
-    @Accessors(fluent = true)
-    @Getter @Setter protected float chance = 1f;
-
-    @Accessors(fluent = true)
     @Getter protected RecipeSlotRole recipeSlotRole = RecipeSlotRole.RENDER_ONLY;
-    protected EntryList<?> entries;
+    protected EntryList<I> entries;
+    @Getter @Setter protected float chance = 1f;
+    @Getter @Setter protected UnaryOperator<I> renderMappingFunction = UnaryOperator.identity();
+
+    protected final Class<I> ingredientClass;
+
+    public RecipeViewerSlotWidget(Class<I> ingredientClass) {
+       this.ingredientClass = ingredientClass;
+    }
 
     public W recipeSlotRole(RecipeSlotRole recipeSlotRole) {
         this.recipeSlotRole = recipeSlotRole;
@@ -34,10 +42,10 @@ public abstract class RecipeViewerSlotWidget<W extends RecipeViewerSlotWidget<W>
         return getThis();
     }
 
-    public <T> W value(EntryList<T> entryList) {
+    public W value(EntryList<I> entryList) {
         this.entries = entryList;
         rebuildRealSlot();
-        if (this.entries.getType() == FluidStack.class) {
+        if (this.ingredientClass == FluidStack.class) {
             background(GuiTextures.SLOT_FLUID);
         } else {
             background(GuiTextures.SLOT_ITEM); // TODO other types
@@ -45,12 +53,15 @@ public abstract class RecipeViewerSlotWidget<W extends RecipeViewerSlotWidget<W>
         return getThis();
     }
 
-    public W value(ItemStack stack) {
-        return value(ItemStackList.of(stack));
-    }
-
-    public W value(FluidStack stack) {
-        return value(FluidStackList.of(stack));
+    @SuppressWarnings("unchecked")
+    public W value(I stack) {
+        if (stack.getClass() == ItemStack.class) {
+            return value((EntryList<I>) ItemStackList.of((ItemStack) stack));
+        } else if (stack.getClass() == FluidStack.class) {
+            return value((EntryList<I>) FluidStackList.of((FluidStack) stack));
+        } else {
+            throw new IllegalArgumentException("Cannot use value(stack) with non-standard stack types! Use value(entryList) instead.");
+        }
     }
 
     protected abstract void rebuildRealSlot();
@@ -65,7 +76,17 @@ public abstract class RecipeViewerSlotWidget<W extends RecipeViewerSlotWidget<W>
         context.graphicsPose().popPose();
     }
 
-    public static RecipeViewerSlotWidget<?> create() {
-        return RecipeViewerHandler.getCurrent().createRecipeViewerSlot();
+    public static <I> RecipeViewerSlotWidget<I, ?> create(Class<I> ingredientClass) {
+        return RecipeViewerHandler.getCurrent().createRecipeViewerSlot(ingredientClass);
+    }
+
+    public static <I> RecipeViewerSlotWidget<I, ?> createFrom(IngredientProvider<I> slot) {
+        return RecipeViewerSlotWidget.<I>create(slot.ingredientClass())
+                .recipeSlotRole(slot.getRecipeRole())
+                .value(slot.getIngredients())
+                .chance(slot.chance())
+                .renderMappingFunction(slot.renderMappingFunction())
+                .copyResizerOf(slot)
+                .copyVisualsOf(slot);
     }
 }
