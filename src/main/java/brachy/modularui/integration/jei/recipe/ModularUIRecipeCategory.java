@@ -161,7 +161,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @ApiStatus.OverrideOnly
-    public IWidget createRecipeSlotForWidget(IRecipeLayoutBuilder builder, IWidget widget, T recipe, IFocusGroup focuses, int index) {
+    public IWidget createRecipeSlotForWidget(IRecipeLayoutBuilder builder, IWidget widget, T recipe, IFocusGroup focuses, MutableInt index) {
         // guard against JEMI issues
         if (!(builder instanceof RecipeLayoutBuilderAccessor recipeLayoutBuilder)) return widget;
         if (!(widget instanceof JeiRecipeViewerSlot recipeViewerSlot)) return widget;
@@ -171,7 +171,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         recipeViewerSlot.setRecipe(recipe);
         recipeViewerSlot.setFocuses(focuses);
         if (recipeViewerSlot.getName() == null) {
-            recipeViewerSlot.name("jei_slot_" + index);
+            recipeViewerSlot.name("jei_slot_" + index.getAndIncrement());
         }
 
         IRecipeSlotBuilder slotBuilder = builder.addSlot(ModularUIJeiPlugin.mapToJeiRole(recipeViewerSlot.recipeSlotRole()))
@@ -187,8 +187,8 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
         ModularScreen screen = getModularScreen(recipe);
-        MutableInt i = new MutableInt(0);
-        screen.getMainPanel().visitTransformAllChildren(widget -> createRecipeSlotForWidget(builder, widget, recipe, focuses, i.getAndIncrement()));
+        MutableInt index = new MutableInt(0);
+        screen.getMainPanel().visitTransformAllChildren(widget -> createRecipeSlotForWidget(builder, widget, recipe, focuses, index));
 
         this.createRecipeDisplay(builder, recipe, focuses);
     }
