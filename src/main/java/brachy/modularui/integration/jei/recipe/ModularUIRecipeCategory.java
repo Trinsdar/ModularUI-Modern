@@ -228,7 +228,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     @Override
     public void draw(T recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
         ModularScreen screen = getModularScreen(recipe);
-        EmbedHandler.drawEmbed(screen, graphics, Minecraft.getInstance().getPartialTick());
+        EmbedHandler.drawEmbed(screen, graphics, (int) mouseX, (int) mouseY, Minecraft.getInstance().getPartialTick());
     }
 
     @Override

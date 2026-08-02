@@ -168,7 +168,8 @@ public abstract class ModularUIREIDisplay implements Display {
         @Override
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             ModularScreen screen = getModularScreen(this.display);
-            EmbedHandler.drawEmbed(screen, graphics, partialTick, () -> {
+            // FIXME this thing breaks if you have the same recipe open in REI and pinned as a favorite.
+            EmbedHandler.drawEmbed(screen, graphics, mouseX, mouseY, partialTick, () -> {
                 screen.getContext().pushMatrix();
                 screen.getContext().translate(this.offsetX, this.offsetY);
             }, () -> {

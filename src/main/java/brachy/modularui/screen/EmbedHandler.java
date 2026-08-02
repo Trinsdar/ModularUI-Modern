@@ -24,43 +24,43 @@ public class EmbedHandler {
         return screen.getMainPanel().getArea().height;
     }
 
-    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, float partialTicks) {
-        drawEmbed(screen, graphics, partialTicks, null, null);
+    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        drawEmbed(screen, graphics, mouseX, mouseY, partialTicks, null, null);
     }
 
-    public static void drawEmbedNoVanillaElements(ModularScreen screen, GuiGraphics graphics, float partialTicks) {
-        drawEmbedNoVanillaElements(screen, graphics, partialTicks, null, null);
+    public static void drawEmbedNoVanillaElements(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        drawEmbedNoVanillaElements(screen, graphics, mouseX, mouseY, partialTicks, null, null);
     }
 
-    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, float partialTicks,
+    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks,
                                  @Nullable Runnable beforeDraw, @Nullable Runnable afterDraw) {
-        drawEmbed(screen, graphics, partialTicks, r -> true, beforeDraw, afterDraw);
+        drawEmbed(screen, graphics, mouseX, mouseY, partialTicks, r -> true, beforeDraw, afterDraw);
     }
 
-    public static void drawEmbedNoVanillaElements(ModularScreen screen, GuiGraphics graphics, float partialTicks,
+    public static void drawEmbedNoVanillaElements(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks,
                                                   @Nullable Runnable beforeDraw, @Nullable Runnable afterDraw) {
-        drawEmbed(screen, graphics, partialTicks, r -> false, beforeDraw, afterDraw);
+        drawEmbed(screen, graphics, mouseX, mouseY, partialTicks, r -> false, beforeDraw, afterDraw);
     }
 
-    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, float partialTicks, Predicate<Renderable> vanillaElementFilter) {
-        drawEmbed(screen, graphics, partialTicks, vanillaElementFilter, null, null);
+    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks,
+                                 Predicate<Renderable> vanillaElementFilter) {
+        drawEmbed(screen, graphics, mouseX, mouseY, partialTicks, vanillaElementFilter, null, null);
     }
 
-    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, float partialTicks, Predicate<Renderable> vanillaElementFilter,
-                                 @Nullable Runnable beforeDraw, @Nullable Runnable afterDraw) {
+    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks,
+                                 Predicate<Renderable> vanillaElementFilter, @Nullable Runnable beforeDraw, @Nullable Runnable afterDraw) {
         screen.getContext().reset();
         graphics.pose().pushPose();
 
         if (beforeDraw != null) beforeDraw.run();
 
-        var defContext = ClientScreenHandler.getDefaultContext();
-        int mx = defContext.getAbsMouseX();
-        int my = defContext.getAbsMouseY();
+        int mx = screen.getContext().unTransformX(mouseX, mouseY);
+        int my = screen.getContext().unTransformY(mouseX, mouseY);
         screen.render(graphics, mx, my, partialTicks);
 
         if (vanillaElementFilter != null) {
             RenderSystem.disableDepthTest();
-            ClientScreenHandler.drawVanillaElements(graphics, screen.getScreenWrapper().wrappedScreen(), mx, my, partialTicks, vanillaElementFilter);
+            ClientScreenHandler.drawVanillaElements(graphics, screen.getScreenWrapper().wrappedScreen(), mouseX, mouseY, partialTicks, vanillaElementFilter);
             RenderSystem.enableDepthTest();
         }
 
