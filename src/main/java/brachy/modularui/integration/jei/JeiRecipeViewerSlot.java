@@ -70,18 +70,16 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
             return;
         }
 
-        // only update the slot's role if it's out of date
         RecipeIngredientRole jeiRole = mapToJeiRole(this.recipeSlotRole);
-        if (slotWidget.getRole() != jeiRole) {
-            // add/remove the output slot tooltip callback depending on if this is now an output slot or not
-            if (this.recipeSlotRole == RecipeSlotRole.OUTPUT) {
-                addOutputSlotTooltipCallback(recipeSlot);
-            } else {
-                recipeSlot.modularui$getTooltipCallbacks().removeIf(callback -> callback instanceof OutputSlotTooltipCallback);
-            }
-            recipeSlot.modularui$setRole(jeiRole);
+        // add/remove the output slot tooltip callback depending on if this is now an output slot or not
+        if (this.recipeSlotRole == RecipeSlotRole.OUTPUT) {
+            addOutputSlotTooltipCallback(recipeSlot);
+        } else {
+            recipeSlot.modularui$getTooltipCallbacks().removeIf(callback -> callback instanceof OutputSlotTooltipCallback);
         }
-        slotWidget.setPosition(this.getArea().x, this.getArea().y);
+        recipeSlot.modularui$setRole(jeiRole);
+        // mmm I love off-by-one errors
+        slotWidget.setPosition(this.getArea().x + 1, this.getArea().y + 1);
 
         replaceSlotIngredients(recipeSlot);
         recipeSlot.modularui$setCycler(this.cycler);
@@ -100,6 +98,7 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
     private void replaceSlotIngredients(RecipeSlotAccessor recipeSlot) {
         if (this.entries == null || this.entries.isEmpty()) {
             recipeSlot.modularui$setAllIngredients(List.of());
+            recipeSlot.modularui$setDisplayIngredients(null);
             return;
         }
 
