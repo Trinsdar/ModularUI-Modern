@@ -58,6 +58,11 @@ public class ModularUIJeiPlugin implements IModPlugin {
     }
 
     @Override
+    public void onRuntimeUnavailable() {
+        runtime = null;
+    }
+
+    @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
         jeiHelpers = registration.getJeiHelpers();
 
