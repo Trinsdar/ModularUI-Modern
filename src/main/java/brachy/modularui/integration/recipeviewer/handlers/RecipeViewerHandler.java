@@ -3,8 +3,11 @@ package brachy.modularui.integration.recipeviewer.handlers;
 import brachy.modularui.ModularUI;
 import brachy.modularui.integration.emi.handler.EmiScreenHandler;
 import brachy.modularui.integration.jei.handler.JeiScreenHandler;
+import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.integration.rei.handler.REIScreenHandler;
 import brachy.modularui.screen.ScreenWrapper;
+
+import brachy.modularui.screen.viewport.ModularGuiContext;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,6 +43,8 @@ public abstract class RecipeViewerHandler {
 
     public abstract @Nullable Object getCurrentlyDragged();
 
+    public abstract RecipeViewerSlotWidget<?> createRecipeViewerSlot();
+
     public boolean isHoveringOver(GhostIngredientSlot<?> slot) {
         Object currentlyDragged = getCurrentlyDragged();
         if (currentlyDragged == null) {
@@ -69,6 +74,18 @@ public abstract class RecipeViewerHandler {
         @Override
         public @Nullable Object getCurrentlyDragged() {
             return null;
+        }
+
+        @Override
+        public RecipeViewerSlotWidget<?> createRecipeViewerSlot() {
+            class DummyRecipeViewerSlot extends RecipeViewerSlotWidget<DummyRecipeViewerSlot> {
+                @Override
+                protected void rebuildRealSlot() {}
+
+                @Override
+                protected void drawRealSlot(ModularGuiContext context) {}
+            }
+            return new DummyRecipeViewerSlot();
         }
     };
 }

@@ -1,15 +1,11 @@
 package brachy.modularui.integration.recipeviewer;
 
-import brachy.modularui.ModularUI;
 import brachy.modularui.api.widget.Interactable;
 import brachy.modularui.drawable.GuiTextures;
-import brachy.modularui.integration.emi.EmiRecipeViewerSlot;
-import brachy.modularui.integration.jei.JeiRecipeViewerSlot;
 import brachy.modularui.integration.recipeviewer.entry.EntryList;
 import brachy.modularui.integration.recipeviewer.entry.fluid.FluidStackList;
 import brachy.modularui.integration.recipeviewer.entry.item.ItemStackList;
 import brachy.modularui.integration.recipeviewer.handlers.RecipeViewerHandler;
-import brachy.modularui.integration.rei.ReiRecipeViewerSlot;
 import brachy.modularui.screen.viewport.ModularGuiContext;
 import brachy.modularui.theme.WidgetThemeEntry;
 import brachy.modularui.widget.Widget;
@@ -70,17 +66,6 @@ public abstract class RecipeViewerSlotWidget<W extends RecipeViewerSlotWidget<W>
     }
 
     public static RecipeViewerSlotWidget<?> create() {
-        if (!ModularUI.Mods.isRecipeViewerLoaded()) {
-            throw new IllegalStateException("Cannot create recipe viewer slot without a recipe viewer mod loaded.");
-        }
-
-        if (ModularUI.Mods.EMI.isLoaded()) {
-            return new EmiRecipeViewerSlot();
-        } else if (ModularUI.Mods.REI.isLoaded()) {
-            return new ReiRecipeViewerSlot();
-        } else if (ModularUI.Mods.JEI.isLoaded()) {
-            return new JeiRecipeViewerSlot();
-        }
-        throw new UnsupportedOperationException("Cannot create recipe viewer slot without EMI, REI, or JEI being loaded.");
+        return RecipeViewerHandler.getCurrent().createRecipeViewerSlot();
     }
 }

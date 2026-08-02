@@ -4,8 +4,10 @@ import brachy.modularui.api.IMuiScreen;
 import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.core.mixins.jei.IngredientListOverlayAccessor;
 import brachy.modularui.integration.jei.GhostIngredientTarget;
+import brachy.modularui.integration.jei.JeiRecipeViewerSlot;
 import brachy.modularui.integration.jei.ModularUIJeiPlugin;
 import brachy.modularui.integration.jei.ModularUIJeiProperties;
+import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.integration.recipeviewer.handlers.GhostIngredientSlot;
 import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.integration.recipeviewer.handlers.RecipeViewerHandler;
@@ -119,6 +121,11 @@ public class JeiScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
     public @Nullable Object getCurrentlyDragged() {
         if (currentIngredient == null) return null;
         return currentIngredient;
+    }
+
+    @Override
+    public RecipeViewerSlotWidget<?> createRecipeViewerSlot() {
+        return new JeiRecipeViewerSlot();
     }
 
     public static class ContainerScreen<T extends AbstractContainerMenu, T1 extends AbstractContainerScreen<T> & IMuiScreen>
