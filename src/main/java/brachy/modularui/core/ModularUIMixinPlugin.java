@@ -20,9 +20,9 @@ public class ModularUIMixinPlugin implements IMixinConfigPlugin {
     private static final String DEV_PACKAGE = "dev.";
 
     static {
-        MOD_COMPAT_MIXINS.put("roughlyenoughitems", "rei");
-        MOD_COMPAT_MIXINS.put("emi", "emi");
-        MOD_COMPAT_MIXINS.put("jei", "jei");
+        MOD_COMPAT_MIXINS.put("roughlyenoughitems", "rei.");
+        MOD_COMPAT_MIXINS.put("emi", "emi.");
+        MOD_COMPAT_MIXINS.put("jei", "jei.");
     }
 
     @Override
@@ -32,7 +32,7 @@ public class ModularUIMixinPlugin implements IMixinConfigPlugin {
             // this should never happen, but better safe than sorry
             return true;
         }
-        if (!FMLLoader.getLoadingModList().getErrors().isEmpty() || !ModLoader.isLoadingStateValid()) {
+        if (!FMLLoader.getLoadingModList().getErrors().isEmpty()) {
             // stop processing mixins if we have load errors to avoid getting bad crash reports in our issues
             return false;
         }
