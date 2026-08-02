@@ -70,14 +70,13 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
             return;
         }
 
-        RecipeIngredientRole jeiRole = mapToJeiRole(this.recipeSlotRole);
-        // add/remove the output slot tooltip callback depending on if this is now an output slot or not
+        // always remove the output slot tooltip callback (this is easier than checking if it already exists etc.)
+        recipeSlot.modularui$getTooltipCallbacks().removeIf(callback -> callback instanceof OutputSlotTooltipCallback);
         if (this.recipeSlotRole == RecipeSlotRole.OUTPUT) {
+            // (re)add the output slot tooltip callback if this is now an output slot
             addOutputSlotTooltipCallback(recipeSlot);
-        } else {
-            recipeSlot.modularui$getTooltipCallbacks().removeIf(callback -> callback instanceof OutputSlotTooltipCallback);
         }
-        recipeSlot.modularui$setRole(jeiRole);
+        recipeSlot.modularui$setRole(mapToJeiRole(this.recipeSlotRole));
         // mmm I love off-by-one errors
         slotWidget.setPosition(this.getArea().x + 1, this.getArea().y + 1);
 
