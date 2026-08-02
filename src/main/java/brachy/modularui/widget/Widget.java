@@ -159,6 +159,11 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
     @Nullable
     private Consumer<W> onUpdateListener;
 
+    private @Nullable IGuiAction.MouseEnterArea mouseEnterArea;
+    private @Nullable IGuiAction.MouseLeaveArea mouseLeaveArea;
+    private @Nullable IGuiAction.MouseStartHover mouseStartHover;
+    private @Nullable IGuiAction.MouseEndHover mouseEndHover;
+
     public Widget() {
         resizer(new StandardResizer(this));
     }
@@ -645,6 +650,42 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
         }
     }
 
+    @MustBeInvokedByOverriders
+    @Override
+    public void onMouseStartHover() {
+        super.onMouseStartHover();
+        if (this.mouseStartHover != null) {
+            this.mouseStartHover.startHover(getContext());
+        }
+    }
+
+    @MustBeInvokedByOverriders
+    @Override
+    public void onMouseEndHover() {
+        if (this.mouseEndHover != null) {
+            this.mouseEndHover.endHover(getContext(), getTicksHovered());
+        }
+        super.onMouseEndHover();
+    }
+
+    @MustBeInvokedByOverriders
+    @Override
+    public void onMouseEnterArea() {
+        super.onMouseEnterArea();
+        if (this.mouseEnterArea != null) {
+            this.mouseEnterArea.enter(getContext());
+        }
+    }
+
+    @MustBeInvokedByOverriders
+    @Override
+    public void onMouseLeaveArea() {
+        if (this.mouseLeaveArea != null) {
+            this.mouseLeaveArea.leave(getContext(), getTicksBelowMouse());
+        }
+        super.onMouseLeaveArea();
+    }
+
     /**
      * Registers a gui action this widget can listen to. Gui action listeners can listen to several mouse and keyboard
      * input events.
@@ -717,6 +758,26 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
      */
     public W setEnabledIf(Predicate<W> condition) {
         return onUpdateListener(w -> setEnabled(condition.test(w)), true);
+    }
+
+    public W onMouseEnterArea(IGuiAction.MouseEnterArea mouseEnterArea) {
+        this.mouseEnterArea = mouseEnterArea;
+        return getThis();
+    }
+
+    public W onMouseLeaveArea(IGuiAction.MouseLeaveArea mouseLeaveArea) {
+        this.mouseLeaveArea = mouseLeaveArea;
+        return getThis();
+    }
+
+    public W onMouseStartHover(IGuiAction.MouseStartHover mouseStartHover) {
+        this.mouseStartHover = mouseStartHover;
+        return getThis();
+    }
+
+    public W onMouseEndHover(IGuiAction.MouseEndHover mouseEndHover) {
+        this.mouseEndHover = mouseEndHover;
+        return getThis();
     }
 
     // ----------------

@@ -5,6 +5,7 @@ import brachy.modularui.api.widget.ITooltip;
 import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
+import brachy.modularui.integration.recipeviewer.util.RecipeDebugDecoratorUtil;
 import brachy.modularui.integration.rei.ReiRecipeViewerSlot;
 import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
@@ -126,6 +127,8 @@ public abstract class ModularUIREIDisplay implements Display {
         }
         ModularScreen screen = ModularScreen.createEmbed(owner, panel);
         screen.getContext().getUISettings().drawTooltipExternally(true);
+
+        RecipeDebugDecoratorUtil.addRecipeDebugOverlays(screen);
         return screen;
     }
 
@@ -138,7 +141,7 @@ public abstract class ModularUIREIDisplay implements Display {
 
     @ApiStatus.OverrideOnly
     public IWidget transformWidget(IWidget widget, Iterator<EntryIngredient> in, Iterator<EntryIngredient> out) {
-        if (!(widget instanceof ReiRecipeViewerSlot recipeViewerSlot)) return widget;
+        if (!(widget instanceof ReiRecipeViewerSlot<?> recipeViewerSlot)) return widget;
 
         if (recipeViewerSlot.recipeSlotRole() == RecipeSlotRole.OUTPUT) {
             // recipeViewerSlot.getSlotWidget().recipeContext(this);
