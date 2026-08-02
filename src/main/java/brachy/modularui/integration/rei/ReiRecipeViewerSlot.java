@@ -28,7 +28,7 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
     @Getter
     private RecipeSlotRole recipeSlotRole = RecipeSlotRole.RENDER_ONLY;
     @Getter
-    private EntryList<?> value;
+    private EntryList<?> entryList;
     @Accessors(fluent = true)
     @Getter
     @Setter
@@ -50,9 +50,9 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
 
     @Override
     public <T> ReiRecipeViewerSlot value(EntryList<T> entryList) {
-        this.value = entryList;
+        this.entryList = entryList;
         rebuildReiSlot();
-        if (this.value.getType() == FluidStack.class) {
+        if (this.entryList.getType() == FluidStack.class) {
             background(GuiTextures.SLOT_FLUID);
         } else {
             background(GuiTextures.SLOT_ITEM); // TODO other types
@@ -62,7 +62,7 @@ public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerS
 
     private void rebuildReiSlot() {
         slotWidget = Widgets.createSlot(new Point()).disableBackground();
-        slotWidget.entries(REIStackConverter.convertToReiEntry(this.value, chance));
+        slotWidget.entries(REIStackConverter.convertToReiEntry(this.entryList, chance));
         if (recipeSlotRole == RecipeSlotRole.INPUT || recipeSlotRole == RecipeSlotRole.CATALYST) {
             slotWidget.markInput();
         } else if (recipeSlotRole == RecipeSlotRole.OUTPUT) {

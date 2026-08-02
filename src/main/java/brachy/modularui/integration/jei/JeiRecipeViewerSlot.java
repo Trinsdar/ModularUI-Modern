@@ -39,7 +39,7 @@ public class JeiRecipeViewerSlot extends RecipeViewerSlotWidget<JeiRecipeViewerS
 
     @Accessors(fluent = true)
     @Getter private RecipeSlotRole recipeSlotRole = RecipeSlotRole.RENDER_ONLY;
-    @Getter private EntryList<?> value;
+    @Getter private EntryList<?> entryList;
     @Accessors(fluent = true)
     @Getter @Setter private float chance = 1f;
 
@@ -58,9 +58,9 @@ public class JeiRecipeViewerSlot extends RecipeViewerSlotWidget<JeiRecipeViewerS
 
     @Override
     public <T> JeiRecipeViewerSlot value(EntryList<T> entryList) {
-        this.value = entryList;
+        this.entryList = entryList;
         rebuildJeiSlot();
-        if (this.value.getType() == FluidStack.class) {
+        if (this.entryList.getType() == FluidStack.class) {
             background(GuiTextures.SLOT_FLUID);
         } else {
             background(GuiTextures.SLOT_ITEM); // TODO other types
@@ -74,10 +74,10 @@ public class JeiRecipeViewerSlot extends RecipeViewerSlotWidget<JeiRecipeViewerS
 
         // kinda meh solution. this isn't API, but I can't find a good way to do this within the API.
         RecipeSlotBuilder builder = new RecipeSlotBuilder(ingredientManager, 0, ModularUIJeiPlugin.mapToJeiRole(this.recipeSlotRole));
-        JeiRecipeViewerSlot.addTypedIngredients(this.value, builder);
+        JeiRecipeViewerSlot.addTypedIngredients(this.entryList, builder);
         builder.setPosition(this.getArea().x, this.getArea().y);
 
-        if (this.value.getType() == FluidStack.class) {
+        if (this.entryList.getType() == FluidStack.class) {
             // special case fluid slots (this is why we can't have nice things.)
             builder.setFluidRenderer(1, false, 18, 18);
         }
