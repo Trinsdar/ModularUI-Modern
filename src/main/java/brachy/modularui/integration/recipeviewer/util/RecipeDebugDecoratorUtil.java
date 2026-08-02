@@ -31,7 +31,7 @@ public class RecipeDebugDecoratorUtil {
         screen.getMainPanel()
                 .onMouseEnterArea((ctx) -> {
                     ModularScreen overlay = new DebugOverlay(screen.getScreenWrapper());
-                    overlay.constructOverlay(Minecraft.getInstance().screen);
+                    overlay.constructOverlay(screen.getScreenWrapper().wrappedScreen());
                     OverlayStack.open(overlay);
 
                     debugOverlay.setValue(overlay);
