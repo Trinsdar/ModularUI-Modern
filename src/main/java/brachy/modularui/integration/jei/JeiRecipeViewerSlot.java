@@ -143,10 +143,12 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
         return this.slotWidget.keyPressed(keyCode, scanCode, modifiers) ? Result.SUCCESS : Result.ACCEPT;
     }
 */
+    private static final ScreenPosition ZERO_POS = new ScreenPosition(0, 0);
+
     @Override
     public Optional<RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
         if (isHovering() && slotWidget != null) {
-            return Optional.of(new RecipeSlotUnderMouse(slotWidget, this.getPosition()));
+            return Optional.of(new RecipeSlotUnderMouse(slotWidget, ZERO_POS));
         }
         return Optional.empty();
     }
