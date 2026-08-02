@@ -131,11 +131,10 @@ public class EmiScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
             if (stack.isEmpty()) {
                 continue;
             }
-            if (stack.getKeyOfType(Item.class) != null) {
-                dragged.add(EmiStackConverter.ITEM.convertFrom(stack));
-            }
-            if (stack.getKeyOfType(Fluid.class) != null) {
-                dragged.add(EmiStackConverter.FLUID.convertFrom(stack));
+            for (var entry : EmiStackConverter.CONVERTERS.entrySet()) {
+                if (stack.getKeyOfType(entry.getKey()) != null) {
+                    dragged.add(entry.getValue().convertFrom(stack));
+                }
             }
         }
         return dragged;

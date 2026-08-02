@@ -137,7 +137,7 @@ public class REIScreenHandler<T extends Screen & IMuiScreen> extends RecipeViewe
     }
 
     @Override
-    public boolean isSearchFocused(){
+    public boolean isSearchFocused() {
         TextField searchField = REIRuntime.getInstance().getSearchTextField();
         if (searchField != null) return searchField.isFocused();
         return false;
