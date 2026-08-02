@@ -9,7 +9,8 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
@@ -24,22 +25,33 @@ public class EmbedHandler {
     }
 
     public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, float partialTicks) {
-        drawEmbed(screen, graphics, partialTicks, r -> true);
+        drawEmbed(screen, graphics, partialTicks, null, null);
     }
 
     public static void drawEmbedNoVanillaElements(ModularScreen screen, GuiGraphics graphics, float partialTicks) {
-        drawEmbed(screen, graphics, partialTicks, r -> false);
+        drawEmbedNoVanillaElements(screen, graphics, partialTicks, null, null);
+    }
+
+    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, float partialTicks,
+                                 @Nullable Runnable beforeDraw, @Nullable Runnable afterDraw) {
+        drawEmbed(screen, graphics, partialTicks, r -> true, beforeDraw, afterDraw);
+    }
+
+    public static void drawEmbedNoVanillaElements(ModularScreen screen, GuiGraphics graphics, float partialTicks,
+                                                  @Nullable Runnable beforeDraw, @Nullable Runnable afterDraw) {
+        drawEmbed(screen, graphics, partialTicks, r -> false, beforeDraw, afterDraw);
     }
 
     public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, float partialTicks, Predicate<Renderable> vanillaElementFilter) {
+        drawEmbed(screen, graphics, partialTicks, vanillaElementFilter, null, null);
+    }
+
+    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, float partialTicks, Predicate<Renderable> vanillaElementFilter,
+                                 @Nullable Runnable beforeDraw, @Nullable Runnable afterDraw) {
         screen.getContext().reset();
-        PoseStack pose = graphics.pose();
-        var m = pose.last().pose();
-        pose.pushPose();
-        pose.setIdentity(); // reset all current transformations and only reapply them for the main panel
-        screen.getMainPanel().transform((p, stack) -> {
-            stack.multiply(m);
-        });
+        graphics.pose().pushPose();
+
+        if (beforeDraw != null) beforeDraw.run();
 
         var defContext = ClientScreenHandler.getDefaultContext();
         int mx = defContext.getAbsMouseX();
@@ -49,14 +61,18 @@ public class EmbedHandler {
         if (vanillaElementFilter != null) {
             RenderSystem.disableDepthTest();
             ClientScreenHandler.drawVanillaElements(graphics, screen.getScreenWrapper().wrappedScreen(), mx, my, partialTicks, vanillaElementFilter);
+            RenderSystem.enableDepthTest();
         }
 
         screen.drawForeground(graphics);
 
+        if (afterDraw != null) afterDraw.run();
+
         RenderSystem.enableDepthTest();
         Lighting.setupFor3DItems();
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        pose.popPose();
+
+        graphics.pose().popPose();
     }
 
     public record EmbedWrapper(ModularScreen screen) implements IMuiScreen {

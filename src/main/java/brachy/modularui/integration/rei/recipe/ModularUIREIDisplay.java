@@ -25,7 +25,6 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
@@ -63,7 +62,6 @@ public abstract class ModularUIREIDisplay implements Display {
     @Getter protected final CategoryIdentifier<?> categoryIdentifier;
 
     private boolean sizeCalculated = false;
-    private Rectangle bounds;
     private int displayWidth, displayHeight;
 
     public ModularUIREIDisplay(ResourceLocation recipeId, Supplier<IWidget> recipeUI, CategoryIdentifier<?> categoryId) {
@@ -90,11 +88,6 @@ public abstract class ModularUIREIDisplay implements Display {
         }
         this.displayWidth = w;
         this.displayHeight = h;
-    }
-
-    public Rectangle getBounds() {
-        calculateSize();
-        return this.bounds;
     }
 
     public int getDisplayWidth() {
@@ -157,27 +150,30 @@ public abstract class ModularUIREIDisplay implements Display {
 
     public List<Widget> createWidgets(Rectangle bounds) {
         List<Widget> widgets = new ArrayList<>();
-        widgets.add(new UIWrapperWidget(this));
+        widgets.add(new UIWrapperWidget(this, bounds.x, bounds.y));
         return widgets;
     }
 
-    public static class UIWrapperWidget extends WidgetWithBounds {
+    public static class UIWrapperWidget extends Widget {
 
         private final ModularUIREIDisplay display;
+        private final float offsetX, offsetY;
 
-        public UIWrapperWidget(ModularUIREIDisplay display) {
+        public UIWrapperWidget(ModularUIREIDisplay display, float offsetX, float offsetY) {
             this.display = display;
-        }
-
-        @Override
-        public Rectangle getBounds() {
-            return this.display.getBounds();
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
         }
 
         @Override
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             ModularScreen screen = getModularScreen(this.display);
-            EmbedHandler.drawEmbed(screen, graphics, partialTick);
+            EmbedHandler.drawEmbed(screen, graphics, partialTick, () -> {
+                screen.getContext().pushMatrix();
+                screen.getContext().translate(this.offsetX, this.offsetY);
+            }, () -> {
+                screen.getContext().popMatrix();
+            });
         }
 
         @Override

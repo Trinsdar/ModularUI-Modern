@@ -15,18 +15,20 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeViewerSlot<I>> {
 
+    private static final Point ONE = new Point(1, 1);
+
     @Getter private Slot slotWidget;
 
     public ReiRecipeViewerSlot(Class<I> ingredientClass) {
         super(ingredientClass);
-        this.slotWidget = Widgets.createSlot(new Point()).disableBackground();
+        this.slotWidget = Widgets.createSlot(ONE).disableBackground();
 
         size(18, 18);
     }
 
     @Override
     protected void rebuildRealSlot() {
-        slotWidget = Widgets.createSlot(new Point()).disableBackground();
+        slotWidget = Widgets.createSlot(ONE).disableBackground();
         slotWidget.entries(REIStackConverter.convertToReiEntry(this.entries, this.chance, this.renderMappingFunction));
 
         if (recipeSlotRole == RecipeSlotRole.INPUT || recipeSlotRole == RecipeSlotRole.CATALYST) {
