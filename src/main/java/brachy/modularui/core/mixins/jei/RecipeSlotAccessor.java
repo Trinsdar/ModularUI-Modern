@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import java.util.List;
 import java.util.Optional;
 
-@Mixin(RecipeSlot.class)
+@Mixin(value = RecipeSlot.class, remap = false)
 public interface RecipeSlotAccessor {
 
     @Accessor("role")

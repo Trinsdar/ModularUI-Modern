@@ -5,7 +5,7 @@ import mezz.jei.library.gui.recipes.RecipeLayout;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(RecipeLayout.class)
+@Mixin(value = RecipeLayout.class, remap = false)
 public interface RecipeLayoutAccessor {
 
     @Accessor("cycleTicker")
