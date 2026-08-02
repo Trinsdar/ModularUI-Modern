@@ -38,13 +38,13 @@ public abstract class RecipeViewerSlotWidget<I, W extends RecipeViewerSlotWidget
 
     public W recipeSlotRole(RecipeSlotRole recipeSlotRole) {
         this.recipeSlotRole = recipeSlotRole;
-        rebuildRealSlot();
+        if (this.entries != null) rebuildRealSlot();
         return getThis();
     }
 
     public W value(EntryList<I> entryList) {
         this.entries = entryList;
-        rebuildRealSlot();
+        if (this.entries != null) rebuildRealSlot();
         if (this.ingredientClass == FluidStack.class) {
             background(GuiTextures.SLOT_FLUID);
         } else {

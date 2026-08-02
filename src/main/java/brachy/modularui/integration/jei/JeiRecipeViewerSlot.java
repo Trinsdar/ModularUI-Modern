@@ -55,7 +55,7 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
 
     public void setSlotWidget(IRecipeSlotDrawable slotWidget) {
         this.slotWidget = slotWidget;
-        rebuildRealSlot();
+        if (this.entries != null) rebuildRealSlot();
     }
 
     /**
@@ -86,21 +86,16 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
 
     @ApiStatus.Internal
     public void configureJeiSlotBuilder(IRecipeSlotBuilder builder) {
-        if (this.entries != null && !this.entries.isEmpty()) {
+        if (this.entries != null) {
             builder.addIngredientsUnsafe(this.entries.getStacks().stream()
                     .map(this.renderMappingFunction)
                     .toList());
         }
+        builder.setPosition(this.getArea().x + 1, this.getArea().y + 1);
     }
 
     // Mostly copied from RecipeSlotBuilder#build
     private void replaceSlotIngredients(RecipeSlotAccessor recipeSlot) {
-        if (this.entries == null || this.entries.isEmpty()) {
-            recipeSlot.modularui$setAllIngredients(List.of());
-            recipeSlot.modularui$setDisplayIngredients(null);
-            return;
-        }
-
         final DisplayIngredientAcceptor ingredients = new DisplayIngredientAcceptor(this.ingredientManager);
         ingredients.addIngredientsUnsafe(this.entries.getStacks().stream()
                 .map(this.renderMappingFunction)
