@@ -24,6 +24,7 @@ import com.google.common.cache.LoadingCache;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
+import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.inputs.IJeiGuiEventListener;
@@ -32,6 +33,7 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.List;
@@ -72,7 +74,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
     /**
      * Calculates the size of the recipe if not already done.<br>
-     * This should be called in subclasses' {@link #setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup) setRecipe} methods.
+     * This should be called in subclasses' {@link #createRecipeDisplay(IRecipeLayoutBuilder, Object, IFocusGroup) createRecipeDisplay} methods.
      * Otherwise, the size of ALL the recipes in the same category are calculated at once, which can make the game lag for a few seconds.
      */
     protected void calculateSize(T recipe) {
@@ -92,31 +94,28 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
     /**
      * Return the maximum expected display width here.<br>
-     * You should also return a per-category display width that's at most this value in {@link #getWidth(Object)}.
+     * You should also return a per-category display width that's at most this value in {@link #getWidth(Object)} if the default value
+     * doesn't suit your needs.
+     *
      * @return The maximum expected display width
      */
-    @ApiStatus.OverrideOnly
-    @Override
-    public abstract int getWidth();
-
-    public int getWidth(T recipe) {
-        calculateSize(recipe);
-        return this.displayWidth;
-    }
+    public abstract int getMaxWidth();
 
     /**
      * Return the maximum expected display height here.<br>
-     * You should also return a per-category display height that's at most this value in {@link #getHeight(Object)}.
+     * You should also return a per-category display height that's at most this value in {@link #getHeight(Object)} if the default value
+     * doesn't suit your needs.
+     *
      * @return The maximum expected display height
      */
-    @ApiStatus.OverrideOnly
-    @Override
-    public abstract int getHeight();
+    public abstract int getMaxHeight();
 
-    public int getHeight(T recipe) {
-        calculateSize(recipe);
-        return this.displayHeight;
-    }
+    /**
+     * Customize your recipe displays here.
+     * <p>
+     * This is used by JEI for lookups to figure out what ingredients are inputs and outputs for a recipe.
+     */
+    public abstract void createRecipeDisplay(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses);
 
     private ModularScreen createScreen(T recipe) {
         ResourceLocation id = this.recipeIdGetter.apply(recipe);
@@ -187,6 +186,8 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         ModularScreen screen = getModularScreen(recipe);
         MutableInt i = new MutableInt(0);
         screen.getMainPanel().visitTransformAllChildren(widget -> createRecipeSlotForWidget(builder, widget, recipe, focuses, i.getAndIncrement()));
+
+        this.createRecipeDisplay(builder, recipe, focuses);
     }
 
     @Override
@@ -225,6 +226,31 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     public void draw(T recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
         ModularScreen screen = getModularScreen(recipe);
         EmbedHandler.drawEmbed(screen, graphics, Minecraft.getInstance().getPartialTick());
+    }
+
+    @Override
+    public @Nullable IDrawable getIcon() {
+        return null;
+    }
+
+    @Override
+    public final int getHeight() {
+        return getMaxHeight();
+    }
+
+    public int getHeight(T recipe) {
+        calculateSize(recipe);
+        return this.displayHeight;
+    }
+
+    @Override
+    public final int getWidth() {
+        return getMaxWidth();
+    }
+
+    public int getWidth(T recipe) {
+        calculateSize(recipe);
+        return this.displayWidth;
     }
 
     public class ModularUIGuiEventListener implements IJeiGuiEventListener {

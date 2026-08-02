@@ -27,15 +27,6 @@ public abstract class ModularUIREIDisplayCategory<D extends ModularUIREIDisplay>
     }
 
     /**
-     * Return the maximum expected display height here.<br>
-     * You should also return a per-category display height that's at most this value in {@link #getDisplayHeight(ModularUIREIDisplay)}.
-     * @return The maximum expected display height
-     */
-    @ApiStatus.OverrideOnly
-    @Override
-    public abstract int getDisplayHeight();
-
-    /**
      * Returns the display-dependent height.
      *
      * @param display the display
@@ -43,5 +34,17 @@ public abstract class ModularUIREIDisplayCategory<D extends ModularUIREIDisplay>
      */
     public int getDisplayHeight(D display) {
         return display.getDisplayHeight();
+    }
+
+    /**
+     * Return the maximum expected display height here.<br>
+     * You should also return a per-category display height that's at most this value in {@link #getDisplayHeight(ModularUIREIDisplay)}.
+     * @return The maximum expected display height
+     */
+    public abstract int getMaxDisplayHeight();
+
+    @Override
+    public final int getDisplayHeight() {
+        return getMaxDisplayHeight();
     }
 }
