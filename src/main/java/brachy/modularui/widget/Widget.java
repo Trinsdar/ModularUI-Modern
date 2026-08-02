@@ -876,7 +876,11 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
     public W excludeAreaInRecipeViewer(boolean val) {
         this.excludeAreaInRecipeViewer = val;
         if (isValid()) {
-            getContext().getRecipeViewerSettings().addExclusionArea(this);
+            if (this.excludeAreaInRecipeViewer) {
+                getContext().getRecipeViewerSettings().addExclusionArea(this);
+            } else {
+                getContext().getRecipeViewerSettings().removeExclusionArea(this);
+            }
         }
         return getThis();
     }
