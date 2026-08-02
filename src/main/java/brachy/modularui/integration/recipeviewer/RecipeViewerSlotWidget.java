@@ -66,16 +66,6 @@ public abstract class RecipeViewerSlotWidget<I, W extends RecipeViewerSlotWidget
 
     protected abstract void rebuildRealSlot();
 
-    protected abstract void drawRealSlot(ModularGuiContext context);
-
-    @Override
-    public final void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
-        context.graphicsPose().pushPose();
-        context.getGraphics().pose().translate(-this.getArea().x, -this.getArea().y, 0);
-        drawRealSlot(context);
-        context.graphicsPose().popPose();
-    }
-
     public static <I> RecipeViewerSlotWidget<I, ?> create(Class<I> ingredientClass) {
         return RecipeViewerHandler.getCurrent().createRecipeViewerSlot(ingredientClass);
     }

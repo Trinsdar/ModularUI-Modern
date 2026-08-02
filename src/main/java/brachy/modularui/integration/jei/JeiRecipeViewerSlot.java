@@ -10,6 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 
 import brachy.modularui.screen.viewport.ModularGuiContext;
 
+import brachy.modularui.theme.WidgetThemeEntry;
+
 import it.unimi.dsi.fastutil.ints.IntSet;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +21,6 @@ import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
 import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.runtime.IIngredientManager;
@@ -121,10 +122,13 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
     }
 
     @Override
-    public void drawRealSlot(ModularGuiContext context) {
-        if (slotWidget != null) {
-            slotWidget.draw(context.getGraphics());
-        }
+    public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
+        if (this.slotWidget == null) return;
+
+        context.graphicsPose().pushPose();
+        context.getGraphics().pose().translate(-this.getArea().x, -this.getArea().y, 0);
+        this.slotWidget.draw(context.getGraphics());
+        context.graphicsPose().popPose();
     }
 /*
     @Override

@@ -9,6 +9,8 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.fluids.FluidStack;
 
+import brachy.modularui.theme.WidgetThemeEntry;
+
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.widget.SlotWidget;
 import dev.emi.emi.api.widget.TankWidget;
@@ -48,8 +50,11 @@ public class EmiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, EmiRecipeV
     }
 
     @Override
-    public void drawRealSlot(ModularGuiContext context) {
+    public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
+        context.graphicsPose().pushPose();
+        context.getGraphics().pose().translate(-this.getArea().x, -this.getArea().y, 0);
         this.slotWidget.render(context.getGraphics(), context.getMouseX(), context.getMouseY(), context.getRenderPartialTicks());
+        context.graphicsPose().popPose();
     }
 
     @Override

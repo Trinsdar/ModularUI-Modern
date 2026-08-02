@@ -7,8 +7,6 @@ import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.integration.rei.handler.REIScreenHandler;
 import brachy.modularui.screen.ScreenWrapper;
 
-import brachy.modularui.screen.viewport.ModularGuiContext;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -86,9 +84,6 @@ public abstract class RecipeViewerHandler {
 
                 @Override
                 protected void rebuildRealSlot() {}
-
-                @Override
-                protected void drawRealSlot(ModularGuiContext context) {}
             }
             return new DummyRecipeViewerSlot(ingredientClass);
         }

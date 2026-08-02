@@ -4,6 +4,8 @@ import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.screen.viewport.ModularGuiContext;
 
+import brachy.modularui.theme.WidgetThemeEntry;
+
 import lombok.Getter;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
@@ -37,7 +39,7 @@ public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeV
     }
 
     @Override
-    public void drawRealSlot(ModularGuiContext context) {
+    public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
         this.slotWidget.render(context.getGraphics(), context.getMouseX(), context.getMouseY(), context.getRenderPartialTicks());
     }
 
