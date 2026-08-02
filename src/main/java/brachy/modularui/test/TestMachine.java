@@ -6,6 +6,7 @@ import brachy.modularui.api.IThemeApi;
 import brachy.modularui.api.IUIHolder;
 import brachy.modularui.api.drawable.Text;
 import brachy.modularui.api.value.IDoubleValue;
+import brachy.modularui.api.widget.IGuiAction;
 import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.GuiTextures;
 import brachy.modularui.drawable.progress.ProgressDrawable;
@@ -289,7 +290,14 @@ public class TestMachine {
                             .child(new ProgressWidget()
                                     .value(progress)
                                     .size(20)
-                                    .texture(GuiTextures.PROGRESS_ARROW, ProgressDrawable.Direction.RIGHT))
+                                    .texture(GuiTextures.PROGRESS_ARROW, ProgressDrawable.Direction.RIGHT)
+                                    .configure(w -> {
+                                        w.listenGuiAction((IGuiAction.MouseReleased) (ctx, button) -> {
+                                            if (!ctx.isMouseAbove(w)) return false;
+                                            TestRecipeViewerGuis.openTestRecipeViewerCategory();
+                                            return true;
+                                        });
+                                    }))
                             .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
                                     .slot(new ModularSlot(out, i).canPut(false))
                                     .recipeRole(RecipeSlotRole.OUTPUT))));

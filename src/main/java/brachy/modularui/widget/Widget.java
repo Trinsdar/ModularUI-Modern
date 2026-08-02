@@ -887,6 +887,47 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
     }
 
     /**
+     * This can be used to further configure widgets in ways not directly allowed by the builder functions.
+     * <p>
+     * For example, adding a click action to a progress widget changes from this:
+     * {@snippet lang="java":
+     *     ProgressWidget progressWidget = new ProgressWidget()
+     *            .value()
+     *            .texture();
+     *     progressWidget.listenGuiAction((IGuiAction.MousePressed) (ctx, button) -> {
+     *         if (!ctx.isMouseAbove(progressWidget)) return false;
+     *         //...
+     *         return true;
+     *     });
+     *     parentWidget.child(progressWidget)
+     *             .child()
+     *             //...
+     * }
+     * to this:
+     * {@snippet lang="java":
+     *     parentWidget.child(new ProgressWidget()
+     *             .value()
+     *             .texture()
+     *             .configure(w -> {
+     *                 w.listenGuiAction((IGuiAction.MousePressed) (ctx, button) -> {
+     *                     if (!ctx.isMouseAbove(w)) return false;
+     *                     //...
+     *                     return true;
+     *                 });
+     *             }))
+     *             .child()
+     *             //...
+     * }
+     *
+     * @param configurator the configuration function
+     * @return this
+     */
+    public W configure(Consumer<W> configurator) {
+        configurator.accept(getThis());
+        return getThis();
+    }
+
+    /**
      * Returns this widget with proper generic type.
      *
      * @return this

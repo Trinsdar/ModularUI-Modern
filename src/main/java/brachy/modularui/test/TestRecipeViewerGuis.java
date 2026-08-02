@@ -9,6 +9,7 @@ import net.minecraftforge.items.wrapper.EmptyHandler;
 import brachy.modularui.ModularUI;
 import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.integration.emi.recipe.ModularUIEmiRecipe;
+import brachy.modularui.integration.jei.ModularUIJeiPlugin;
 import brachy.modularui.integration.jei.recipe.ModularUIRecipeCategory;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
@@ -18,6 +19,7 @@ import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.value.DoubleValue;
 import brachy.modularui.widgets.slot.ItemSlot;
 
+import dev.emi.emi.api.EmiApi;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.stack.EmiIngredient;
@@ -26,6 +28,7 @@ import lombok.Getter;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
@@ -37,6 +40,7 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import org.jetbrains.annotations.NotNullByDefault;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +77,23 @@ public class TestRecipeViewerGuis {
         return panel.child(recipeUI);
     }
 
+    public static void openTestRecipeViewerCategory() {
+        if (ModularUI.Mods.EMI.isLoaded()) {
+            EMI.openRecipeCategory();
+        } else if (ModularUI.Mods.REI.isLoaded()) {
+            REI.openRecipeCategory();
+        } else if (ModularUI.Mods.JEI.isLoaded()) {
+            JEI.openRecipeCategory();
+        }
+    }
+
     public static class EMI {
 
         public static final EmiRecipeCategory CATEGORY = new EmiRecipeCategory(ModularUI.id("machine"), EmiStack.of(TestRegistration.TEST_MACHINE_BLOCK_ITEM.get()));
+
+        public static void openRecipeCategory() {
+            EmiApi.displayRecipeCategory(CATEGORY);
+        }
 
         public static void register(EmiRegistry registry) {
             registry.addCategory(CATEGORY);
@@ -109,6 +127,10 @@ public class TestRecipeViewerGuis {
     public static class JEI {
 
         public static final RecipeType<TestMachine.Recipe> RECIPE_TYPE = new RecipeType<>(ModularUI.id("machine"), TestMachine.Recipe.class);
+
+        public static void openRecipeCategory() {
+            ModularUIJeiPlugin.getRuntime().getRecipesGui().showTypes(List.of(RECIPE_TYPE));
+        }
 
         public static void registerCategory(IRecipeCategoryRegistration registry) {
             registry.addRecipeCategories(new RecipeCategory(TestRecipeViewerGuis::buildViewerUI, r -> r.id));
@@ -154,12 +176,21 @@ public class TestRecipeViewerGuis {
             public void createRecipeDisplay(IRecipeLayoutBuilder builder, TestMachine.Recipe recipe, IFocusGroup focuses) {
                 calculateSize(recipe);
             }
+
+            @Override
+            public @Nullable ResourceLocation getRegistryName(TestMachine.Recipe recipe) {
+                return recipe.id;
+            }
         }
     }
 
     public static class REI {
 
         public static final CategoryIdentifier<RecipeDisplay> CATEGORY = CategoryIdentifier.of(ModularUI.id("machine"));
+
+        public static void openRecipeCategory() {
+            ViewSearchBuilder.builder().addCategory(CATEGORY).open();
+        }
 
         public static void registerCategory(CategoryRegistry registry) {
             registry.add(new RecipeCategory());
