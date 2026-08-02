@@ -3,7 +3,10 @@ package brachy.modularui.integration.jei;
 import brachy.modularui.api.IMuiScreen;
 import brachy.modularui.widget.sizer.Area;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+
+import com.mojang.blaze3d.platform.Window;
 
 import lombok.Getter;
 import mezz.jei.api.gui.handlers.IGuiProperties;
@@ -15,6 +18,8 @@ import java.util.Objects;
  * This needs to be an immutable class, otherwise JEI shits itself.
  */
 public class ModularUIJeiProperties implements IGuiProperties {
+
+    private static final int DEFAULT_GUI_WIDTH = 176, DEFAULT_GUI_HEIGHT = 166;
 
     @Getter
     private final Class<? extends Screen> screenClass;
@@ -32,15 +37,20 @@ public class ModularUIJeiProperties implements IGuiProperties {
     private final int screenHeight;
 
     public ModularUIJeiProperties(IMuiScreen screen) {
-        Area mainArea = screen.screen().getMainPanel().getArea();
-        Area screenArea = screen.screen().getScreenArea();
         this.screenClass = screen.wrappedScreen().getClass();
-        this.guiLeft = mainArea.x;
-        this.guiTop = mainArea.y;
-        this.guiXSize = mainArea.width;
-        this.guiYSize = mainArea.height;
-        this.screenWidth = screenArea.width;
-        this.screenHeight = screenArea.height;
+
+        // we have to assign default values to gui size if the size is 0 (e.g. during the instant it's created)
+        //  because MUI initializes the screen/panel sizing data after JEI wants to use them
+        Window window = Minecraft.getInstance().getWindow();
+        Area screenArea = screen.screen().getScreenArea();
+        this.screenWidth = screenArea.width == 0 ? window.getGuiScaledWidth() : screenArea.width;
+        this.screenHeight = screenArea.height == 0 ? window.getGuiScaledHeight() : screenArea.height;
+
+        Area mainArea = screen.screen().getMainPanel().getArea();
+        this.guiXSize = mainArea.width == 0 ? DEFAULT_GUI_WIDTH : mainArea.width;
+        this.guiYSize = mainArea.height == 0 ? DEFAULT_GUI_HEIGHT : mainArea.height;
+        this.guiLeft = mainArea.width == 0 ? (this.screenWidth - DEFAULT_GUI_WIDTH) / 2 : mainArea.x;
+        this.guiTop = mainArea.height == 0 ? (this.screenHeight - DEFAULT_GUI_HEIGHT) / 2 : mainArea.y;
     }
 
     @Override
