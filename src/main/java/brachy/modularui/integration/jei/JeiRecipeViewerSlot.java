@@ -23,14 +23,11 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Optional;
 
-@ApiStatus.Experimental
-public class JeiRecipeViewerSlot extends RecipeViewerSlotWidget<JeiRecipeViewerSlot> implements ISlottedRecipeWidget {
+@ApiStatus.Internal
+public class JeiRecipeViewerSlot<R> extends RecipeViewerSlotWidget<JeiRecipeViewerSlot<R>> implements ISlottedRecipeWidget {
 
-    @ApiStatus.Internal
-    @Getter @Setter private @UnknownNullability IRecipeSlotDrawable slotWidget;
-    @ApiStatus.Internal
+    @Getter private @UnknownNullability IRecipeSlotDrawable slotWidget;
     @Setter private IFocusGroup focuses;
-    @ApiStatus.Internal
     @Setter private ICycler cycler;
 
     public JeiRecipeViewerSlot() {

@@ -10,10 +10,9 @@ import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.Experimental
+@ApiStatus.Internal
 public class ReiRecipeViewerSlot extends RecipeViewerSlotWidget<ReiRecipeViewerSlot> {
 
-    @ApiStatus.Internal
     @Getter private Slot slotWidget;
 
     public ReiRecipeViewerSlot() {

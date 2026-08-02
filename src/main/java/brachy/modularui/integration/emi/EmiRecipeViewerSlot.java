@@ -18,10 +18,9 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.UnaryOperator;
 
-@ApiStatus.Experimental
+@ApiStatus.Internal
 public class EmiRecipeViewerSlot extends RecipeViewerSlotWidget<EmiRecipeViewerSlot> {
 
-    @ApiStatus.Internal
     @Getter private SlotWidget slotWidget;
 
     public EmiRecipeViewerSlot() {
