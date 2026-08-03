@@ -28,6 +28,7 @@ import mezz.jei.library.gui.ingredients.ICycler;
 import mezz.jei.library.gui.recipes.OutputSlotTooltipCallback;
 import mezz.jei.library.ingredients.DisplayIngredientAcceptor;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ import static brachy.modularui.integration.jei.ModularUIJeiPlugin.mapToJeiRole;
 @ApiStatus.Internal
 public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiRecipeViewerSlot<I, R>> implements ISlottedRecipeWidget {
 
-    @Getter private @UnknownNullability IRecipeSlotDrawable slotWidget;
+    @Getter private @Nullable IRecipeSlotDrawable slotWidget;
     @Setter private IFocusGroup focuses;
     @Setter private ICycler cycler;
 
@@ -79,7 +80,7 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
         }
         recipeSlot.modularui$setRole(mapToJeiRole(this.recipeSlotRole));
         // mmm I love off-by-one errors
-        slotWidget.setPosition(this.getArea().x + 1, this.getArea().y + 1);
+        slotWidget.setPosition(1, 1);
 
         replaceSlotIngredients(recipeSlot);
         recipeSlot.modularui$setCycler(this.cycler);
@@ -92,7 +93,8 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
                     .map(this.renderMappingFunction)
                     .toList());
         }
-        builder.setPosition(this.getArea().x + 1, this.getArea().y + 1);
+        // mmm I love off-by-one errors
+        builder.setPosition(1, 1);
     }
 
     // Mostly copied from RecipeSlotBuilder#build
@@ -125,10 +127,7 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
     public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
         if (this.slotWidget == null) return;
 
-        context.graphicsPose().pushPose();
-        context.getGraphics().pose().translate(-this.getArea().x, -this.getArea().y, 0);
         this.slotWidget.draw(context.getGraphics());
-        context.graphicsPose().popPose();
     }
 /*
     @Override
@@ -141,12 +140,11 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
         return this.slotWidget.keyPressed(keyCode, scanCode, modifiers) ? Result.SUCCESS : Result.ACCEPT;
     }
 */
-    private static final ScreenPosition ZERO_POS = new ScreenPosition(0, 0);
 
     @Override
     public Optional<RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
         if (isHovering() && slotWidget != null) {
-            return Optional.of(new RecipeSlotUnderMouse(slotWidget, ZERO_POS));
+            return Optional.of(new RecipeSlotUnderMouse(slotWidget, getArea().x, getArea().y));
         }
         return Optional.empty();
     }

@@ -51,10 +51,7 @@ public class EmiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, EmiRecipeV
 
     @Override
     public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
-        context.graphicsPose().pushPose();
-        context.getGraphics().pose().translate(-this.getArea().x, -this.getArea().y, 0);
         this.slotWidget.render(context.getGraphics(), context.getMouseX(), context.getMouseY(), context.getRenderPartialTicks());
-        context.graphicsPose().popPose();
     }
 
     @Override
