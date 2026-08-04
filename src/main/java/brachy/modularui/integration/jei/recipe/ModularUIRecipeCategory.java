@@ -14,6 +14,8 @@ import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.screen.ModularScreen;
 import brachy.modularui.screen.RichTooltip;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -38,6 +40,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 @ApiStatus.Experimental
@@ -46,6 +49,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     public static final String SCREEN_NAME_PREFIX = "jei_recipe_";
 
     private final LoadingCache<T, ModularScreen> modularScreenCache;
+    private final Map<ResourceLocation, IRecipeExtrasBuilder> recipeLayoutCache = new Object2ObjectOpenHashMap<>();
 
     private final Function<T, IWidget> recipeUI;
     private final Function<T, ResourceLocation> recipeIdGetter;
@@ -58,7 +62,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         this.recipeIdGetter = recipeIdGetter;
 
         this.modularScreenCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(Duration.ofSeconds(1))
+                .expireAfterAccess(Duration.ofSeconds(10))
                 .maximumSize(20)
                 .build(new CacheLoader<>() {
 
@@ -120,7 +124,12 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
     private ModularScreen createScreen(T recipe) {
         ResourceLocation id = this.recipeIdGetter.apply(recipe);
-        return createScreen(this.recipeUI.apply(recipe), id.getNamespace(), SCREEN_NAME_PREFIX + id.getPath());
+        ModularScreen screen = createScreen(this.recipeUI.apply(recipe), id.getNamespace(), SCREEN_NAME_PREFIX + id.getPath());
+        if (recipeLayoutCache.containsKey(id)){
+            IRecipeExtrasBuilder builder = recipeLayoutCache.get(id);
+            screen.getMainPanel().visitTransformAllChildren(widget -> transformWidget(builder, widget));
+        }
+        return screen;
     }
 
     public ModularScreen createScreen(IWidget recipeUI, String owner, String name) {
@@ -186,6 +195,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
+        recipeLayoutCache.remove(recipeIdGetter.apply(recipe));
         ModularScreen screen = getModularScreen(recipe);
         MutableInt index = new MutableInt(0);
         screen.getMainPanel().visitTransformAllChildren(widget -> createRecipeSlotForWidget(builder, widget, recipe, focuses, index));
@@ -198,6 +208,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         ModularScreen screen = getModularScreen(recipe);
 
         screen.getMainPanel().visitTransformAllChildren(widget -> transformWidget(builder, widget));
+        recipeLayoutCache.put(recipeIdGetter.apply(recipe), builder);
         builder.addGuiEventListener(new ModularUIGuiEventListener(recipe));
     }
 
