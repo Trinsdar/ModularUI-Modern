@@ -12,6 +12,7 @@ import brachy.modularui.drawable.GuiTextures;
 import brachy.modularui.drawable.progress.ProgressDrawable;
 import brachy.modularui.factory.PosGuiData;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
+import brachy.modularui.integration.recipeviewer.RecipeViewerCompatConstants;
 import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.screen.ModularScreen;
 import brachy.modularui.screen.UISettings;
@@ -31,9 +32,13 @@ import brachy.modularui.widgets.menu.DropdownWidget;
 import brachy.modularui.widgets.slot.ItemSlot;
 import brachy.modularui.widgets.slot.ModularSlot;
 
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -172,7 +177,7 @@ public class TestMachine {
         }
 
         public Recipe in(ItemStack stack) {
-            this.in.add(stack);
+            if (!stack.isEmpty()) this.in.add(stack);
             return this;
         }
 
@@ -185,7 +190,7 @@ public class TestMachine {
         }
 
         public Recipe out(ItemStack stack) {
-            this.out.add(stack);
+            if (!stack.isEmpty()) this.out.add(stack);
             return this;
         }
 
@@ -220,15 +225,40 @@ public class TestMachine {
 
     public static class Recipes {
 
-        public static final List<Recipe> list = new ArrayList<>();
-
-        static {
+        public static final List<Recipe> list = Util.make(new ArrayList<>(), list -> {
             list.add(new Recipe("/stuff_to_nether_star")
                     .in(Items.DIAMOND)
                     .in(Items.EMERALD)
                     .in(Items.GOLD_INGOT, 4)
                     .out(Items.NETHER_STAR));
-        }
+
+            // add more recipes with (consistent) random inputs and outputs to try to overflow the cache for testing
+            final int TOO_MANY_RECIPES_FOR_CACHE = RecipeViewerCompatConstants.EXPECTED_GOOD_CACHE_SIZE * 3 / 2 - 1;
+            RandomSource rng = RandomSource.create("this is a randomly picked seed.".hashCode());
+
+            for (int i = 0; i < TOO_MANY_RECIPES_FOR_CACHE; i++) {
+                int inAmount = Math.min(i % 4 + 1, 4);
+                int outAmount = Math.min((i + 3) % 4 + 1, 4);
+                Recipe recipe = new Recipe("/random_" + i + "_in-" + inAmount + "_out-" + outAmount);
+
+                while (recipe.in.size() < inAmount) {
+                    BuiltInRegistries.ITEM.getRandom(rng).ifPresent(item -> {
+                        ItemStack stack = new ItemStack(item);
+                        stack.setCount(Mth.clamp((int) (rng.nextGaussian() * stack.getMaxStackSize()), 0, stack.getMaxStackSize()));
+                        recipe.in(stack);
+                    });
+                }
+                while (recipe.out.size() < outAmount) {
+                    BuiltInRegistries.ITEM.getRandom(rng).ifPresent(item -> {
+                        ItemStack stack = new ItemStack(item);
+                        stack.setCount(Mth.clamp((int) (rng.nextGaussian() * stack.getMaxStackSize()), 0, stack.getMaxStackSize()));
+                        recipe.out(stack);
+                    });
+                }
+
+                list.add(recipe);
+            }
+        });
 
         public static Recipe findRecipe(IItemHandler input, @Nullable Recipe lastRecipe) {
             if (lastRecipe != null && lastRecipe.startRecipe(input, true)) return lastRecipe;
