@@ -8,6 +8,7 @@ import brachy.modularui.core.mixins.jei.RecipeLayoutBuilderAccessor;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.jei.JeiRecipeViewerSlot;
 import brachy.modularui.integration.jei.ModularUIJeiPlugin;
+import brachy.modularui.integration.recipeviewer.RecipeViewerCompatConstants;
 import brachy.modularui.integration.recipeviewer.util.RecipeDebugDecoratorUtil;
 import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
@@ -36,7 +37,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
 
@@ -58,8 +58,10 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         this.recipeIdGetter = recipeIdGetter;
 
         this.modularScreenCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(Duration.ofSeconds(10))
-                .maximumSize(20)
+                .expireAfterAccess(RecipeViewerCompatConstants.CACHE_EXPIRY_TIME)
+                .initialCapacity(RecipeViewerCompatConstants.GOOD_CACHE_INITIAL_SIZE)
+                .maximumSize(RecipeViewerCompatConstants.EXPECTED_MAX_CATEGORY_RECIPES)
+                .softValues()
                 .build(new CacheLoader<>() {
                     @Override
                     public ModularScreen load(T recipe) {

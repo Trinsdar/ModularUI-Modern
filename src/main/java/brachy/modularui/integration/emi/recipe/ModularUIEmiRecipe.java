@@ -5,6 +5,7 @@ import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.emi.EmiRecipeViewerSlot;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
+import brachy.modularui.integration.recipeviewer.RecipeViewerCompatConstants;
 import brachy.modularui.integration.recipeviewer.util.RecipeDebugDecoratorUtil;
 import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
@@ -29,7 +30,6 @@ import dev.emi.emi.screen.widget.SizedButtonWidget;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
@@ -39,8 +39,10 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
 
     private static final String SCREEN_NAME_PREFIX = "emi_recipe_";
     private static final LoadingCache<ModularUIEmiRecipe, ModularScreen> SCREEN_CACHE = CacheBuilder.newBuilder()
-            .expireAfterAccess(Duration.ofSeconds(1))
-            .maximumSize(20)
+            .expireAfterAccess(RecipeViewerCompatConstants.CACHE_EXPIRY_TIME)
+            .initialCapacity(RecipeViewerCompatConstants.GOOD_CACHE_INITIAL_SIZE)
+            .maximumSize(RecipeViewerCompatConstants.EXPECTED_GOOD_CACHE_SIZE)
+            .softValues()
             .build(new CacheLoader<>() {
                 @Override
                 public ModularScreen load(ModularUIEmiRecipe key) {

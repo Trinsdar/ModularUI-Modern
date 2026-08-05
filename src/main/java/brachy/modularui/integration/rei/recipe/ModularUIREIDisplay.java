@@ -5,6 +5,7 @@ import brachy.modularui.api.widget.ITooltip;
 import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
+import brachy.modularui.integration.recipeviewer.RecipeViewerCompatConstants;
 import brachy.modularui.integration.recipeviewer.util.RecipeDebugDecoratorUtil;
 import brachy.modularui.integration.rei.ReiRecipeViewerSlot;
 import brachy.modularui.screen.EmbedHandler;
@@ -31,7 +32,6 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -44,8 +44,10 @@ public abstract class ModularUIREIDisplay implements Display {
 
     private static final String SCREEN_NAME_PREFIX = "rei_display_";
     private static final LoadingCache<ModularUIREIDisplay, ModularScreen> SCREEN_CACHE = CacheBuilder.newBuilder()
-            .expireAfterAccess(Duration.ofSeconds(1))
-            .maximumSize(20)
+            .expireAfterAccess(RecipeViewerCompatConstants.CACHE_EXPIRY_TIME)
+            .initialCapacity(RecipeViewerCompatConstants.GOOD_CACHE_INITIAL_SIZE)
+            .maximumSize(RecipeViewerCompatConstants.EXPECTED_GOOD_CACHE_SIZE)
+            .softValues()
             .build(new CacheLoader<>() {
                 @Override
                 public ModularScreen load(ModularUIREIDisplay key) {
