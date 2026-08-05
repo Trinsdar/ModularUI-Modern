@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
@@ -173,8 +174,9 @@ public class TestRecipeViewerGuis {
             }
 
             @Override
-            public void createRecipeDisplay(IRecipeLayoutBuilder builder, TestMachine.Recipe recipe, IFocusGroup focuses) {
-                calculateSize(recipe);
+            public void setupRecipeIngredients(IRecipeLayoutBuilder builder, TestMachine.Recipe recipe, IFocusGroup focuses) {
+                recipe.in.forEach(item -> builder.addSlot(RecipeIngredientRole.INPUT).addItemStack(item));
+                recipe.out.forEach(item -> builder.addSlot(RecipeIngredientRole.OUTPUT).addItemStack(item));
             }
 
             @Override

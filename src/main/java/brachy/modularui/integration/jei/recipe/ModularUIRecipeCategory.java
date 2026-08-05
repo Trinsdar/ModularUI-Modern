@@ -113,11 +113,13 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     public abstract int getMaxHeight();
 
     /**
-     * Customize your recipe displays here.
+     * Add your recipes' inputs and outputs here. This is used by JEI for lookups to figure out what ingredients are inputs and
+     * outputs for a recipe.
      * <p>
-     * This is used by JEI for lookups to figure out what ingredients are inputs and outputs for a recipe.
+     * Note that you can <b>only</b> add inputs and outputs for JEI's recipe lookup/search here, as the layout builder that's
+     * passed into this method only handles those and not the displayed recipe previews.
      */
-    public abstract void createRecipeDisplay(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses);
+    public abstract void setupRecipeIngredients(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses);
 
     private ModularScreen createScreen(T recipe) {
         ResourceLocation id = this.recipeIdGetter.apply(recipe);
@@ -163,11 +165,9 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @ApiStatus.OverrideOnly
     public IWidget createRecipeSlotForWidget(IRecipeLayoutBuilder builder, IWidget widget, T recipe, IFocusGroup focuses, MutableInt index) {
-        // guard against JEMI issues
-        if (!(builder instanceof RecipeLayoutBuilderAccessor recipeLayoutBuilder)) return widget;
         if (!(widget instanceof JeiRecipeViewerSlot recipeViewerSlot)) return widget;
 
-        recipeViewerSlot.setIngredientManager(recipeLayoutBuilder.modularui$getIngredientManager());
+        recipeViewerSlot.setIngredientManager(((RecipeLayoutBuilderAccessor) builder).modularui$getIngredientManager());
         recipeViewerSlot.setRecipeCategory(this);
         recipeViewerSlot.setRecipe(recipe);
         recipeViewerSlot.setFocuses(focuses);
@@ -187,11 +187,16 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
-        ModularScreen screen = getModularScreen(recipe);
-        MutableInt index = new MutableInt(0);
-        screen.getMainPanel().visitTransformAllChildren(widget -> createRecipeSlotForWidget(builder, widget, recipe, focuses, index));
-
-        this.createRecipeDisplay(builder, recipe, focuses);
+        // guard against JEMI issues by explicitly checking for JEI's implementation
+        // this is also done to skip having to create the whole widget tree when JEI is only looking up the recipe's ingredients
+        if (builder instanceof RecipeLayoutBuilderAccessor) {
+            ModularScreen screen = getModularScreen(recipe);
+            MutableInt index = new MutableInt(0);
+            screen.getMainPanel().visitTransformAllChildren(widget -> createRecipeSlotForWidget(builder, widget, recipe, focuses, index));
+        } else {
+            // don't bother with creating the full widget tree if setRecipe was called to get the recipe's ingredients
+            this.setupRecipeIngredients(builder, recipe, focuses);
+        }
     }
 
     @Override
