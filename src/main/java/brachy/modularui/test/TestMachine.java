@@ -98,7 +98,7 @@ public class TestMachine {
                                     .coverChildren(176, 30)
                                     .padding(7)
                                     .widgetTheme(IThemeApi.PANEL)
-                                    .child(Recipes.buildMachineUI(panel, this.input, this.output, new DoubleSyncValue(this::getProgress).allowC2S()))
+                                    .child(Recipes.buildMachineUI(panel, this.input, this.output, new DoubleSyncValue(this::getProgress), true))
                                     .child(new ParentWidget<>()
                                             .coverChildren()
                                             .decoration()
@@ -258,7 +258,8 @@ public class TestMachine {
             return false;
         }
 
-        public static IWidget buildMachineUI(ModularPanel<?> panel, IItemHandler in, IItemHandler out, IDoubleValue<?> progress) {
+        public static IWidget buildMachineUI(ModularPanel<?> panel, IItemHandler in, IItemHandler out, IDoubleValue<?> progress,
+                                             final boolean addRecipeViewerClickArea) {
             var val = new StringValue("Option 1");
             IPanelHandler panelHandler = IPanelHandler.simple(panel, (parent, player) -> {
                 return new ModularPanel<>("test_sub_panel").size(50).overlay(Text.str("Test"));
@@ -292,11 +293,13 @@ public class TestMachine {
                                     .size(20)
                                     .texture(GuiTextures.PROGRESS_ARROW, ProgressDrawable.Direction.RIGHT)
                                     .configure(w -> {
-                                        w.listenGuiAction((IGuiAction.MouseReleased) (ctx, button) -> {
-                                            if (!ctx.isMouseAbove(w)) return false;
-                                            TestRecipeViewerGuis.openTestRecipeViewerCategory();
-                                            return true;
-                                        });
+                                        if (addRecipeViewerClickArea) {
+                                            w.listenGuiAction((IGuiAction.MouseReleased) (ctx, button) -> {
+                                                if (!ctx.isMouseAbove(w)) return false;
+                                                TestRecipeViewerGuis.openTestRecipeViewerCategory();
+                                                return true;
+                                            });
+                                        }
                                     }))
                             .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
                                     .slot(new ModularSlot(out, i).canPut(false))

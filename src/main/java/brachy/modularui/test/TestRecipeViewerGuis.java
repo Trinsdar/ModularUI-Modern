@@ -62,7 +62,7 @@ public class TestRecipeViewerGuis {
         var panel = new ModularPanel<>("recipe_viewer_recipe")
                 .coverChildren(60, 40)
                 .invisible();
-        IWidget recipeUI = TestMachine.Recipes.buildMachineUI(panel, EMPTY_INFINITE_ITEM_HANDLER, EMPTY_INFINITE_ITEM_HANDLER, DoubleValue.simulateProgress(5000));
+        IWidget recipeUI = TestMachine.Recipes.buildMachineUI(panel, EMPTY_INFINITE_ITEM_HANDLER, EMPTY_INFINITE_ITEM_HANDLER, DoubleValue.simulateProgress(5000), false);
         recipeUI.visitTransformAllChildren(w -> {
             if (w instanceof ItemSlot slot) {
                 List<ItemStack> l = slot.getRecipeRole() == RecipeSlotRole.INPUT ? recipe.in : recipe.out;
