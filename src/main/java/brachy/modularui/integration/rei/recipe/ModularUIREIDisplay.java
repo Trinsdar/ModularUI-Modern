@@ -6,6 +6,7 @@ import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.util.RecipeDebugDecoratorUtil;
+import brachy.modularui.integration.rei.ModularUIREIPlugin;
 import brachy.modularui.integration.rei.ReiRecipeViewerSlot;
 import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
@@ -254,5 +255,15 @@ public abstract class ModularUIREIDisplay implements Display {
         public boolean charTyped(char codePoint, int modifiers) {
             return getModularScreen(this.display).charTyped(codePoint, modifiers);
         }
+    }
+
+    private static final StackWalker BETTER_CALL_SAUL = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+
+    @ApiStatus.Internal
+    public static void clearScreenCache() {
+        if (!BETTER_CALL_SAUL.getCallerClass().equals(ModularUIREIPlugin.class)) {
+            throw new IllegalCallerException("Attempted to call ModularUIREIDisplay#clearScreenCache!");
+        }
+        SCREEN_CACHE.invalidateAll();
     }
 }

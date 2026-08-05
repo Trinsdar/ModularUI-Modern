@@ -227,4 +227,14 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
             return getModularScreen(this.recipe).mouseReleased(button);
         }
     }
+
+    private static final StackWalker STAR_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+
+    @ApiStatus.Internal
+    public static void clearScreenCache() {
+        if (!STAR_WALKER.getCallerClass().equals(ModularUIEmiRecipe.class)) {
+            throw new IllegalCallerException("Attempted to call ModularUIEmiRecipe#clearScreenCache!");
+        }
+        SCREEN_CACHE.invalidateAll();
+    }
 }

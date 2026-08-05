@@ -92,10 +92,10 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         return this.modularScreenCache.getUnchecked(recipe);
     }
 
-    @ApiStatus.OverrideOnly
     /**
      * Calculates the size of the recipe.
      */
+    @ApiStatus.OverrideOnly
     protected Dimensions calculateSize(T recipe) {
         IWidget ui = this.recipeUI.apply(recipe);
         ResourceLocation id = this.recipeIdGetter.apply(recipe);
