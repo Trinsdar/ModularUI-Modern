@@ -5,7 +5,6 @@ import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.emi.EmiRecipeViewerSlot;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
-import brachy.modularui.integration.recipeviewer.RecipeViewerCompatConstants;
 import brachy.modularui.integration.recipeviewer.util.RecipeDebugDecoratorUtil;
 import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
@@ -19,6 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
@@ -39,14 +40,18 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
 
     private static final String SCREEN_NAME_PREFIX = "emi_recipe_";
     private static final LoadingCache<ModularUIEmiRecipe, ModularScreen> SCREEN_CACHE = CacheBuilder.newBuilder()
-            .expireAfterAccess(RecipeViewerCompatConstants.CACHE_EXPIRY_TIME)
-            .initialCapacity(RecipeViewerCompatConstants.GOOD_CACHE_INITIAL_SIZE)
-            .maximumSize(RecipeViewerCompatConstants.EXPECTED_GOOD_CACHE_SIZE)
+            .initialCapacity(64)
             .softValues()
             .build(new CacheLoader<>() {
                 @Override
                 public ModularScreen load(ModularUIEmiRecipe key) {
                     return key.createScreen();
+                }
+
+                @Override
+                public ListenableFuture<ModularScreen> reload(ModularUIEmiRecipe key, ModularScreen oldValue) {
+                    // if an old value is (somehow) available, reuse it
+                    return Futures.immediateFuture(oldValue);
                 }
             });
 

@@ -8,7 +8,6 @@ import brachy.modularui.core.mixins.jei.RecipeLayoutBuilderAccessor;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.jei.JeiRecipeViewerSlot;
 import brachy.modularui.integration.jei.ModularUIJeiPlugin;
-import brachy.modularui.integration.recipeviewer.RecipeViewerCompatConstants;
 import brachy.modularui.integration.recipeviewer.util.RecipeDebugDecoratorUtil;
 import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
@@ -23,6 +22,8 @@ import net.minecraft.resources.ResourceLocation;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -46,6 +47,8 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
 
     public static final String SCREEN_NAME_PREFIX = "jei_recipe_";
 
+    // These don't need special clearing because they're instance fields so the category instance being recreated by JEI is enough to
+    //  free the class instance for GC (and thus free & clear these)
     private final LoadingCache<T, ModularScreen> modularScreenCache;
     private final LoadingCache<T, Dimensions> displaySizeCache;
 
@@ -57,9 +60,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         this.recipeIdGetter = recipeIdGetter;
 
         this.modularScreenCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(RecipeViewerCompatConstants.CACHE_EXPIRY_TIME)
-                .initialCapacity(RecipeViewerCompatConstants.GOOD_CACHE_INITIAL_SIZE)
-                .maximumSize(RecipeViewerCompatConstants.EXPECTED_GOOD_CACHE_SIZE)
+                .initialCapacity(64)
                 .softValues()
                 .build(new CacheLoader<>() {
                     @Override
@@ -70,10 +71,15 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
                             ModularUIRecipeCategory.this.displaySizeCache.refresh(recipe);
                         }
                     }
+
+                    @Override
+                    public ListenableFuture<ModularScreen> reload(T key, ModularScreen oldValue) {
+                        // if an old value is (somehow) available, reuse it
+                        return Futures.immediateFuture(oldValue);
+                    }
                 });
         this.displaySizeCache = CacheBuilder.newBuilder()
-                .initialCapacity(RecipeViewerCompatConstants.GOOD_CACHE_INITIAL_SIZE)
-                .maximumSize(RecipeViewerCompatConstants.EXPECTED_GOOD_CACHE_SIZE)
+                .initialCapacity(64)
                 .build(new CacheLoader<>() {
                     @Override
                     public Dimensions load(T recipe) {

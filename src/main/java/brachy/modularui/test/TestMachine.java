@@ -12,7 +12,6 @@ import brachy.modularui.drawable.GuiTextures;
 import brachy.modularui.drawable.progress.ProgressDrawable;
 import brachy.modularui.factory.PosGuiData;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
-import brachy.modularui.integration.recipeviewer.RecipeViewerCompatConstants;
 import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.screen.ModularScreen;
 import brachy.modularui.screen.UISettings;
@@ -232,11 +231,15 @@ public class TestMachine {
                     .in(Items.GOLD_INGOT, 4)
                     .out(Items.NETHER_STAR));
 
-            // add more recipes with (consistent) random inputs and outputs to try to overflow the cache for testing
-            final int TOO_MANY_RECIPES_FOR_CACHE = RecipeViewerCompatConstants.EXPECTED_GOOD_CACHE_SIZE * 3 / 2 - 1;
-            RandomSource rng = RandomSource.create("this is a randomly picked seed.".hashCode());
+            // add (many) more recipes with (consistent) random inputs and outputs to try to overflow the cache for testing
+            final int VERY_MANY_RECIPES = 256;
+            RandomSource rng = RandomSource.create("""
+                      // chosen by fair dice roll.
+                      // guaranteed to be random.
+                    """.hashCode());
 
-            for (int i = 0; i < TOO_MANY_RECIPES_FOR_CACHE; i++) {
+            // start counting from 1 so we get exactly 256 recipes
+            for (int i = 1; i < VERY_MANY_RECIPES; i++) {
                 int inAmount = Math.min(i % 4 + 1, 4);
                 int outAmount = Math.min((i + 3) % 4 + 1, 4);
                 Recipe recipe = new Recipe("/random_" + i + "_in-" + inAmount + "_out-" + outAmount);
