@@ -59,7 +59,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         this.modularScreenCache = CacheBuilder.newBuilder()
                 .expireAfterAccess(RecipeViewerCompatConstants.CACHE_EXPIRY_TIME)
                 .initialCapacity(RecipeViewerCompatConstants.GOOD_CACHE_INITIAL_SIZE)
-                .maximumSize(RecipeViewerCompatConstants.EXPECTED_MAX_CATEGORY_RECIPES)
+                .maximumSize(RecipeViewerCompatConstants.EXPECTED_GOOD_CACHE_SIZE)
                 .softValues()
                 .build(new CacheLoader<>() {
                     @Override
@@ -73,7 +73,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
                 });
         this.displaySizeCache = CacheBuilder.newBuilder()
                 .initialCapacity(RecipeViewerCompatConstants.GOOD_CACHE_INITIAL_SIZE)
-                .maximumSize(RecipeViewerCompatConstants.EXPECTED_MAX_CATEGORY_RECIPES)
+                .maximumSize(RecipeViewerCompatConstants.EXPECTED_GOOD_CACHE_SIZE)
                 .build(new CacheLoader<>() {
                     @Override
                     public Dimensions load(T recipe) {
