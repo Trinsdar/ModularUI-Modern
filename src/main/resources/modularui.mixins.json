@@ -22,6 +22,7 @@
         "common.ComponentSerializerMixin",
         "common.SlotAccessor",
         "common.TextColorMixin",
+        "jei.RecipeGuiLogicMixin",
         "jei.RecipeLayoutAccessor",
         "jei.RecipeLayoutBuilderAccessor",
         "jei.RecipeLayoutBuilderMixin",

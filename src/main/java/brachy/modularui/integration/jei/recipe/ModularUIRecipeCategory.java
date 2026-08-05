@@ -35,6 +35,7 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -46,12 +47,10 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     public static final String SCREEN_NAME_PREFIX = "jei_recipe_";
 
     private final LoadingCache<T, ModularScreen> modularScreenCache;
+    private final LoadingCache<T, Dimensions> displaySizeCache;
 
     private final Function<T, IWidget> recipeUI;
     private final Function<T, ResourceLocation> recipeIdGetter;
-
-    private boolean sizeCalculated = false;
-    private int displayWidth, displayHeight;
 
     protected ModularUIRecipeCategory(Function<T, IWidget> recipeUI, Function<T, ResourceLocation> recipeIdGetter) {
         this.recipeUI = recipeUI;
@@ -65,7 +64,20 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
                 .build(new CacheLoader<>() {
                     @Override
                     public ModularScreen load(T recipe) {
-                        return ModularUIRecipeCategory.this.createScreen(recipe);
+                        try {
+                            return ModularUIRecipeCategory.this.createScreen(recipe);
+                        } finally {
+                            ModularUIRecipeCategory.this.displaySizeCache.refresh(recipe);
+                        }
+                    }
+                });
+        this.displaySizeCache = CacheBuilder.newBuilder()
+                .initialCapacity(RecipeViewerCompatConstants.GOOD_CACHE_INITIAL_SIZE)
+                .maximumSize(RecipeViewerCompatConstants.EXPECTED_MAX_CATEGORY_RECIPES)
+                .build(new CacheLoader<>() {
+                    @Override
+                    public Dimensions load(T recipe) {
+                        return ModularUIRecipeCategory.this.calculateSize(recipe);
                     }
                 });
     }
@@ -74,14 +86,11 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         return this.modularScreenCache.getUnchecked(recipe);
     }
 
+    @ApiStatus.OverrideOnly
     /**
-     * Calculates the size of the recipe if not already done.<br>
-     * This should be called in subclasses' {@link #createRecipeDisplay(IRecipeLayoutBuilder, Object, IFocusGroup) createRecipeDisplay} methods.
-     * Otherwise, the size of ALL the recipes in the same category are calculated at once, which can make the game lag for a few seconds.
+     * Calculates the size of the recipe.
      */
-    protected void calculateSize(T recipe) {
-        if (this.sizeCalculated) return;
-        this.sizeCalculated = true;
+    protected Dimensions calculateSize(T recipe) {
         IWidget ui = this.recipeUI.apply(recipe);
         ResourceLocation id = this.recipeIdGetter.apply(recipe);
         int w = ui.resizer().getFixedPixelWidth(), h = ui.resizer().getFixedPixelHeight();
@@ -90,8 +99,16 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
             w = EmbedHandler.getEmbedWidth(screen);
             h = EmbedHandler.getEmbedHeight(screen);
         }
-        this.displayWidth = w;
-        this.displayHeight = h;
+        return new Dimensions(w, h);
+    }
+
+    /**
+     * Calculates and caches the size of the recipe if not already done.<br>
+     * This should be called in subclasses' {@link #setupRecipeIngredients(IRecipeLayoutBuilder, Object, IFocusGroup) setupRecipeIngredients} methods.
+     * Otherwise, the size of ALL the recipes in the same category are calculated at once, which can make the game lag for a few seconds.
+     */
+    protected final void calculateAndCacheSize(T recipe) {
+        this.displaySizeCache.getUnchecked(recipe);
     }
 
     /**
@@ -119,7 +136,10 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
      * Note that you can <b>only</b> add inputs and outputs for JEI's recipe lookup/search here, as the layout builder that's
      * passed into this method only handles those and not the displayed recipe previews.
      */
-    public abstract void setupRecipeIngredients(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses);
+    @MustBeInvokedByOverriders
+    public void setupRecipeIngredients(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
+        calculateAndCacheSize(recipe);
+    }
 
     private ModularScreen createScreen(T recipe) {
         ResourceLocation id = this.recipeIdGetter.apply(recipe);
@@ -248,8 +268,8 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     }
 
     public int getHeight(T recipe) {
-        calculateSize(recipe);
-        return this.displayHeight;
+        Dimensions size = this.displaySizeCache.getUnchecked(recipe);
+        return size.height;
     }
 
     @Override
@@ -258,9 +278,11 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     }
 
     public int getWidth(T recipe) {
-        calculateSize(recipe);
-        return this.displayWidth;
+        Dimensions display = this.displaySizeCache.getUnchecked(recipe);
+        return display.width;
     }
+
+    protected record Dimensions(int width, int height) { }
 
     public static class ModularUIGuiEventListener implements IJeiGuiEventListener {
 

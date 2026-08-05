@@ -175,6 +175,7 @@ public class TestRecipeViewerGuis {
 
             @Override
             public void setupRecipeIngredients(IRecipeLayoutBuilder builder, TestMachine.Recipe recipe, IFocusGroup focuses) {
+                super.setupRecipeIngredients(builder, recipe, focuses);
                 recipe.in.forEach(item -> builder.addSlot(RecipeIngredientRole.INPUT).addItemStack(item));
                 recipe.out.forEach(item -> builder.addSlot(RecipeIngredientRole.OUTPUT).addItemStack(item));
             }
