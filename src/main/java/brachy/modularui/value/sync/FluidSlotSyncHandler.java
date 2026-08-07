@@ -1,7 +1,7 @@
 package brachy.modularui.value.sync;
 
 import brachy.modularui.utils.handlers.fluid.FluidTankHandler;
-import brachy.modularui.utils.handlers.fluid.IMultiFluidTankHandler;
+import brachy.modularui.utils.handlers.fluid.IMultiTankFluidHandler;
 import brachy.modularui.utils.MouseData;
 
 import net.minecraft.network.FriendlyByteBuf;
@@ -51,7 +51,7 @@ public class FluidSlotSyncHandler extends ValueSyncHandler<FluidStack, FluidSlot
         allowC2S();
     }
 
-    public FluidSlotSyncHandler(IMultiFluidTankHandler fluidTank, int index) {
+    public FluidSlotSyncHandler(IMultiTankFluidHandler fluidTank, int index) {
         this(fluidTank.getFluidTank(index));
     }
 
