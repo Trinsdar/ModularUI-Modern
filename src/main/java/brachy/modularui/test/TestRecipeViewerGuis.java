@@ -3,6 +3,8 @@ package brachy.modularui.test;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.EmptyHandler;
 
@@ -16,7 +18,11 @@ import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.integration.rei.recipe.ModularUIREIDisplay;
 import brachy.modularui.integration.rei.recipe.ModularUIREIDisplayCategory;
 import brachy.modularui.screen.ModularPanel;
+import brachy.modularui.utils.handlers.fluid.EmptyFluidTank;
+import brachy.modularui.utils.handlers.fluid.IMultiTankFluidHandler;
+import brachy.modularui.utils.handlers.fluid.MultiTankFluidHandler;
 import brachy.modularui.value.DoubleValue;
+import brachy.modularui.widgets.slot.FluidSlot;
 import brachy.modularui.widgets.slot.ItemSlot;
 
 import dev.emi.emi.api.EmiApi;
@@ -56,20 +62,37 @@ public class TestRecipeViewerGuis {
             return Integer.MAX_VALUE; // pls don't iterate UwU
         }
     };
+    private static final IMultiTankFluidHandler EMPTY_MULTI_TANK_FLUID_HANDLER = new MultiTankFluidHandler() {
+        @Override
+        public int getTanks() {
+            return Integer.MAX_VALUE; // pls don't iterate UwU
+        }
+
+        @Override
+        public IFluidTank getFluidTank(int index) {
+            return EmptyFluidTank.INSTANCE;
+        }
+    };
     public static final Component CATEGORY_TITLE = Component.translatable("recipe_category.modularui.machine");
 
     public static IWidget buildViewerUI(TestMachine.Recipe recipe) {
         var panel = new ModularPanel<>("recipe_viewer_recipe")
                 .coverChildren(60, 40)
                 .invisible();
-        IWidget recipeUI = TestMachine.Recipes.buildMachineUI(panel, EMPTY_INFINITE_ITEM_HANDLER, EMPTY_INFINITE_ITEM_HANDLER, DoubleValue.simulateProgress(5000), false);
+        IWidget recipeUI = TestMachine.Recipes.buildMachineUI(panel, EMPTY_INFINITE_ITEM_HANDLER, EMPTY_INFINITE_ITEM_HANDLER, EMPTY_MULTI_TANK_FLUID_HANDLER, EMPTY_MULTI_TANK_FLUID_HANDLER, DoubleValue.simulateProgress(5000), false);
         recipeUI.visitTransformAllChildren(w -> {
             if (w instanceof ItemSlot slot) {
-                List<ItemStack> l = slot.getRecipeRole() == RecipeSlotRole.INPUT ? recipe.in : recipe.out;
+                List<ItemStack> l = slot.getRecipeRole() == RecipeSlotRole.INPUT ? recipe.inItems : recipe.outItems;
                 int index = slot.getSlot().getSlotIndex();
                 ItemStack item = index >= l.size() ? ItemStack.EMPTY : l.get(index);
                 return slot.toRecipeViewerSlot()
                         .value(item);
+            } else if (w instanceof FluidSlot slot) {
+                List<FluidStack> l = slot.getRecipeRole() == RecipeSlotRole.INPUT ? recipe.inFluids : recipe.outFluids;
+                int index = slot.getSyncHandler().getTankIndex();
+                FluidStack fluid = index < 0 || index >= l.size() ? FluidStack.EMPTY : l.get(index);
+                return slot.toRecipeViewerSlot()
+                        .value(fluid);
             } else if (w instanceof IngredientProvider<?> slot) {
                 return slot.toRecipeViewerSlot();
             }
@@ -112,8 +135,8 @@ public class TestRecipeViewerGuis {
             public RecipeDisplay(Supplier<IWidget> widgetSupplier, TestMachine.Recipe recipe) {
                 super(recipe.id, widgetSupplier);
                 this.recipe = recipe;
-                recipe.in.stream().map(EmiStack::of).forEach(inputs::add);
-                recipe.out.stream().map(EmiStack::of).forEach(outputs::add);
+                recipe.inItems.stream().map(EmiStack::of).forEach(inputs::add);
+                recipe.outItems.stream().map(EmiStack::of).forEach(outputs::add);
 
                 calculateSize();
             }
@@ -176,8 +199,8 @@ public class TestRecipeViewerGuis {
             @Override
             public void setupRecipeIngredients(IRecipeLayoutBuilder builder, TestMachine.Recipe recipe, IFocusGroup focuses) {
                 super.setupRecipeIngredients(builder, recipe, focuses);
-                recipe.in.forEach(item -> builder.addSlot(RecipeIngredientRole.INPUT).addItemStack(item));
-                recipe.out.forEach(item -> builder.addSlot(RecipeIngredientRole.OUTPUT).addItemStack(item));
+                recipe.inItems.forEach(item -> builder.addSlot(RecipeIngredientRole.INPUT).addItemStack(item));
+                recipe.outItems.forEach(item -> builder.addSlot(RecipeIngredientRole.OUTPUT).addItemStack(item));
             }
 
             @Override
@@ -215,8 +238,8 @@ public class TestRecipeViewerGuis {
             public RecipeDisplay(Supplier<IWidget> recipeUI, TestMachine.Recipe recipe) {
                 super(recipe.id, recipeUI, CATEGORY);
                 this.recipe = recipe;
-                recipe.in.stream().map(EntryIngredients::of).forEach(inputEntries::add);
-                recipe.out.stream().map(EntryIngredients::of).forEach(outputEntries::add);
+                recipe.inItems.stream().map(EntryIngredients::of).forEach(inputEntries::add);
+                recipe.outItems.stream().map(EntryIngredients::of).forEach(outputEntries::add);
 
                 calculateSize();
             }

@@ -16,6 +16,9 @@ import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.screen.ModularScreen;
 import brachy.modularui.screen.UISettings;
 import brachy.modularui.utils.Color;
+import brachy.modularui.utils.handlers.fluid.CombinedFluidHandlerWrapper;
+import brachy.modularui.utils.handlers.fluid.IMultiTankFluidHandler;
+import brachy.modularui.utils.handlers.fluid.MultiTankFluidHandler;
 import brachy.modularui.value.StringValue;
 import brachy.modularui.value.sync.BooleanSyncValue;
 import brachy.modularui.value.sync.DoubleSyncValue;
@@ -28,6 +31,7 @@ import brachy.modularui.widgets.SlotGroupWidget;
 import brachy.modularui.widgets.ToggleButton;
 import brachy.modularui.widgets.layout.Flow;
 import brachy.modularui.widgets.menu.DropdownWidget;
+import brachy.modularui.widgets.slot.FluidSlot;
 import brachy.modularui.widgets.slot.ItemSlot;
 import brachy.modularui.widgets.slot.ModularSlot;
 
@@ -42,9 +46,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -61,11 +69,16 @@ import java.util.List;
 @ApiStatus.Experimental
 public class TestMachine {
 
+    private static final int FLUID_SLOT_CAPACITY = 10_000;
+
     public static class BE extends AbstractBlockEntity implements IUIHolder<PosGuiData> {
 
-        private final ItemStackHandler input = new ItemStackHandler(4);
-        private final ItemStackHandler output = new ItemStackHandler(4);
-        private final LazyOptional<IItemHandlerModifiable> inv = LazyOptional.of(() -> new CombinedInvWrapper(input, output));
+        private final ItemStackHandler inputItems = new ItemStackHandler(4);
+        private final ItemStackHandler outputItems = new ItemStackHandler(4);
+        private final MultiTankFluidHandler inputFluids = new MultiTankFluidHandler(2, FLUID_SLOT_CAPACITY);
+        private final MultiTankFluidHandler outputFluids = new MultiTankFluidHandler(2, FLUID_SLOT_CAPACITY);
+        private final LazyOptional<IItemHandlerModifiable> items = LazyOptional.of(() -> new CombinedInvWrapper(inputItems, outputItems));
+        private final LazyOptional<IFluidHandler> fluids = LazyOptional.of(() -> new CombinedFluidHandlerWrapper(inputFluids, outputFluids));
 
         private int ticks = 0;
         private boolean running = false, paused = false;
@@ -79,7 +92,9 @@ public class TestMachine {
         @Override
         public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
             if (cap == ForgeCapabilities.ITEM_HANDLER) {
-                return this.inv.cast();
+                return this.items.cast();
+            } else if (cap == ForgeCapabilities.FLUID_HANDLER) {
+                return this.fluids.cast();
             }
             return super.getCapability(cap, side);
         }
@@ -102,7 +117,7 @@ public class TestMachine {
                                     .coverChildren(176, 30)
                                     .padding(7)
                                     .widgetTheme(IThemeApi.PANEL)
-                                    .child(Recipes.buildMachineUI(panel, this.input, this.output, new DoubleSyncValue(this::getProgress), true))
+                                    .child(Recipes.buildMachineUI(panel, this.inputItems, this.outputItems, this.inputFluids, this.outputFluids, new DoubleSyncValue(this::getProgress), true))
                                     .child(new ParentWidget<>()
                                             .coverChildren()
                                             .decoration()
@@ -137,21 +152,21 @@ public class TestMachine {
         public void update() {
             if (hasLevel() && !getLevel().isClientSide) {
                 if (this.running && this.lastRecipe != null && !this.paused) {
-                    if (++this.recipeProgress == this.lastRecipe.ticks) {
-                        this.lastRecipe.finishRecipe(this.output);
+                    if (++this.recipeProgress >= this.lastRecipe.ticks) {
+                        this.lastRecipe.finishRecipe(this.outputItems, this.outputFluids);
                         this.recipeProgress = 0;
-                        if (this.lastRecipe.startRecipe(this.input, true)) {
-                            this.lastRecipe.startRecipe(this.input, false);
+                        if (this.lastRecipe.startRecipe(this.inputItems, this.inputFluids, true)) {
+                            this.lastRecipe.startRecipe(this.inputItems, this.inputFluids, false);
                         } else {
                             this.running = false;
                         }
                     }
                 } else if (this.ticks % 20 == 0) {
-                    Recipe recipe = Recipes.findRecipe(this.input, this.lastRecipe);
+                    Recipe recipe = Recipes.findRecipe(this.inputItems, this.inputFluids, this.lastRecipe);
                     if (recipe != null) {
                         this.lastRecipe = recipe;
                         this.recipeProgress = 0;
-                        this.lastRecipe.startRecipe(this.input, false);
+                        this.lastRecipe.startRecipe(this.inputItems, this.inputFluids, false);
                         this.running = true;
                     }
                 }
@@ -168,37 +183,64 @@ public class TestMachine {
     public static class Recipe {
 
         protected final ResourceLocation id;
-        protected final List<ItemStack> in = new ArrayList<>(), out = new ArrayList<>();
+        protected final List<ItemStack> inItems = new ArrayList<>(), outItems = new ArrayList<>();
+        protected final List<FluidStack> inFluids = new ArrayList<>(), outFluids = new ArrayList<>();
         private int ticks = 80;
 
         public Recipe(String name) {
             this.id = ModularUI.id(name);
         }
 
-        public Recipe in(ItemStack stack) {
-            if (!stack.isEmpty()) this.in.add(stack);
+        public Recipe itemIn(ItemStack stack) {
+            if (!stack.isEmpty()) this.inItems.add(stack);
             return this;
         }
 
-        public Recipe in(Item item, int count) {
-            return in(new ItemStack(item, count));
+        public Recipe itemIn(Item item, int count) {
+            return itemIn(new ItemStack(item, count));
         }
 
-        public Recipe in(Item item) {
-            return in(item, 1);
+        public Recipe itemIn(Item item) {
+            return itemIn(item, 1);
         }
 
-        public Recipe out(ItemStack stack) {
-            if (!stack.isEmpty()) this.out.add(stack);
+        public Recipe itemOut(ItemStack stack) {
+            if (!stack.isEmpty()) this.outItems.add(stack);
             return this;
         }
 
-        public Recipe out(Item item, int count) {
-            return out(new ItemStack(item, count));
+        public Recipe itemOut(Item item, int count) {
+            return itemOut(new ItemStack(item, count));
         }
 
-        public Recipe out(Item item) {
-            return out(item, 1);
+        public Recipe itemOut(Item item) {
+            return itemOut(item, 1);
+        }
+
+        public Recipe fluidIn(FluidStack stack) {
+            if (!stack.isEmpty()) this.inFluids.add(stack);
+            return this;
+        }
+
+        public Recipe fluidIn(Fluid fluid, int count) {
+            return fluidIn(new FluidStack(fluid, count));
+        }
+
+        public Recipe fluidIn(Fluid fluid) {
+            return fluidIn(fluid, FluidType.BUCKET_VOLUME);
+        }
+
+        public Recipe fluidOut(FluidStack stack) {
+            if (!stack.isEmpty()) this.outFluids.add(stack);
+            return this;
+        }
+
+        public Recipe fluidOut(Fluid fluid, int count) {
+            return fluidOut(new FluidStack(fluid, count));
+        }
+
+        public Recipe fluidOut(Fluid fluid) {
+            return fluidOut(fluid, FluidType.BUCKET_VOLUME);
         }
 
         public Recipe ticks(int ticks) {
@@ -206,18 +248,26 @@ public class TestMachine {
             return this;
         }
 
-        public boolean startRecipe(IItemHandler handler, boolean simulate) {
-            for (ItemStack in : this.in) {
-                if (!Recipes.extract(in, handler, simulate)) {
+        public boolean startRecipe(IItemHandler itemHandler, IFluidHandler fluidHandler, boolean simulate) {
+            for (ItemStack in : this.inItems) {
+                if (!Recipes.extract(in, itemHandler, simulate)) {
+                    return false;
+                }
+            }
+            for (FluidStack in : this.inFluids) {
+                if (!Recipes.extract(in, fluidHandler, simulate)) {
                     return false;
                 }
             }
             return true;
         }
 
-        public void finishRecipe(IItemHandler handler) {
-            for (ItemStack out : this.out) {
-                ItemHandlerHelper.insertItemStacked(handler, out, false);
+        public void finishRecipe(IItemHandler itemHandler, IFluidHandler fluidHandler) {
+            for (ItemStack out : this.outItems) {
+                ItemHandlerHelper.insertItemStacked(itemHandler, out, false);
+            }
+            for (FluidStack out : this.outFluids) {
+                fluidHandler.fill(out.copy(), IFluidHandler.FluidAction.EXECUTE);
             }
         }
     }
@@ -226,10 +276,10 @@ public class TestMachine {
 
         public static final List<Recipe> list = Util.make(new ArrayList<>(), list -> {
             list.add(new Recipe("/stuff_to_nether_star")
-                    .in(Items.DIAMOND)
-                    .in(Items.EMERALD)
-                    .in(Items.GOLD_INGOT, 4)
-                    .out(Items.NETHER_STAR));
+                    .itemIn(Items.DIAMOND)
+                    .itemIn(Items.EMERALD)
+                    .itemIn(Items.GOLD_INGOT, 4)
+                    .itemOut(Items.NETHER_STAR));
 
             // add (many) more recipes with (consistent) random inputs and outputs to try to overflow the cache for testing
             final int VERY_MANY_RECIPES = 256;
@@ -240,22 +290,39 @@ public class TestMachine {
 
             // start counting from 1 so we get exactly 256 recipes
             for (int i = 1; i < VERY_MANY_RECIPES; i++) {
-                int inAmount = Math.min(i % 4 + 1, 4);
-                int outAmount = Math.min((i + 3) % 4 + 1, 4);
-                Recipe recipe = new Recipe("/random_" + i + "_in-" + inAmount + "_out-" + outAmount);
+                int inItems = rng.nextIntBetweenInclusive(1, 4), inFluids = rng.nextIntBetweenInclusive(1, 4);
+                int outItems = rng.nextIntBetweenInclusive(1, 4), outFluids = rng.nextIntBetweenInclusive(1, 4);
+                Recipe recipe = new Recipe("/random_" + i)
+                        .ticks(rng.nextIntBetweenInclusive(1, 512));
 
-                while (recipe.in.size() < inAmount) {
+                while (recipe.inItems.size() < inItems) {
                     BuiltInRegistries.ITEM.getRandom(rng).ifPresent(item -> {
-                        ItemStack stack = new ItemStack(item);
+                        ItemStack stack = item.value().getDefaultInstance();
                         stack.setCount(Mth.clamp((int) (rng.nextGaussian() * stack.getMaxStackSize()), 0, stack.getMaxStackSize()));
-                        recipe.in(stack);
+                        recipe.itemIn(stack);
                     });
                 }
-                while (recipe.out.size() < outAmount) {
+                while (recipe.outItems.size() < outItems) {
                     BuiltInRegistries.ITEM.getRandom(rng).ifPresent(item -> {
-                        ItemStack stack = new ItemStack(item);
+                        ItemStack stack = item.value().getDefaultInstance();
                         stack.setCount(Mth.clamp((int) (rng.nextGaussian() * stack.getMaxStackSize()), 0, stack.getMaxStackSize()));
-                        recipe.out(stack);
+                        recipe.itemOut(stack);
+                    });
+                }
+                while (recipe.inFluids.size() < inFluids) {
+                    BuiltInRegistries.FLUID.getRandom(rng).ifPresent(fluid -> {
+                        int amount = Mth.clamp((int) (rng.nextGaussian() * FLUID_SLOT_CAPACITY), 0, FLUID_SLOT_CAPACITY);
+                        if (amount == 0) return;
+
+                        recipe.fluidIn(fluid.value(), amount);
+                    });
+                }
+                while (recipe.outFluids.size() < outFluids) {
+                    BuiltInRegistries.FLUID.getRandom(rng).ifPresent(fluid -> {
+                        int amount = Mth.clamp((int) (rng.nextGaussian() * FLUID_SLOT_CAPACITY), 0, FLUID_SLOT_CAPACITY);
+                        if (amount == 0) return;
+
+                        recipe.fluidOut(fluid.value(), amount);
                     });
                 }
 
@@ -263,10 +330,10 @@ public class TestMachine {
             }
         });
 
-        public static Recipe findRecipe(IItemHandler input, @Nullable Recipe lastRecipe) {
-            if (lastRecipe != null && lastRecipe.startRecipe(input, true)) return lastRecipe;
+        public static Recipe findRecipe(IItemHandler inputItems, IFluidHandler inputFluids, @Nullable Recipe lastRecipe) {
+            if (lastRecipe != null && lastRecipe.startRecipe(inputItems, inputFluids, true)) return lastRecipe;
             for (Recipe recipe : list) {
-                if (recipe.startRecipe(input, true)) {
+                if (recipe.startRecipe(inputItems, inputFluids, true)) {
                     return recipe;
                 }
             }
@@ -291,7 +358,21 @@ public class TestMachine {
             return false;
         }
 
-        public static IWidget buildMachineUI(ModularPanel<?> panel, IItemHandler in, IItemHandler out, IDoubleValue<?> progress,
+        private static boolean extract(FluidStack stack, IFluidHandler handler, boolean simulate) {
+            if (stack.isEmpty()) return true;
+            FluidStack c = handler.drain(stack.getAmount(), IFluidHandler.FluidAction.SIMULATE);
+            if (stack.isFluidEqual(c)) {
+                if (!simulate) {
+                    c = handler.drain(stack.getAmount(), IFluidHandler.FluidAction.EXECUTE);
+                }
+                return c.getAmount() >= stack.getAmount();
+            }
+
+            return false;
+        }
+
+        public static IWidget buildMachineUI(ModularPanel<?> panel, IItemHandler inItems, IItemHandler outItems,
+                                             IMultiTankFluidHandler inFluids, IMultiTankFluidHandler outFluids, IDoubleValue<?> progress,
                                              final boolean addRecipeViewerClickArea) {
             var val = new StringValue("Option 1");
             IPanelHandler panelHandler = IPanelHandler.simple(panel, (parent, player) -> {
@@ -318,9 +399,13 @@ public class TestMachine {
                     .child(Flow.row().name("slots")
                             .coverChildren()
                             .childPadding(8)
-                            .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
-                                    .slot(new ModularSlot(in, i))
-                                    .recipeRole(RecipeSlotRole.INPUT)))
+                            .child(Flow.col().name("input")
+                                    .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
+                                            .slot(new ModularSlot(inItems, i))
+                                            .recipeRole(RecipeSlotRole.INPUT)))
+                                    .child(SlotGroupWidget.rect(2, 1, i -> new FluidSlot()
+                                            .tank(inFluids, i)
+                                            .recipeRole(RecipeSlotRole.INPUT))))
                             .child(new ProgressWidget()
                                     .value(progress)
                                     .size(20)
@@ -334,9 +419,13 @@ public class TestMachine {
                                             });
                                         }
                                     }))
-                            .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
-                                    .slot(new ModularSlot(out, i).canPut(false))
-                                    .recipeRole(RecipeSlotRole.OUTPUT))));
+                            .child(Flow.col().name("output")
+                                    .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
+                                            .slot(new ModularSlot(outItems, i).canPut(false).canDragInto(false))
+                                            .recipeRole(RecipeSlotRole.OUTPUT)))
+                                    .child(SlotGroupWidget.rect(2, 1, i -> new FluidSlot()
+                                            .tank(outFluids, i)
+                                            .recipeRole(RecipeSlotRole.OUTPUT)))));
         }
     }
 }

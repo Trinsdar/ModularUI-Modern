@@ -30,7 +30,6 @@ import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidTank;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.fml.ModList;
 
 import lombok.Getter;
@@ -46,7 +45,6 @@ public class FluidSlot extends AbstractFluidDisplayWidget<FluidSlot>
     public static final String UNIT_BUCKET = "B";
     public static final String UNIT_LITER = "L";
     private static final DecimalFormat TOOLTIP_FORMAT = new DecimalFormat("#.##");
-    private static final IFluidTank EMPTY = new FluidTank(0);
 
     static {
         TOOLTIP_FORMAT.setGroupingUsed(true);
@@ -233,7 +231,7 @@ public class FluidSlot extends AbstractFluidDisplayWidget<FluidSlot>
     }
 
     public IFluidTank getFluidTank() {
-        return this.syncHandler == null ? EMPTY : this.syncHandler.fluidTank();
+        return this.syncHandler == null ? EmptyFluidTank.INSTANCE : this.syncHandler.fluidTank();
     }
 
     /**
