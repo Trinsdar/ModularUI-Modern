@@ -22,6 +22,7 @@ import brachy.modularui.utils.handlers.fluid.MultiTankFluidHandler;
 import brachy.modularui.value.StringValue;
 import brachy.modularui.value.sync.BooleanSyncValue;
 import brachy.modularui.value.sync.DoubleSyncValue;
+import brachy.modularui.value.sync.FluidSlotSyncHandler;
 import brachy.modularui.value.sync.PanelSyncManager;
 import brachy.modularui.widget.ParentWidget;
 import brachy.modularui.widget.SingleChildWidget;
@@ -117,7 +118,7 @@ public class TestMachine {
                                     .coverChildren(176, 30)
                                     .padding(7)
                                     .widgetTheme(IThemeApi.PANEL)
-                                    .child(Recipes.buildMachineUI(panel, this.inputItems, this.outputItems, this.inputFluids, this.outputFluids, new DoubleSyncValue(this::getProgress), true))
+                                    .child(Recipes.buildMachineUI(panel, this.inputItems, this.outputItems, this.inputFluids, this.outputFluids, new DoubleSyncValue(this::getProgress), false))
                                     .child(new ParentWidget<>()
                                             .coverChildren()
                                             .decoration()
@@ -373,7 +374,7 @@ public class TestMachine {
 
         public static IWidget buildMachineUI(ModularPanel<?> panel, IItemHandler inItems, IItemHandler outItems,
                                              IMultiTankFluidHandler inFluids, IMultiTankFluidHandler outFluids, IDoubleValue<?> progress,
-                                             final boolean addRecipeViewerClickArea) {
+                                             final boolean isRecipeViewerUI) {
             var val = new StringValue("Option 1");
             IPanelHandler panelHandler = IPanelHandler.simple(panel, (parent, player) -> {
                 return new ModularPanel<>("test_sub_panel").size(50).overlay(Text.str("Test"));
@@ -400,18 +401,27 @@ public class TestMachine {
                             .coverChildren()
                             .childPadding(8)
                             .child(Flow.col().name("input")
+                                    .coverChildren()
                                     .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
-                                            .slot(new ModularSlot(inItems, i))
+                                            .configure(w -> {
+                                                if (!isRecipeViewerUI) {
+                                                    w.slot(new ModularSlot(inItems, i));
+                                                }
+                                            })
                                             .recipeRole(RecipeSlotRole.INPUT)))
                                     .child(SlotGroupWidget.rect(2, 1, i -> new FluidSlot()
-                                            .tank(inFluids, i)
+                                            .configure(w -> {
+                                                if (!isRecipeViewerUI) {
+                                                    w.syncHandler(new FluidSlotSyncHandler(inFluids, i));
+                                                }
+                                            })
                                             .recipeRole(RecipeSlotRole.INPUT))))
                             .child(new ProgressWidget()
                                     .value(progress)
                                     .size(20)
                                     .texture(GuiTextures.PROGRESS_ARROW, ProgressDrawable.Direction.RIGHT)
                                     .configure(w -> {
-                                        if (addRecipeViewerClickArea) {
+                                        if (!isRecipeViewerUI) {
                                             w.listenGuiAction((IGuiAction.MouseReleased) (ctx, button) -> {
                                                 if (!ctx.isMouseAbove(w)) return false;
                                                 TestRecipeViewerGuis.openTestRecipeViewerCategory();
@@ -420,10 +430,20 @@ public class TestMachine {
                                         }
                                     }))
                             .child(Flow.col().name("output")
+                                    .coverChildren()
                                     .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
-                                            .slot(new ModularSlot(outItems, i).canPut(false).canDragInto(false))
+                                            .configure(w -> {
+                                                if (!isRecipeViewerUI) {
+                                                    w.slot(new ModularSlot(outItems, i).canPut(false).canDragInto(false));
+                                                }
+                                            })
                                             .recipeRole(RecipeSlotRole.OUTPUT)))
                                     .child(SlotGroupWidget.rect(2, 1, i -> new FluidSlot()
+                                            .configure(w -> {
+                                                if (!isRecipeViewerUI) {
+                                                    w.syncHandler(new FluidSlotSyncHandler(outFluids, i).canFillSlot(false));
+                                                }
+                                            })
                                             .tank(outFluids, i)
                                             .recipeRole(RecipeSlotRole.OUTPUT)))));
         }
