@@ -12,7 +12,7 @@ import brachy.modularui.screen.RichTooltip;
 import brachy.modularui.screen.viewport.ModularGuiContext;
 import brachy.modularui.theme.SlotTheme;
 import brachy.modularui.theme.WidgetThemeEntry;
-import brachy.modularui.utils.IMultiFluidTankHandler;
+import brachy.modularui.utils.handlers.fluid.IMultiFluidTankHandler;
 import brachy.modularui.utils.MouseData;
 import brachy.modularui.value.sync.FluidSlotSyncHandler;
 import brachy.modularui.widgets.AbstractFluidDisplayWidget;

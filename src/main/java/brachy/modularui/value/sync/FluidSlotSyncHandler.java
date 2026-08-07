@@ -1,7 +1,7 @@
 package brachy.modularui.value.sync;
 
-import brachy.modularui.utils.FluidTankHandler;
-import brachy.modularui.utils.IMultiFluidTankHandler;
+import brachy.modularui.utils.handlers.fluid.FluidTankHandler;
+import brachy.modularui.utils.handlers.fluid.IMultiFluidTankHandler;
 import brachy.modularui.utils.MouseData;
 
 import net.minecraft.network.FriendlyByteBuf;

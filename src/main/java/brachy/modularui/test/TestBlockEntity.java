@@ -18,7 +18,7 @@ import brachy.modularui.screen.UISettings;
 import brachy.modularui.utils.Alignment;
 import brachy.modularui.utils.Color;
 import brachy.modularui.utils.Interpolation;
-import brachy.modularui.utils.MultiFluidTankHandler;
+import brachy.modularui.utils.handlers.fluid.MultiFluidTankHandler;
 import brachy.modularui.value.sync.DoubleSyncValue;
 import brachy.modularui.value.sync.DynamicLinkedSyncHandler;
 import brachy.modularui.value.sync.DynamicSyncHandler;
