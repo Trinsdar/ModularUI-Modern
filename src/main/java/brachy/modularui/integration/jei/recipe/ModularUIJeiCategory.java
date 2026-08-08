@@ -1,5 +1,6 @@
 package brachy.modularui.integration.jei.recipe;
 
+import brachy.modularui.ModularUI;
 import brachy.modularui.api.drawable.IRichTextBuilder;
 import brachy.modularui.api.widget.ITooltip;
 import brachy.modularui.api.widget.IWidget;
@@ -17,6 +18,7 @@ import brachy.modularui.screen.RichTooltip;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -24,8 +26,6 @@ import net.minecraft.resources.ResourceLocation;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -34,6 +34,7 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.inputs.IJeiGuiEventListener;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
+import mezz.jei.api.gui.widgets.IRecipeWidget;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -42,6 +43,8 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 @ApiStatus.Experimental
@@ -49,9 +52,6 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
 
     public static final String SCREEN_NAME_PREFIX = "jei_recipe_";
 
-    // These don't need special clearing because they're instance fields so the category instance being recreated by JEI is enough to
-    //  free the class instance for GC (and thus free & clear these)
-    private final LoadingCache<T, ModularScreen> modularScreenCache;
     private final LoadingCache<T, Dimensions> displaySizeCache;
 
     private final Function<T, IWidget> recipeUI;
@@ -61,25 +61,6 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
         this.recipeUI = recipeUI;
         this.recipeIdGetter = recipeIdGetter;
 
-        this.modularScreenCache = CacheBuilder.newBuilder()
-                .initialCapacity(64)
-                .softValues()
-                .build(new CacheLoader<>() {
-                    @Override
-                    public ModularScreen load(T recipe) {
-                        try {
-                            return ModularUIJeiCategory.this.createScreen(recipe);
-                        } finally {
-                            ModularUIJeiCategory.this.displaySizeCache.refresh(recipe);
-                        }
-                    }
-
-                    @Override
-                    public ListenableFuture<ModularScreen> reload(T key, ModularScreen oldValue) {
-                        // if an old value is (somehow) available, reuse it
-                        return Futures.immediateFuture(oldValue);
-                    }
-                });
         this.displaySizeCache = CacheBuilder.newBuilder()
                 .initialCapacity(64)
                 .build(new CacheLoader<>() {
@@ -88,10 +69,6 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
                         return ModularUIJeiCategory.this.calculateSize(recipe);
                     }
                 });
-    }
-
-    private ModularScreen getModularScreen(T recipe) {
-        return this.modularScreenCache.getUnchecked(recipe);
     }
 
     /**
@@ -219,14 +196,18 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
         return RecipeViewerUtils.getCategoryTitle(this.getRecipeType().getUid());
     }
 
+    // this is a map instead of a simple field so mods that make JEI loading asynchronous work as expected
+    private final Map<T, ModularScreen> veryTemporaryScreenCache = new ConcurrentHashMap<>();
+
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
         // guard against JEMI issues by explicitly checking for JEI's implementation
         // this is also done to skip having to create the whole widget tree when JEI is only looking up the recipe's ingredients
         if (builder instanceof RecipeLayoutBuilderAccessor) {
-            ModularScreen screen = getModularScreen(recipe);
+            ModularScreen screen = createScreen(recipe);
             MutableInt index = new MutableInt(0);
             screen.getMainPanel().visitTransformAllChildren(widget -> createRecipeSlotForWidget(builder, widget, recipe, focuses, index));
+            veryTemporaryScreenCache.put(recipe, screen);
         } else {
             // don't bother with creating the full widget tree if setRecipe was called to get the recipe's ingredients
             this.setupRecipeIngredients(builder, recipe, focuses);
@@ -235,41 +216,21 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
 
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder builder, T recipe, IFocusGroup focuses) {
-        ModularScreen screen = getModularScreen(recipe);
-
-        screen.getMainPanel().visitTransformAllChildren(widget -> transformWidget(builder, widget));
-        builder.addGuiEventListener(new ModularUIGuiEventListener(screen));
-    }
-
-    @Override
-    public void getTooltip(ITooltipBuilder tooltipBuilder, T recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
-        ModularScreen screen = getModularScreen(recipe);
-        if (!screen.getContext().getUISettings().drawTooltipExternally()) {
-            IRecipeCategory.super.getTooltip(tooltipBuilder, recipe, recipeSlotsView, mouseX, mouseY);
+        ModularScreen screen = veryTemporaryScreenCache.get(recipe);
+        if (screen == null) {
+            ModularUI.LOGGER.error("Could not get cached screen for recipe {} somehow?!", recipe);
             return;
         }
+        veryTemporaryScreenCache.remove(recipe);
 
-        IWidget hovered = screen.getContext().getTopHovered();
-        if (hovered instanceof ITooltip<?> tooltip && tooltip.getTooltip() != null) {
-            RichTooltip richTooltip = tooltip.getTooltip();
-            if (richTooltip.autoUpdate()) richTooltip.markDirty();
-            richTooltip.isEmpty(); // causes the tooltip to rebuild if necessary
-
-            IRichTextBuilder<?> richTextBuilder = richTooltip.getRichText();
-            if (richTextBuilder instanceof RichText richText) {
-                for (var line : richText.getAsText()) {
-                    // scuffed conversion, but it mostly works
-                    line.ifLeft(tooltipBuilder::add).ifRight(tooltipBuilder::add);
-                }
-            }
-        }
+        screen.getMainPanel().visitTransformAllChildren(widget -> transformWidget(builder, widget));
+        UIWrapperWidget wrapper = new UIWrapperWidget(screen);
+        builder.addGuiEventListener(wrapper);
+        builder.addWidget(wrapper);
     }
 
     @Override
-    public void draw(T recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
-        ModularScreen screen = getModularScreen(recipe);
-        EmbedHandler.drawEmbed(screen, graphics, (int) mouseX, (int) mouseY, Minecraft.getInstance().getPartialTick());
-    }
+    public void getTooltip(ITooltipBuilder tooltipBuilder, T recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {}
 
     @Override
     public @Nullable IDrawable getIcon() {
@@ -298,16 +259,49 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
 
     protected record Dimensions(int width, int height) { }
 
-    public static class ModularUIGuiEventListener implements IJeiGuiEventListener {
+    public static class UIWrapperWidget implements IJeiGuiEventListener, IRecipeWidget {
 
         private final ModularScreen screen;
 
-        public ModularUIGuiEventListener(ModularScreen screen) {
+        public UIWrapperWidget(ModularScreen screen) {
             this.screen = screen;
         }
 
         public ScreenRectangle getArea() {
             return this.screen.getMainRectangle();
+        }
+
+        @Override
+        public ScreenPosition getPosition() {
+            return getArea().position();
+        }
+
+        @Override
+        public void drawWidget(GuiGraphics graphics, double mouseX, double mouseY) {
+            EmbedHandler.drawEmbed(this.screen, graphics, (int) mouseX, (int) mouseY, Minecraft.getInstance().getPartialTick());
+        }
+
+        @Override
+        public void getTooltip(ITooltipBuilder tooltipBuilder, double mouseX, double mouseY) {
+            if (!this.screen.getContext().getUISettings().drawTooltipExternally()) {
+                IRecipeWidget.super.getTooltip(tooltipBuilder, mouseX, mouseY);
+                return;
+            }
+
+            IWidget hovered = screen.getContext().getTopHovered();
+            if (hovered instanceof ITooltip<?> tooltip && tooltip.getTooltip() != null) {
+                RichTooltip richTooltip = tooltip.getTooltip();
+                if (richTooltip.autoUpdate()) richTooltip.markDirty();
+                richTooltip.isEmpty(); // causes the tooltip to rebuild if necessary
+
+                IRichTextBuilder<?> richTextBuilder = richTooltip.getRichText();
+                if (richTextBuilder instanceof RichText richText) {
+                    for (var line : richText.getAsText()) {
+                        // scuffed conversion, but it mostly works
+                        line.ifLeft(tooltipBuilder::add).ifRight(tooltipBuilder::add);
+                    }
+                }
+            }
         }
 
         @Override

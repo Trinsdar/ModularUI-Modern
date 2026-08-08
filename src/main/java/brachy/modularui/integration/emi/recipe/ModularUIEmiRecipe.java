@@ -21,7 +21,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import dev.emi.emi.api.recipe.EmiRecipe;
-import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.SlotWidget;
@@ -31,7 +30,7 @@ import dev.emi.emi.screen.widget.SizedButtonWidget;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Iterator;
+import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -39,8 +38,10 @@ import java.util.function.Supplier;
 public abstract class ModularUIEmiRecipe implements EmiRecipe {
 
     private static final String SCREEN_NAME_PREFIX = "emi_recipe_";
-    private static final LoadingCache<ModularUIEmiRecipe, ModularScreen> SCREEN_CACHE = CacheBuilder.newBuilder()
-            .initialCapacity(64)
+    private static final LoadingCache<ModularUIEmiRecipe, ModularScreen> PREVIEW_SCREEN_CACHE = CacheBuilder.newBuilder()
+            .expireAfterAccess(Duration.ofSeconds(60))
+            .initialCapacity(8)
+            .maximumSize(32)
             .softValues()
             .build(new CacheLoader<>() {
                 @Override
@@ -55,8 +56,8 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
                 }
             });
 
-    private static ModularScreen getModularScreen(ModularUIEmiRecipe recipe) {
-        return SCREEN_CACHE.getUnchecked(recipe);
+    private static ModularScreen getCachedModularScreen(ModularUIEmiRecipe recipe) {
+        return PREVIEW_SCREEN_CACHE.getUnchecked(recipe);
     }
 
     @Getter private final ResourceLocation id;
@@ -131,9 +132,8 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
                     .invisible()
                     .child(recipeUI);
         }
-        if (getInputs() != null && getOutputs() != null) {
-            panel = transform(panel);
-        }
+        panel = transform(panel);
+
         ModularScreen screen = ModularScreen.createEmbed(owner, panel);
         screen.getContext().getUISettings().drawTooltipExternally(true);
 
@@ -142,13 +142,11 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
     }
 
     public ModularPanel<?> transform(ModularPanel<?> panel) {
-        Iterator<EmiIngredient> in = getInputs().iterator();
-        Iterator<EmiStack> out = getOutputs().iterator();
-        panel.visitTransformAllChildren(widget -> transformWidget(widget, in, out));
+        panel.visitTransformAllChildren(this::transformWidget);
         return panel;
     }
 
-    public IWidget transformWidget(IWidget widget, Iterator<EmiIngredient> in, Iterator<EmiStack> out) {
+    public IWidget transformWidget(IWidget widget) {
         if (!(widget instanceof EmiRecipeViewerSlot<?> recipeViewerSlot)) return widget;
 
         if (recipeViewerSlot.recipeSlotRole() == RecipeSlotRole.OUTPUT) {
@@ -158,44 +156,60 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
         return recipeViewerSlot;
     }
 
+    private boolean useScreenCacheForNextWidgetQuery = false;
+
+    /**
+     * This is used to make EMI's recipe tooltip components use the screen cache because those normally recreate the widgets every frame
+     */
+    @ApiStatus.Internal
+    public final void useScreenCacheForNextWidgetQuery() {
+        useScreenCacheForNextWidgetQuery = true;
+    }
+
     @Override
     public void addWidgets(WidgetHolder widgets) {
-        // emi complains when it cant find an output slot
-        widgets.add(new SlotWidget(EmiStack.EMPTY, -1000, -1000).drawBack(false).recipeContext(this));
-        widgets.add(new UIWrapperWidget(this));
+        if (this.supportsRecipeTree()) {
+            // emi complains when it cant find an output slot
+            widgets.add(new SlotWidget(EmiStack.EMPTY, -1000, -1000).drawBack(false).recipeContext(this));
+        }
+        widgets.add(new UIWrapperWidget(this, useScreenCacheForNextWidgetQuery));
+        useScreenCacheForNextWidgetQuery = false;
     }
 
     public static class UIWrapperWidget extends Widget {
 
-        private final ModularUIEmiRecipe recipe;
+        private final ModularScreen screen;
 
-        public UIWrapperWidget(ModularUIEmiRecipe recipe) {
-            this.recipe = recipe;
-        }
+        @Getter
+        private final Bounds bounds;
 
-        @Override
-        public Bounds getBounds() {
-            return this.recipe.getBounds();
+        public UIWrapperWidget(ModularUIEmiRecipe recipe, boolean useScreenCache) {
+            this.screen = useScreenCache ? getCachedModularScreen(recipe) : recipe.createScreen();
+
+            if (recipe.sizeCalculated) {
+                this.bounds = recipe.getBounds();
+            } else {
+                this.bounds = new Bounds(0, 0, EmbedHandler.getEmbedWidth(screen), EmbedHandler.getEmbedHeight(screen));
+            }
         }
 
         @Override
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            ModularScreen screen = getModularScreen(this.recipe);
-            EmbedHandler.drawEmbed(screen, graphics, mouseX, mouseY, partialTick, r -> !(r instanceof SizedButtonWidget));
+            EmbedHandler.drawEmbed(this.screen, graphics, mouseX, mouseY, partialTick, r -> !(r instanceof SizedButtonWidget));
         }
 
         @Override
         public List<ClientTooltipComponent> getTooltip(int mouseX, int mouseY) {
-            ModularScreen screen = getModularScreen(this.recipe);
-            if (!screen.getContext().getUISettings().drawTooltipExternally()) {
+            if (!this.screen.getContext().getUISettings().drawTooltipExternally()) {
                 return super.getTooltip(mouseX, mouseY);
             }
 
-            IWidget hovered = screen.getContext().getTopHovered();
+            IWidget hovered = this.screen.getContext().getTopHovered();
             if (hovered instanceof ITooltip<?> tooltip && tooltip.getTooltip() != null) {
                 RichTooltip richTooltip = tooltip.getTooltip();
                 if (richTooltip.autoUpdate()) richTooltip.markDirty();
-                richTooltip.isEmpty(); // causes the tooltip to rebuild if necessary
+                // causes the tooltip to rebuild if necessary
+                if (richTooltip.isEmpty()) return List.of();
 
                 if (richTooltip.getRichText() instanceof RichText richText) {
                     // scuffed conversion, but it mostly works
@@ -207,34 +221,24 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
 
         @Override
         public boolean mouseClicked(int mouseX, int mouseY, int button) {
-            return getModularScreen(this.recipe).mousePressed(button);
+            return this.screen.mousePressed(button);
         }
 
         @Override
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-            return getModularScreen(this.recipe).keyPressed(keyCode, scanCode, modifiers);
+            return this.screen.keyPressed(keyCode, scanCode, modifiers);
         }
 
         public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-            return getModularScreen(this.recipe).mouseScrolled(delta);
+            return this.screen.mouseScrolled(delta);
         }
 
         public boolean mouseDragged(int button, double dragX, double dragY) {
-            return getModularScreen(this.recipe).mouseDragged(button, dragX, dragY);
+            return this.screen.mouseDragged(button, dragX, dragY);
         }
 
         public boolean mouseReleased(int button) {
-            return getModularScreen(this.recipe).mouseReleased(button);
+            return this.screen.mouseReleased(button);
         }
-    }
-
-    private static final StackWalker STAR_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
-
-    @ApiStatus.Internal
-    public static void clearScreenCache() {
-        if (!STAR_WALKER.getCallerClass().equals(ModularUIEmiRecipe.class)) {
-            throw new IllegalCallerException("Attempted to call ModularUIEmiRecipe#clearScreenCache!");
-        }
-        SCREEN_CACHE.invalidateAll();
     }
 }

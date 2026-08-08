@@ -11,6 +11,7 @@
         "client.MinecraftMixin",
         "client.ScreenAccessor",
         "client.StringSplitterAccessor",
+        "emi.EmiRenderHelperMixin",
         "emi.RecipeScreenMixin",
         "jei.IngredientListOverlayAccessor",
         "rei.DefaultDisplayViewingScreenMixin"

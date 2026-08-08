@@ -6,7 +6,6 @@ import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.util.RecipeDebugDecoratorUtil;
-import brachy.modularui.integration.rei.ModularUIReiPlugin;
 import brachy.modularui.integration.rei.ReiRecipeViewerSlot;
 import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
@@ -45,25 +44,6 @@ import java.util.function.Supplier;
 public abstract class ModularUIReiDisplay implements Display {
 
     private static final String SCREEN_NAME_PREFIX = "rei_display_";
-    private static final LoadingCache<ModularUIReiDisplay, ModularScreen> SCREEN_CACHE = CacheBuilder.newBuilder()
-            .initialCapacity(64)
-            .softValues()
-            .build(new CacheLoader<>() {
-                @Override
-                public ModularScreen load(ModularUIReiDisplay key) {
-                    return key.createScreen();
-                }
-
-                @Override
-                public ListenableFuture<ModularScreen> reload(ModularUIReiDisplay key, ModularScreen oldValue) {
-                    // if an old value is (somehow) available, reuse it
-                    return Futures.immediateFuture(oldValue);
-                }
-            });
-
-    private static ModularScreen getModularScreen(ModularUIReiDisplay display) {
-        return SCREEN_CACHE.getUnchecked(display);
-    }
 
     private final ResourceLocation recipeId;
     private final Supplier<IWidget> recipeUI;
@@ -164,20 +144,18 @@ public abstract class ModularUIReiDisplay implements Display {
 
     public static class UIWrapperWidget extends Widget {
 
-        private final ModularUIREIDisplay display;
+        private final ModularScreen screen;
         private final float offsetX, offsetY;
 
         public UIWrapperWidget(ModularUIReiDisplay display, float offsetX, float offsetY) {
-            this.display = display;
+            this.screen = display.createScreen();
             this.offsetX = offsetX;
             this.offsetY = offsetY;
         }
 
         @Override
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            ModularScreen screen = getModularScreen(this.display);
-            // FIXME this thing breaks if you have the same recipe open in REI and pinned as a favorite.
-            EmbedHandler.drawEmbed(screen, graphics, mouseX, mouseY, partialTick, () -> {
+            EmbedHandler.drawEmbed(this.screen, graphics, mouseX, mouseY, partialTick, () -> {
                 screen.getContext().pushMatrix();
                 screen.getContext().translate(this.offsetX, this.offsetY);
             }, () -> {
@@ -187,12 +165,11 @@ public abstract class ModularUIReiDisplay implements Display {
 
         @Override
         public @Nullable Tooltip getTooltip(TooltipContext context) {
-            ModularScreen screen = getModularScreen(this.display);
-            if (!screen.getContext().getUISettings().drawTooltipExternally()) {
+            if (!this.screen.getContext().getUISettings().drawTooltipExternally()) {
                 return super.getTooltip(context);
             }
 
-            IWidget hovered = screen.getContext().getTopHovered();
+            IWidget hovered = this.screen.getContext().getTopHovered();
             if (hovered instanceof ITooltip<?> tooltip && tooltip.getTooltip() != null) {
                 RichTooltip richTooltip = tooltip.getTooltip();
                 if (richTooltip.autoUpdate()) richTooltip.markDirty();
@@ -218,52 +195,42 @@ public abstract class ModularUIReiDisplay implements Display {
 
         @Override
         public void mouseMoved(double mouseX, double mouseY) {
-            //getModularScreen(this.display).mouseMoved(mouseX, mouseY);
+            //this.screen.mouseMoved(mouseX, mouseY);
         }
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            return getModularScreen(this.display).mousePressed(button);
+            return this.screen.mousePressed(button);
         }
 
         @Override
         public boolean mouseReleased(double mouseX, double mouseY, int button) {
-            return getModularScreen(this.display).mouseReleased(button);
+            return this.screen.mouseReleased(button);
         }
 
         @Override
         public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-            return getModularScreen(this.display).mouseDragged(button, dragX, dragY);
+            return this.screen.mouseDragged(button, dragX, dragY);
         }
 
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double scrollDelta) {
-            return getModularScreen(this.display).mouseScrolled(scrollDelta);
+            return this.screen.mouseScrolled(scrollDelta);
         }
 
         @Override
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-            return getModularScreen(this.display).keyPressed(keyCode, scanCode, modifiers);
+            return this.screen.keyPressed(keyCode, scanCode, modifiers);
         }
 
         @Override
         public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-            return getModularScreen(this.display).keyReleased(keyCode, scanCode, modifiers);
+            return this.screen.keyReleased(keyCode, scanCode, modifiers);
         }
 
         @Override
         public boolean charTyped(char codePoint, int modifiers) {
-            return getModularScreen(this.display).charTyped(codePoint, modifiers);
+            return this.screen.charTyped(codePoint, modifiers);
         }
-    }
-
-    private static final StackWalker BETTER_CALL_SAUL = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
-
-    @ApiStatus.Internal
-    public static void clearScreenCache() {
-        if (!BETTER_CALL_SAUL.getCallerClass().equals(ModularUIReiPlugin.class)) {
-            throw new IllegalCallerException("Attempted to call ModularUIREIDisplay#clearScreenCache!");
-        }
-        SCREEN_CACHE.invalidateAll();
     }
 }
