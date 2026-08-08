@@ -8,6 +8,7 @@ import brachy.modularui.core.mixins.jei.RecipeLayoutBuilderAccessor;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.jei.JeiRecipeViewerSlot;
 import brachy.modularui.integration.jei.ModularUIJeiPlugin;
+import brachy.modularui.integration.recipeviewer.RecipeViewerUtils;
 import brachy.modularui.integration.recipeviewer.util.RecipeDebugDecoratorUtil;
 import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
@@ -17,6 +18,7 @@ import brachy.modularui.screen.RichTooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import com.google.common.cache.CacheBuilder;
@@ -210,6 +212,11 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
         slotBuilder.setFluidRenderer(1, false, 16, 16);
 
         return recipeViewerSlot;
+    }
+
+    @Override
+    public Component getTitle() {
+        return RecipeViewerUtils.getCategoryTitle(this.getRecipeType().getUid());
     }
 
     @Override

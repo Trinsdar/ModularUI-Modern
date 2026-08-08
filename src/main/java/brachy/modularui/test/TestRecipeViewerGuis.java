@@ -54,9 +54,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@NotNullByDefault
 public class TestRecipeViewerGuis {
-
-    public static final Component CATEGORY_TITLE = Component.translatable("recipe_category.modularui.machine");
 
     public static IWidget buildViewerUI(TestMachine.Recipe recipe) {
         var panel = new ModularPanel<>("recipe_viewer_recipe")
@@ -151,7 +150,6 @@ public class TestRecipeViewerGuis {
             registry.addRecipeCatalyst(TestRegistration.TEST_MACHINE_BLOCK_ITEM.get(), RECIPE_TYPE);
         }
 
-        @NotNullByDefault
         public static class RecipeCategory extends ModularUIJeiCategory<TestMachine.Recipe> {
 
             protected RecipeCategory(Function<TestMachine.Recipe, IWidget> recipeUI,
@@ -162,11 +160,6 @@ public class TestRecipeViewerGuis {
             @Override
             public RecipeType<TestMachine.Recipe> getRecipeType() {
                 return RECIPE_TYPE;
-            }
-
-            @Override
-            public Component getTitle() {
-                return CATEGORY_TITLE;
             }
 
             @Override
@@ -237,11 +230,6 @@ public class TestRecipeViewerGuis {
             @Override
             public CategoryIdentifier<RecipeDisplay> getCategoryIdentifier() {
                 return CATEGORY;
-            }
-
-            @Override
-            public Component getTitle() {
-                return CATEGORY_TITLE;
             }
 
             @Override

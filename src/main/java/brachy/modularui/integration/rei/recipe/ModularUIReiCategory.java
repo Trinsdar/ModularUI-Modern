@@ -1,5 +1,9 @@
 package brachy.modularui.integration.rei.recipe;
 
+import net.minecraft.network.chat.Component;
+
+import brachy.modularui.integration.recipeviewer.RecipeViewerUtils;
+
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
@@ -46,5 +50,10 @@ public abstract class ModularUIReiCategory<D extends ModularUIReiDisplay> implem
     @Override
     public final int getDisplayHeight() {
         return getMaxDisplayHeight();
+    }
+
+    @Override
+    public Component getTitle() {
+        return RecipeViewerUtils.getCategoryTitle(this.getIdentifier());
     }
 }
