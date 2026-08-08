@@ -1,8 +1,7 @@
 package brachy.modularui.integration.recipeviewer.util;
 
-import net.minecraft.client.Minecraft;
-
 import brachy.modularui.ModularUIConfig;
+import brachy.modularui.api.IMuiScreen;
 import brachy.modularui.overlay.DebugOverlay;
 import brachy.modularui.overlay.OverlayStack;
 import brachy.modularui.screen.ModularScreen;
@@ -21,22 +20,27 @@ public class RecipeDebugDecoratorUtil {
         }
 
         MutableObject<ModularScreen> debugOverlay = new MutableObject<>();
-        Runnable close = () -> {
-            ModularScreen overlay = debugOverlay.getValue();
-            if (overlay != null) {
-                OverlayStack.close(overlay);
-            }
-        };
 
         screen.getMainPanel()
-                .onMouseEnterArea((ctx) -> {
-                    ModularScreen overlay = new DebugOverlay(screen.getScreenWrapper());
-                    overlay.constructOverlay(screen.getScreenWrapper().wrappedScreen());
-                    OverlayStack.open(overlay);
+                .onOpenAction(panel -> {
+                    if (debugOverlay.getValue() != null) {
+                        return;
+                    }
+                    IMuiScreen screenWrapper = panel.getScreen().getScreenWrapper();
 
+                    ModularScreen overlay = new DebugOverlay(screenWrapper);
+                    // set this ASAP to avoid the possibility of double init
                     debugOverlay.setValue(overlay);
+                    overlay.constructOverlay(screenWrapper.wrappedScreen());
+                    OverlayStack.open(overlay);
                 })
-                .onMouseLeaveArea((ctx, timeBelowMouse) -> close.run())
-                .onCloseAction(close);
+                .onCloseAction(panel -> {
+                    ModularScreen overlay = debugOverlay.getValue();
+                    if (overlay == null) {
+                        return;
+                    }
+                    OverlayStack.close(overlay);
+                    debugOverlay.setValue(null);
+                });
     }
 }
