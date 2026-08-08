@@ -378,7 +378,7 @@ public class RichTooltip implements IRichTextBuilder<RichTooltip> {
 
     @Override
     public IRichTextBuilder<?> getRichText() {
-        return text;
+        return this.text;
     }
 
     public RichTooltip tooltipBuilder(Consumer<RichTooltip> tooltipBuilder) {

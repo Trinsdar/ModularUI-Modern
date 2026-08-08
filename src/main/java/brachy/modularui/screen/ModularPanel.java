@@ -154,7 +154,7 @@ public class ModularPanel<W extends ModularPanel<W>> extends ParentWidget<W> imp
      * If animating is enabled and an animation is already playing this method will do nothing.
      */
     public void closeIfOpen() {
-        if (!isOpen() || (!getContext().getUItype().isScreen && isMainPanel())) return;
+        if (!isOpen() || (!getContext().getUIType().isScreen && isMainPanel())) return;
         closeSubPanels();
         if (isMainPanel()) {
             // close screen and let NEA handle animation // TODO: since nea is not yet ported, it will just close the
