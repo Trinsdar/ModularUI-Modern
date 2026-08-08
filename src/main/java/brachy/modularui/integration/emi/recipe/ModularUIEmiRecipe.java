@@ -29,6 +29,7 @@ import dev.emi.emi.api.widget.WidgetHolder;
 import dev.emi.emi.screen.widget.SizedButtonWidget;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 
 import java.time.Duration;
 import java.util.List;
@@ -122,6 +123,7 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
         return createScreen(this.recipeUI.get(), this.id.getNamespace(), SCREEN_NAME_PREFIX + this.id.getPath());
     }
 
+    @ApiStatus.OverrideOnly
     public ModularScreen createScreen(IWidget recipeUI, String owner, String name) {
         ModularPanel<?> panel;
         if (recipeUI instanceof ModularPanel<?> panel1) {
@@ -141,11 +143,13 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
         return screen;
     }
 
+    @ApiStatus.OverrideOnly
     public ModularPanel<?> transform(ModularPanel<?> panel) {
         panel.visitTransformAllChildren(this::transformWidget);
         return panel;
     }
 
+    @ApiStatus.OverrideOnly
     public IWidget transformWidget(IWidget widget) {
         if (!(widget instanceof EmiRecipeViewerSlot<?> recipeViewerSlot)) return widget;
 
@@ -166,6 +170,7 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
         useScreenCacheForNextWidgetQuery = true;
     }
 
+    @MustBeInvokedByOverriders
     @Override
     public void addWidgets(WidgetHolder widgets) {
         if (this.supportsRecipeTree()) {

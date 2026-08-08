@@ -130,6 +130,7 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
         return createScreen(this.recipeUI.apply(recipe), id.getNamespace(), SCREEN_NAME_PREFIX + id.getPath(), recipe);
     }
 
+    @ApiStatus.OverrideOnly
     public ModularScreen createScreen(IWidget recipeUI, String owner, String name, T recipe) {
         ModularPanel<?> panel;
         if (recipeUI instanceof ModularPanel<?> panel1) {
@@ -168,6 +169,7 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @ApiStatus.OverrideOnly
+    @MustBeInvokedByOverriders
     public IWidget createRecipeSlotForWidget(IRecipeLayoutBuilder builder, IWidget widget, T recipe, IFocusGroup focuses, MutableInt index) {
         if (!(widget instanceof JeiRecipeViewerSlot recipeViewerSlot)) return widget;
 
@@ -213,6 +215,7 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
         }
     }
 
+    @MustBeInvokedByOverriders
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder builder, T recipe, IFocusGroup focuses) {
         ModularScreen screen = veryTemporaryScreenCache.get(recipe);
