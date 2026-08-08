@@ -8,7 +8,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 
 @ApiStatus.Experimental
-public abstract class ModularUIREIDisplayCategory<D extends ModularUIREIDisplay> implements DisplayCategory<D> {
+public abstract class ModularUIReiCategory<D extends ModularUIReiDisplay> implements DisplayCategory<D> {
 
     @Override
     public List<Widget> setupDisplay(D display, Rectangle bounds) {
@@ -38,7 +38,7 @@ public abstract class ModularUIREIDisplayCategory<D extends ModularUIREIDisplay>
 
     /**
      * Return the maximum expected display height here.<br>
-     * You should also return a per-category display height that's at most this value in {@link #getDisplayHeight(ModularUIREIDisplay)}.
+     * You should also return a per-category display height that's at most this value in {@link #getDisplayHeight(ModularUIReiDisplay)}.
      * @return The maximum expected display height
      */
     public abstract int getMaxDisplayHeight();

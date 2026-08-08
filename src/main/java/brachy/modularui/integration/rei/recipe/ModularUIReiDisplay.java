@@ -6,7 +6,7 @@ import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.util.RecipeDebugDecoratorUtil;
-import brachy.modularui.integration.rei.ModularUIREIPlugin;
+import brachy.modularui.integration.rei.ModularUIReiPlugin;
 import brachy.modularui.integration.rei.ReiRecipeViewerSlot;
 import brachy.modularui.screen.EmbedHandler;
 import brachy.modularui.screen.ModularPanel;
@@ -42,26 +42,26 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @ApiStatus.Experimental
-public abstract class ModularUIREIDisplay implements Display {
+public abstract class ModularUIReiDisplay implements Display {
 
     private static final String SCREEN_NAME_PREFIX = "rei_display_";
-    private static final LoadingCache<ModularUIREIDisplay, ModularScreen> SCREEN_CACHE = CacheBuilder.newBuilder()
+    private static final LoadingCache<ModularUIReiDisplay, ModularScreen> SCREEN_CACHE = CacheBuilder.newBuilder()
             .initialCapacity(64)
             .softValues()
             .build(new CacheLoader<>() {
                 @Override
-                public ModularScreen load(ModularUIREIDisplay key) {
+                public ModularScreen load(ModularUIReiDisplay key) {
                     return key.createScreen();
                 }
 
                 @Override
-                public ListenableFuture<ModularScreen> reload(ModularUIREIDisplay key, ModularScreen oldValue) {
+                public ListenableFuture<ModularScreen> reload(ModularUIReiDisplay key, ModularScreen oldValue) {
                     // if an old value is (somehow) available, reuse it
                     return Futures.immediateFuture(oldValue);
                 }
             });
 
-    private static ModularScreen getModularScreen(ModularUIREIDisplay display) {
+    private static ModularScreen getModularScreen(ModularUIReiDisplay display) {
         return SCREEN_CACHE.getUnchecked(display);
     }
 
@@ -72,7 +72,7 @@ public abstract class ModularUIREIDisplay implements Display {
     private boolean sizeCalculated = false;
     private int displayWidth, displayHeight;
 
-    public ModularUIREIDisplay(ResourceLocation recipeId, Supplier<IWidget> recipeUI, CategoryIdentifier<?> categoryId) {
+    public ModularUIReiDisplay(ResourceLocation recipeId, Supplier<IWidget> recipeUI, CategoryIdentifier<?> categoryId) {
         this.recipeId = recipeId;
         this.recipeUI = recipeUI;
         this.categoryIdentifier = categoryId;
@@ -167,7 +167,7 @@ public abstract class ModularUIREIDisplay implements Display {
         private final ModularUIREIDisplay display;
         private final float offsetX, offsetY;
 
-        public UIWrapperWidget(ModularUIREIDisplay display, float offsetX, float offsetY) {
+        public UIWrapperWidget(ModularUIReiDisplay display, float offsetX, float offsetY) {
             this.display = display;
             this.offsetX = offsetX;
             this.offsetY = offsetY;
@@ -261,7 +261,7 @@ public abstract class ModularUIREIDisplay implements Display {
 
     @ApiStatus.Internal
     public static void clearScreenCache() {
-        if (!BETTER_CALL_SAUL.getCallerClass().equals(ModularUIREIPlugin.class)) {
+        if (!BETTER_CALL_SAUL.getCallerClass().equals(ModularUIReiPlugin.class)) {
             throw new IllegalCallerException("Attempted to call ModularUIREIDisplay#clearScreenCache!");
         }
         SCREEN_CACHE.invalidateAll();

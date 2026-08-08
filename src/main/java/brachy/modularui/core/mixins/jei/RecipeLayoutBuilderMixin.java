@@ -1,6 +1,6 @@
 package brachy.modularui.core.mixins.jei;
 
-import brachy.modularui.integration.jei.recipe.ModularUIRecipeCategory;
+import brachy.modularui.integration.jei.recipe.ModularUIJeiCategory;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -23,7 +23,7 @@ public abstract class RecipeLayoutBuilderMixin<T> implements IRecipeLayoutBuilde
     @ModifyExpressionValue(method = { "createShapelessIcon", "getRecipeTransferButtonPosition" },
             at = @At(value = "INVOKE", target = "Lmezz/jei/api/recipe/category/IRecipeCategory;getWidth()I"), require = 0)
     private int modularui$makeWidthRecipeDependent(int original) {
-        if (recipeCategory instanceof ModularUIRecipeCategory<T> muiCategory) {
+        if (recipeCategory instanceof ModularUIJeiCategory<T> muiCategory) {
             return muiCategory.getWidth(this.recipe);
         }
         return original;
@@ -32,7 +32,7 @@ public abstract class RecipeLayoutBuilderMixin<T> implements IRecipeLayoutBuilde
     @ModifyExpressionValue(method = { "createShapelessIcon", "getRecipeTransferButtonPosition" },
             at = @At(value = "INVOKE", target = "Lmezz/jei/api/recipe/category/IRecipeCategory;getHeight()I"), require = 0)
     private int modularui$makeHeightRecipeDependent(int original) {
-        if (recipeCategory instanceof ModularUIRecipeCategory<T> muiCategory) {
+        if (recipeCategory instanceof ModularUIJeiCategory<T> muiCategory) {
             return muiCategory.getHeight(recipe);
         }
         return original;

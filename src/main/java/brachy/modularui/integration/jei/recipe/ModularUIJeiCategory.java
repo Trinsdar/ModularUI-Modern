@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @ApiStatus.Experimental
-public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
+public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
 
     public static final String SCREEN_NAME_PREFIX = "jei_recipe_";
 
@@ -55,7 +55,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     private final Function<T, IWidget> recipeUI;
     private final Function<T, ResourceLocation> recipeIdGetter;
 
-    protected ModularUIRecipeCategory(Function<T, IWidget> recipeUI, Function<T, ResourceLocation> recipeIdGetter) {
+    protected ModularUIJeiCategory(Function<T, IWidget> recipeUI, Function<T, ResourceLocation> recipeIdGetter) {
         this.recipeUI = recipeUI;
         this.recipeIdGetter = recipeIdGetter;
 
@@ -66,9 +66,9 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
                     @Override
                     public ModularScreen load(T recipe) {
                         try {
-                            return ModularUIRecipeCategory.this.createScreen(recipe);
+                            return ModularUIJeiCategory.this.createScreen(recipe);
                         } finally {
-                            ModularUIRecipeCategory.this.displaySizeCache.refresh(recipe);
+                            ModularUIJeiCategory.this.displaySizeCache.refresh(recipe);
                         }
                     }
 
@@ -83,7 +83,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
                 .build(new CacheLoader<>() {
                     @Override
                     public Dimensions load(T recipe) {
-                        return ModularUIRecipeCategory.this.calculateSize(recipe);
+                        return ModularUIJeiCategory.this.calculateSize(recipe);
                     }
                 });
     }
@@ -136,8 +136,9 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
     public abstract int getMaxHeight();
 
     /**
-     * Add your recipes' inputs and outputs here. This is used by JEI for lookups to figure out what ingredients are inputs and
-     * outputs for a recipe.
+     * Sets all the recipe's ingredients by filling out an instance of {@link IRecipeLayoutBuilder}.
+     * This is used by JEI for lookups, to figure out what ingredients are inputs and outputs for a recipe.
+     *
      * <p>
      * Note that you can <b>only</b> add inputs and outputs for JEI's recipe lookup/search here, as the layout builder that's
      * passed into this method only handles those and not the displayed recipe previews.

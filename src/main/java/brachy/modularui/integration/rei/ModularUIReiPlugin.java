@@ -2,7 +2,7 @@ package brachy.modularui.integration.rei;
 
 import brachy.modularui.ModularUI;
 import brachy.modularui.integration.rei.handler.REIScreenHandler;
-import brachy.modularui.integration.rei.recipe.ModularUIREIDisplay;
+import brachy.modularui.integration.rei.recipe.ModularUIReiDisplay;
 import brachy.modularui.screen.ContainerScreenWrapper;
 import brachy.modularui.screen.ScreenWrapper;
 
@@ -17,13 +17,13 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.forge.REIPluginClient;
 
 @REIPluginClient
-public class ModularUIREIPlugin implements REIClientPlugin {
+public class ModularUIReiPlugin implements REIClientPlugin {
 
     /// This is only used to clear the stale recipe display "screen" cache.
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public void registerEntryRenderers(EntryRendererRegistry registry) {
-        ModularUIREIDisplay.clearScreenCache();
+        ModularUIReiDisplay.clearScreenCache();
     }
 
     @Override

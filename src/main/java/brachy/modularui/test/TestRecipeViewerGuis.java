@@ -12,11 +12,11 @@ import brachy.modularui.ModularUI;
 import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.integration.emi.recipe.ModularUIEmiRecipe;
 import brachy.modularui.integration.jei.ModularUIJeiPlugin;
-import brachy.modularui.integration.jei.recipe.ModularUIRecipeCategory;
+import brachy.modularui.integration.jei.recipe.ModularUIJeiCategory;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
-import brachy.modularui.integration.rei.recipe.ModularUIREIDisplay;
-import brachy.modularui.integration.rei.recipe.ModularUIREIDisplayCategory;
+import brachy.modularui.integration.rei.recipe.ModularUIReiDisplay;
+import brachy.modularui.integration.rei.recipe.ModularUIReiCategory;
 import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.utils.handlers.fluid.EmptyFluidTank;
 import brachy.modularui.utils.handlers.fluid.IMultiTankFluidHandler;
@@ -152,7 +152,7 @@ public class TestRecipeViewerGuis {
         }
 
         @NotNullByDefault
-        public static class RecipeCategory extends ModularUIRecipeCategory<TestMachine.Recipe> {
+        public static class RecipeCategory extends ModularUIJeiCategory<TestMachine.Recipe> {
 
             protected RecipeCategory(Function<TestMachine.Recipe, IWidget> recipeUI,
                                      Function<TestMachine.Recipe, ResourceLocation> recipeIdGetter) {
@@ -212,7 +212,7 @@ public class TestRecipeViewerGuis {
                     .forEach(registry::add);
         }
 
-        public static class RecipeDisplay extends ModularUIREIDisplay {
+        public static class RecipeDisplay extends ModularUIReiDisplay {
 
             private final TestMachine.Recipe recipe;
             @Getter private final List<EntryIngredient> inputEntries = new ArrayList<>();
@@ -228,8 +228,7 @@ public class TestRecipeViewerGuis {
             }
         }
 
-        @NotNullByDefault
-        public static class RecipeCategory extends ModularUIREIDisplayCategory<RecipeDisplay> {
+        public static class RecipeCategory extends ModularUIReiCategory<RecipeDisplay> {
 
             protected RecipeCategory() {
                 super();

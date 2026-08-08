@@ -1,7 +1,7 @@
 package brachy.modularui.core.mixins.rei;
 
-import brachy.modularui.integration.rei.recipe.ModularUIREIDisplay;
-import brachy.modularui.integration.rei.recipe.ModularUIREIDisplayCategory;
+import brachy.modularui.integration.rei.recipe.ModularUIReiDisplay;
+import brachy.modularui.integration.rei.recipe.ModularUIReiCategory;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -53,8 +53,8 @@ public abstract class DefaultDisplayViewingScreenMixin extends AbstractDisplayVi
     @Unique
     private static int modularui$calculateCustomDisplayHeight(DisplayCategory<?> category, Display display,
                                                               @Nullable ToIntFunction<DisplayCategory<?>> originalValue) {
-        if (category instanceof ModularUIREIDisplayCategory<?> muiCategory && display instanceof ModularUIREIDisplay muiDisplay) {
-            return ((ModularUIREIDisplayCategory<ModularUIREIDisplay>) muiCategory).getDisplayHeight(muiDisplay);
+        if (category instanceof ModularUIReiCategory<?> muiCategory && display instanceof ModularUIReiDisplay muiDisplay) {
+            return ((ModularUIReiCategory<ModularUIReiDisplay>) muiCategory).getDisplayHeight(muiDisplay);
         } else {
             // if this isn't a MUI display, set it back to the original value
             // (I think it's possible that an MUI category has a non-MUI display in it? not sure tho.)

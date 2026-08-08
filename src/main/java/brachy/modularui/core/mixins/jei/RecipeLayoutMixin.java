@@ -1,6 +1,6 @@
 package brachy.modularui.core.mixins.jei;
 
-import brachy.modularui.integration.jei.recipe.ModularUIRecipeCategory;
+import brachy.modularui.integration.jei.recipe.ModularUIJeiCategory;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -17,7 +17,7 @@ public abstract class RecipeLayoutMixin<R> implements IRecipeLayoutDrawable<R> {
     private int modularui$makeWidthRecipeDependent(int original,
                                                    @Local(argsOnly = true) IRecipeCategory<R> recipeCategory,
                                                    @Local(argsOnly = true) R recipe) {
-        if (recipeCategory instanceof ModularUIRecipeCategory<R> muiCategory) {
+        if (recipeCategory instanceof ModularUIJeiCategory<R> muiCategory) {
             return muiCategory.getWidth(recipe);
         }
         return original;
@@ -27,7 +27,7 @@ public abstract class RecipeLayoutMixin<R> implements IRecipeLayoutDrawable<R> {
     private int modularui$makeHeightRecipeDependent(int original,
                                                     @Local(argsOnly = true) IRecipeCategory<R> recipeCategory,
                                                     @Local(argsOnly = true) R recipe) {
-        if (recipeCategory instanceof ModularUIRecipeCategory<R> muiCategory) {
+        if (recipeCategory instanceof ModularUIJeiCategory<R> muiCategory) {
             return muiCategory.getHeight(recipe);
         }
         return original;
