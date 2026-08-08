@@ -12,6 +12,7 @@ import brachy.modularui.screen.viewport.ModularGuiContext;
 
 import brachy.modularui.theme.WidgetThemeEntry;
 
+import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,7 @@ import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
 import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.runtime.IIngredientManager;
@@ -33,18 +35,20 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static brachy.modularui.integration.jei.ModularUIJeiPlugin.mapToJeiRole;
 
 @ApiStatus.Internal
-public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiRecipeViewerSlot<I, R>> implements ISlottedRecipeWidget {
+public class JeiRecipeViewerSlot<I, T> extends RecipeViewerSlotWidget<I, JeiRecipeViewerSlot<I, T>> implements ISlottedRecipeWidget {
 
     @Getter private @Nullable IRecipeSlotDrawable slotWidget;
     @Setter private IFocusGroup focuses;
     @Setter private ICycler cycler;
 
-    @Setter private IRecipeCategory<R> recipeCategory;
-    @Setter private R recipe;
+    @Setter private IRecipeCategory<T> recipeCategory;
+    @Setter private T recipe;
 
     @Setter private IIngredientManager ingredientManager;
 
@@ -71,17 +75,21 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
             return;
         }
 
-        // always remove the output slot tooltip callback (this is easier than checking if it already exists etc.)
-        recipeSlot.modularui$getTooltipCallbacks().removeIf(callback -> callback instanceof OutputSlotTooltipCallback);
-        if (this.recipeSlotRole == RecipeSlotRole.OUTPUT) {
-            // (re)add the output slot tooltip callback if this is now an output slot
-            addOutputSlotTooltipCallback(recipeSlot);
+        RecipeIngredientRole jeiIngredientRole = mapToJeiRole(this.recipeSlotRole);
+        if (slotWidget.getRole() != jeiIngredientRole) {
+            // always remove the output slot tooltip callback (this is easier than checking if it already exists etc.)
+            recipeSlot.modularui$getTooltipCallbacks().removeIf(callback -> callback instanceof OutputSlotTooltipCallback);
+            if (this.recipeSlotRole == RecipeSlotRole.OUTPUT) {
+                // (re)add the output slot tooltip callback if this is now an output slot
+                addOutputSlotTooltipCallback(recipeSlot);
+            }
+            recipeSlot.modularui$setRole(jeiIngredientRole);
         }
-        recipeSlot.modularui$setRole(mapToJeiRole(this.recipeSlotRole));
         // mmm I love off-by-one errors
         slotWidget.setPosition(1, 1);
 
-        replaceSlotIngredients(recipeSlot);
+        replaceSlotIngredients(recipeSlot, jeiIngredientRole);
+
         recipeSlot.modularui$setCycler(this.cycler);
     }
 
@@ -97,7 +105,7 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
     }
 
     // Mostly copied from RecipeSlotBuilder#build
-    private void replaceSlotIngredients(RecipeSlotAccessor recipeSlot) {
+    private void replaceSlotIngredients(RecipeSlotAccessor recipeSlot, RecipeIngredientRole ingredientRole) {
         if (this.ingredientManager == null) {
             if (ModularUIJeiPlugin.jeiHelpers == null) {
                 return;
@@ -112,12 +120,26 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
 
         List<Optional<ITypedIngredient<?>>> allIngredients = ingredients.getAllIngredients();
 
-        IntSet focusMatches = ingredients.getMatches(this.focuses, mapToJeiRole(this.recipeSlotRole));
-        List<Optional<ITypedIngredient<?>>> focusedIngredients = null;
+        // recipeSlot is the same object as this.slotWidget
+        // noinspection DataFlowIssue
+        if (!slotWidget.isEmpty()) {
+            // check if the slot's ingredients are the same as our new ones and skip replacing them if so
+            // this lets us optimize lookup by not parsing the focused ingredients if possible
+            Set<ITypedIngredient<?>> newIngredients = allIngredients.stream().flatMap(Optional::stream).collect(Collectors.toSet());
+            slotWidget.getAllIngredients().forEach(newIngredients::remove);
 
+            // every ingredient was removed -> the ingredient lists are equal
+            if (newIngredients.isEmpty()) {
+                return;
+            }
+        }
+
+        IntSet focusMatches = ingredients.getMatches(this.focuses, ingredientRole);
+        List<Optional<ITypedIngredient<?>>> focusedIngredients = null;
         if (!focusMatches.isEmpty()) {
             focusedIngredients = new ArrayList<>();
-            for (Integer i : focusMatches) {
+            for (IntIterator iterator = focusMatches.iterator(); iterator.hasNext(); ) {
+                int i = iterator.nextInt();
                 if (i < allIngredients.size()) {
                     Optional<ITypedIngredient<?>> ingredient = allIngredients.get(i);
                     focusedIngredients.add(ingredient);
@@ -168,7 +190,7 @@ public class JeiRecipeViewerSlot<I, R> extends RecipeViewerSlotWidget<I, JeiReci
     private void addOutputSlotTooltipCallback(RecipeSlotAccessor slot) {
         ResourceLocation recipeName = recipeCategory.getRegistryName(recipe);
         if (recipeName != null) {
-            RecipeType<R> recipeType = recipeCategory.getRecipeType();
+            RecipeType<T> recipeType = recipeCategory.getRecipeType();
             OutputSlotTooltipCallback callback = new OutputSlotTooltipCallback(recipeName, recipeType);
             slot.modularui$getTooltipCallbacks().add(callback);
         }

@@ -49,6 +49,7 @@ public class ModularUIJeiProperties implements IGuiProperties {
         Area mainArea = screen.screen().getMainPanel().getArea();
         this.guiXSize = mainArea.width == 0 ? DEFAULT_GUI_WIDTH : mainArea.width;
         this.guiYSize = mainArea.height == 0 ? DEFAULT_GUI_HEIGHT : mainArea.height;
+        // don't check mainArea x/y here because those can actually be 0
         this.guiLeft = mainArea.width == 0 ? (this.screenWidth - DEFAULT_GUI_WIDTH) / 2 : mainArea.x;
         this.guiTop = mainArea.height == 0 ? (this.screenHeight - DEFAULT_GUI_HEIGHT) / 2 : mainArea.y;
     }
@@ -70,9 +71,10 @@ public class ModularUIJeiProperties implements IGuiProperties {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ModularUIJeiProperties that = (ModularUIJeiProperties) o;
-        return guiLeft == that.guiLeft && guiTop == that.guiTop && guiXSize == that.guiXSize && guiYSize == that.guiYSize &&
-                screenWidth == that.screenWidth && screenHeight == that.screenHeight &&
-                Objects.equals(screenClass, that.screenClass);
+        return this.guiLeft == that.guiLeft && this.guiTop == that.guiTop &&
+                this.guiXSize == that.guiXSize && this.guiYSize == that.guiYSize &&
+                this.screenWidth == that.screenWidth && this.screenHeight == that.screenHeight &&
+                Objects.equals(this.screenClass, that.screenClass);
     }
 
     @Override

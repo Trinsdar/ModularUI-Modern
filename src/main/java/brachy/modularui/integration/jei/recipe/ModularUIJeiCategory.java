@@ -80,7 +80,7 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
         ResourceLocation id = this.recipeIdGetter.apply(recipe);
         int w = ui.resizer().getFixedPixelWidth(), h = ui.resizer().getFixedPixelHeight();
         if (w < 0 || h < 0) {
-            ModularScreen screen = createScreen(ui, id.getNamespace(), SCREEN_NAME_PREFIX + id.getPath());
+            ModularScreen screen = createScreen(ui, id.getNamespace(), SCREEN_NAME_PREFIX + id.getPath(), recipe);
             w = EmbedHandler.getEmbedWidth(screen);
             h = EmbedHandler.getEmbedHeight(screen);
         }
@@ -122,17 +122,15 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
      * Note that you can <b>only</b> add inputs and outputs for JEI's recipe lookup/search here, as the layout builder that's
      * passed into this method only handles those and not the displayed recipe previews.
      */
-    @MustBeInvokedByOverriders
-    public void setupRecipeIngredients(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
-        calculateAndCacheSize(recipe);
-    }
+    @ApiStatus.OverrideOnly
+    public abstract void setupRecipeIngredients(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses);
 
     private ModularScreen createScreen(T recipe) {
         ResourceLocation id = this.recipeIdGetter.apply(recipe);
-        return createScreen(this.recipeUI.apply(recipe), id.getNamespace(), SCREEN_NAME_PREFIX + id.getPath());
+        return createScreen(this.recipeUI.apply(recipe), id.getNamespace(), SCREEN_NAME_PREFIX + id.getPath(), recipe);
     }
 
-    public ModularScreen createScreen(IWidget recipeUI, String owner, String name) {
+    public ModularScreen createScreen(IWidget recipeUI, String owner, String name, T recipe) {
         ModularPanel<?> panel;
         if (recipeUI instanceof ModularPanel<?> panel1) {
             panel = panel1;
@@ -199,6 +197,7 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
     // this is a map instead of a simple field so mods that make JEI loading asynchronous work as expected
     private final Map<T, ModularScreen> veryTemporaryScreenCache = new ConcurrentHashMap<>();
 
+    @MustBeInvokedByOverriders
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
         // guard against JEMI issues by explicitly checking for JEI's implementation

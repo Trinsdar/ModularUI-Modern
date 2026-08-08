@@ -1,12 +1,8 @@
 package brachy.modularui.test;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidTank;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.EmptyHandler;
 
 import brachy.modularui.ModularUI;
 import brachy.modularui.api.widget.IWidget;
@@ -18,9 +14,6 @@ import brachy.modularui.integration.recipeviewer.handlers.IngredientProvider;
 import brachy.modularui.integration.rei.recipe.ModularUIReiDisplay;
 import brachy.modularui.integration.rei.recipe.ModularUIReiCategory;
 import brachy.modularui.screen.ModularPanel;
-import brachy.modularui.utils.handlers.fluid.EmptyFluidTank;
-import brachy.modularui.utils.handlers.fluid.IMultiTankFluidHandler;
-import brachy.modularui.utils.handlers.fluid.MultiTankFluidHandler;
 import brachy.modularui.value.DoubleValue;
 import brachy.modularui.widgets.slot.FluidSlot;
 import brachy.modularui.widgets.slot.ItemSlot;
@@ -174,7 +167,6 @@ public class TestRecipeViewerGuis {
 
             @Override
             public void setupRecipeIngredients(IRecipeLayoutBuilder builder, TestMachine.Recipe recipe, IFocusGroup focuses) {
-                super.setupRecipeIngredients(builder, recipe, focuses);
                 recipe.inItems.forEach(item -> builder.addSlot(RecipeIngredientRole.INPUT).addItemStack(item));
                 recipe.outItems.forEach(item -> builder.addSlot(RecipeIngredientRole.OUTPUT).addItemStack(item));
             }
