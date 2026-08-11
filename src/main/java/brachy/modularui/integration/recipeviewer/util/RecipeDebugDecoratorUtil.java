@@ -27,6 +27,10 @@ public class RecipeDebugDecoratorUtil {
                         return;
                     }
                     IMuiScreen screenWrapper = panel.getScreen().getScreenWrapper();
+                    if (screenWrapper.wrappedScreen() == null) {
+                        // safeguard against initing too early
+                        return;
+                    }
 
                     ModularScreen overlay = new DebugOverlay(screenWrapper);
                     // set this ASAP to avoid the possibility of double init
