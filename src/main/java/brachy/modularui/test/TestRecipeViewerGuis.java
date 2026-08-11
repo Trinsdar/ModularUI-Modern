@@ -4,6 +4,7 @@ import brachy.modularui.utils.handlers.fluid.EmptyFluidTank;
 import brachy.modularui.utils.handlers.fluid.IMultiTankFluidHandler;
 import brachy.modularui.utils.handlers.fluid.MultiTankFluidHandler;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
@@ -92,7 +93,10 @@ public class TestRecipeViewerGuis {
                 int index = slot.getSlot().getSlotIndex();
                 ItemStack item = index >= l.size() ? ItemStack.EMPTY : l.get(index);
                 return slot.toRecipeViewerSlot()
-                        .value(item);
+                        .value(item)
+                        .tooltip(tooltip -> {
+                            tooltip.newLine().add(Component.translatable("modularui.test"));
+                        });
             } else if (w instanceof FluidSlot slot) {
                 List<FluidStack> l = slot.getRecipeRole() == RecipeSlotRole.INPUT ? recipe.inFluids : recipe.outFluids;
                 int index = slot.getSyncHandler().getTankIndex();

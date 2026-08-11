@@ -218,7 +218,11 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
 
                 if (richTooltip.getRichText() instanceof RichText richText) {
                     // scuffed conversion, but it mostly works
-                    return richText.getAsText().toClientTooltipComponents();
+                    List<ClientTooltipComponent> components = richText.getAsText().toClientTooltipComponents();
+                    if (hovered instanceof EmiRecipeViewerSlot<?> recipeViewerSlot) {
+                        components.addAll(0, recipeViewerSlot.getSlotWidget().getTooltip(mouseX, mouseY));
+                    }
+                    return components;
                 }
             }
             return List.of();

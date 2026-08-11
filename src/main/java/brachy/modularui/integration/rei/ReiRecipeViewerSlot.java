@@ -1,12 +1,7 @@
 package brachy.modularui.integration.rei;
 
-import brachy.modularui.api.drawable.IRichTextBuilder;
-import brachy.modularui.api.drawable.Text;
-import brachy.modularui.drawable.ClientTooltipComponentIcon;
-import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
-import brachy.modularui.screen.RichTooltip;
 import brachy.modularui.screen.viewport.ModularGuiContext;
 
 import brachy.modularui.theme.WidgetThemeEntry;
@@ -14,12 +9,8 @@ import brachy.modularui.theme.WidgetThemeEntry;
 import lombok.Getter;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeViewerSlot<I>> {
@@ -30,26 +21,14 @@ public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeV
 
     public ReiRecipeViewerSlot(Class<I> ingredientClass) {
         super(ingredientClass);
-        this.slotWidget = this.new MuiEntryWidget(ONE).disableBackground().disableTooltips();
+        this.slotWidget = new EntryWidget(ONE).disableBackground().disableTooltips();
 
-        this.tooltipAutoUpdate(true);
-        this.tooltipDynamic(r -> {
-            if (slotWidget != null){
-                Tooltip tooltip = slotWidget.getCurrentTooltip(TooltipContext.ofMouse());
-                if (tooltip == null) return;
-                tooltip.entries().forEach(e -> {
-                    if (e.isText()){
-                        r.addLine(e.getAsText());
-                    }
-                });
-            }
-        });
         size(18, 18);
     }
 
     @Override
     protected void rebuildRealSlot() {
-        slotWidget = this.new MuiEntryWidget(ONE).disableBackground().disableTooltips();
+        slotWidget = new EntryWidget(ONE).disableBackground().disableTooltips();
         slotWidget.entries(REIStackConverter.convertToReiEntry(this.entries, this.chance, this.renderMappingFunction));
 
         if (recipeSlotRole == RecipeSlotRole.INPUT || recipeSlotRole == RecipeSlotRole.CATALYST) {
@@ -74,16 +53,5 @@ public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeV
     @Override
     public Result onKeyPressed(int keyCode, int scanCode, int modifiers) {
         return this.slotWidget.keyPressed(keyCode, scanCode, modifiers) ? Result.SUCCESS : Result.ACCEPT;
-    }
-
-    private class MuiEntryWidget extends EntryWidget{
-        private MuiEntryWidget(Point point) {
-            super(point);
-        }
-
-        public boolean containsMouse(double mouseX, double mouseY) {
-            return ReiRecipeViewerSlot.this.isHovering();
-        }
-
     }
 }

@@ -298,6 +298,10 @@ public abstract class ModularUIJeiCategory<T> implements IRecipeCategory<T> {
 
                 IRichTextBuilder<?> richTextBuilder = richTooltip.getRichText();
                 if (richTextBuilder instanceof RichText richText) {
+                    if (hovered instanceof JeiRecipeViewerSlot<?, ?> recipeViewerSlot && recipeViewerSlot.getSlotWidget() != null) {
+                        recipeViewerSlot.getSlotWidget().getTooltip(tooltipBuilder);
+                    }
+
                     for (var line : richText.getAsText()) {
                         // scuffed conversion, but it mostly works
                         line.ifLeft(tooltipBuilder::add).ifRight(tooltipBuilder::add);
