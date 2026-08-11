@@ -166,19 +166,11 @@ public class JeiRecipeViewerSlot<I, T> extends RecipeViewerSlotWidget<I, JeiReci
         if (this.slotWidget == null) return;
 
         this.slotWidget.draw(context.getGraphics());
-        if (isMouseIn(context.getMouseX(), context.getMouseY())){
-            PoseStack poseStack = context.graphicsPose();
-            poseStack.pushPose();
-            //ScreenPosition offset = slotWidget.offset();
-            //poseStack.translate((float)offset.x(), (float)offset.y(), 0.0F);
+        if (isHovering()){
             slotWidget.drawHoverOverlays(context.getGraphics());
-            poseStack.popPose();
         }
     }
 
-    protected boolean isMouseIn(double mouseX, double mouseY){
-        return false; //TODO
-    }
 /*
     @Override
     public Result onMousePressed(int button) {
