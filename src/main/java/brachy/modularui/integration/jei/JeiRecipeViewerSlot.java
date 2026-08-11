@@ -4,6 +4,7 @@ import brachy.modularui.core.mixins.jei.RecipeSlotAccessor;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.network.chat.Component;
@@ -165,6 +166,18 @@ public class JeiRecipeViewerSlot<I, T> extends RecipeViewerSlotWidget<I, JeiReci
         if (this.slotWidget == null) return;
 
         this.slotWidget.draw(context.getGraphics());
+        if (isMouseIn(context.getMouseX(), context.getMouseY())){
+            PoseStack poseStack = context.graphicsPose();
+            poseStack.pushPose();
+            //ScreenPosition offset = slotWidget.offset();
+            //poseStack.translate((float)offset.x(), (float)offset.y(), 0.0F);
+            slotWidget.drawHoverOverlays(context.getGraphics());
+            poseStack.popPose();
+        }
+    }
+
+    protected boolean isMouseIn(double mouseX, double mouseY){
+        return false; //TODO
     }
 /*
     @Override
