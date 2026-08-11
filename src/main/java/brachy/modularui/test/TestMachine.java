@@ -444,7 +444,6 @@ public class TestMachine {
                                                     w.syncHandler(new FluidSlotSyncHandler(outFluids, i).canFillSlot(false));
                                                 }
                                             })
-                                            .tank(outFluids, i)
                                             .recipeRole(RecipeSlotRole.OUTPUT)))));
         }
     }
