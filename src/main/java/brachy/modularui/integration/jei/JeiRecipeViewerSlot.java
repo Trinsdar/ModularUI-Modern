@@ -6,6 +6,7 @@ import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenPosition;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import brachy.modularui.screen.viewport.ModularGuiContext;
@@ -56,6 +57,14 @@ public class JeiRecipeViewerSlot<I, T> extends RecipeViewerSlotWidget<I, JeiReci
         super(ingredientClass);
 
         size(18, 18);
+        tooltipAutoUpdate(true);
+        tooltipDynamic(tooltip -> {
+            if (slotWidget != null){
+                for (Component component : slotWidget.getTooltip()){
+                    tooltip.addLine(component);
+                }
+            }
+        });
     }
 
     public void setSlotWidget(IRecipeSlotDrawable slotWidget) {
