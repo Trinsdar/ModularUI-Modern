@@ -384,10 +384,7 @@ public class RichTooltip implements IRichTextBuilder<RichTooltip> {
     public RichTooltip tooltipBuilder(Consumer<RichTooltip> tooltipBuilder) {
         Consumer<RichTooltip> existingBuilder = this.tooltipBuilder;
         if (existingBuilder != null && tooltipBuilder != null) {
-            this.tooltipBuilder = tooltip -> {
-                existingBuilder.accept(this);
-                tooltipBuilder.accept(this);
-            };
+            this.tooltipBuilder = existingBuilder.andThen(tooltipBuilder);
         } else {
             this.tooltipBuilder = tooltipBuilder;
         }

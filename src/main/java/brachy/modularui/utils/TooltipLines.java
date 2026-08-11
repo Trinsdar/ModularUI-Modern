@@ -134,9 +134,6 @@ public class TooltipLines extends AbstractList<Either<Component, TooltipComponen
             lines.get(i).index++;
         }
         s.ifLeft(ft -> {
-            if (!(ft instanceof Component)) {
-                throw new IllegalArgumentException("Tooltip text must be components");
-            }
             this.elements.add(elementIndex, ft);
             this.lastElementIndex++;
         });
@@ -154,11 +151,6 @@ public class TooltipLines extends AbstractList<Either<Component, TooltipComponen
     @Override
     public Either<Component, TooltipComponent> set(int index, Either<Component, TooltipComponent> element) {
         Line line = lines.get(index);
-        element.ifLeft(ft -> {
-            if (!(ft instanceof Component)) {
-                throw new IllegalArgumentException("Tooltip text must be components");
-            }
-        });
         if (line.length == 1) {
             this.elements.set(line.index, element);
             this.lines.set(index, new Line(element, line.index, line.length));
@@ -183,17 +175,14 @@ public class TooltipLines extends AbstractList<Either<Component, TooltipComponen
                 .toList();
     }
 
-    public static ClientTooltipComponent textToCTC(FormattedText text) {
+    public static ClientTooltipComponent textToCTC(Component text) {
         if (text instanceof ClientTooltipComponent ctc) return ctc;
-        if (text instanceof Component component) {
-            return ClientTooltipComponent.create(component.getVisualOrderText());
-        }
-        return ClientTooltipComponent.create(Language.getInstance().getVisualOrder(text));
+        return ClientTooltipComponent.create(text.getVisualOrderText());
     }
 
     public static ClientTooltipComponent tooltipComponentToCTC(TooltipComponent comp) {
-        if (comp instanceof ClientTooltipComponent ctc) return ctc;
         if (comp instanceof ClientTooltipComponentIcon icon) return icon.getClientTooltipComponent();
+        if (comp instanceof ClientTooltipComponent ctc) return ctc;
         return ClientTooltipComponent.create(comp);
     }
 
