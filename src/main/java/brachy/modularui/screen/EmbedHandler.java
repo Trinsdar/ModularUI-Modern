@@ -28,27 +28,8 @@ public class EmbedHandler {
         drawEmbed(screen, graphics, mouseX, mouseY, partialTicks, null, null);
     }
 
-    public static void drawEmbedNoVanillaElements(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        drawEmbedNoVanillaElements(screen, graphics, mouseX, mouseY, partialTicks, null, null);
-    }
-
     public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks,
                                  @Nullable Runnable beforeDraw, @Nullable Runnable afterDraw) {
-        drawEmbed(screen, graphics, mouseX, mouseY, partialTicks, r -> true, beforeDraw, afterDraw);
-    }
-
-    public static void drawEmbedNoVanillaElements(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks,
-                                                  @Nullable Runnable beforeDraw, @Nullable Runnable afterDraw) {
-        drawEmbed(screen, graphics, mouseX, mouseY, partialTicks, r -> false, beforeDraw, afterDraw);
-    }
-
-    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks,
-                                 Predicate<Renderable> vanillaElementFilter) {
-        drawEmbed(screen, graphics, mouseX, mouseY, partialTicks, vanillaElementFilter, null, null);
-    }
-
-    public static void drawEmbed(ModularScreen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks,
-                                 Predicate<Renderable> vanillaElementFilter, @Nullable Runnable beforeDraw, @Nullable Runnable afterDraw) {
         screen.getContext().reset();
         graphics.pose().pushPose();
 
@@ -57,12 +38,6 @@ public class EmbedHandler {
         int mx = screen.getContext().unTransformX(mouseX, mouseY);
         int my = screen.getContext().unTransformY(mouseX, mouseY);
         screen.render(graphics, mx, my, partialTicks);
-
-        if (vanillaElementFilter != null) {
-            RenderSystem.disableDepthTest();
-            ClientScreenHandler.drawVanillaElements(graphics, screen.getScreenWrapper().wrappedScreen(), mouseX, mouseY, partialTicks, vanillaElementFilter);
-            RenderSystem.enableDepthTest();
-        }
 
         screen.drawForeground(graphics);
 
