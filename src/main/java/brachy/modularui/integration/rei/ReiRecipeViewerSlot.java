@@ -1,6 +1,8 @@
 package brachy.modularui.integration.rei;
 
 import brachy.modularui.api.drawable.IRichTextBuilder;
+import brachy.modularui.api.drawable.Text;
+import brachy.modularui.drawable.ClientTooltipComponentIcon;
 import brachy.modularui.drawable.text.RichText;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
@@ -28,14 +30,26 @@ public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeV
 
     public ReiRecipeViewerSlot(Class<I> ingredientClass) {
         super(ingredientClass);
-        this.slotWidget = this.new MuiEntryWidget(ONE).disableBackground();
+        this.slotWidget = this.new MuiEntryWidget(ONE).disableBackground().disableTooltips();
 
+        this.tooltipAutoUpdate(true);
+        this.tooltipDynamic(r -> {
+            if (slotWidget != null){
+                Tooltip tooltip = slotWidget.getCurrentTooltip(TooltipContext.ofMouse());
+                if (tooltip == null) return;
+                tooltip.entries().forEach(e -> {
+                    if (e.isText()){
+                        r.addLine(e.getAsText());
+                    }
+                });
+            }
+        });
         size(18, 18);
     }
 
     @Override
     protected void rebuildRealSlot() {
-        slotWidget = this.new MuiEntryWidget(ONE).disableBackground();
+        slotWidget = this.new MuiEntryWidget(ONE).disableBackground().disableTooltips();
         slotWidget.entries(REIStackConverter.convertToReiEntry(this.entries, this.chance, this.renderMappingFunction));
 
         if (recipeSlotRole == RecipeSlotRole.INPUT || recipeSlotRole == RecipeSlotRole.CATALYST) {
@@ -65,26 +79,6 @@ public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeV
     private class MuiEntryWidget extends EntryWidget{
         private MuiEntryWidget(Point point) {
             super(point);
-        }
-
-        @Override
-        public @Nullable Tooltip getTooltip(TooltipContext context) {
-            RichTooltip richTooltip = ReiRecipeViewerSlot.this.getTooltip();
-            if (richTooltip != null){
-                if (richTooltip.autoUpdate()) richTooltip.markDirty();
-                richTooltip.isEmpty(); // causes the tooltip to rebuild if necessary
-
-                IRichTextBuilder<?> richTextBuilder = richTooltip.getRichText();
-                if (richTextBuilder instanceof RichText richText) {
-                    // scuffed conversion, but it mostly works
-                    Tooltip tooltipBuilder = Tooltip.create(context.getPoint());
-                    for (var line : richText.getAsText()) {
-                        line.ifLeft(tooltipBuilder::add).ifRight(tooltipBuilder::add);
-                    }
-                    return tooltipBuilder;
-                }
-            }
-            return null;
         }
 
         public boolean containsMouse(double mouseX, double mouseY) {

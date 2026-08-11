@@ -161,6 +161,10 @@ public abstract class ModularUIReiDisplay implements Display {
             }, () -> {
                 screen.getContext().popMatrix();
             });
+            Tooltip tooltip = this.getTooltip(TooltipContext.ofMouse());
+            if (tooltip != null) {
+                tooltip.queue();
+            }
         }
 
         @Override
