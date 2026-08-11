@@ -82,7 +82,7 @@ public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeV
         }
 
         public boolean containsMouse(double mouseX, double mouseY) {
-            return mouseX >= (double)(ReiRecipeViewerSlot.this.getArea().x + 1) && mouseY >= (double)(ReiRecipeViewerSlot.this.getArea().y + 1) && mouseX <= (double)(ReiRecipeViewerSlot.this.getArea().width - 1) && mouseY <= (double)(ReiRecipeViewerSlot.this.getArea().height - 1);
+            return ReiRecipeViewerSlot.this.isHovering();
         }
 
     }
