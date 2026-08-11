@@ -1,5 +1,9 @@
 package brachy.modularui.test;
 
+import brachy.modularui.utils.handlers.fluid.EmptyFluidTank;
+import brachy.modularui.utils.handlers.fluid.IMultiTankFluidHandler;
+import brachy.modularui.utils.handlers.fluid.MultiTankFluidHandler;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
@@ -39,6 +43,11 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+
+import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.wrapper.EmptyHandler;
+
 import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,11 +59,33 @@ import java.util.function.Supplier;
 @NotNullByDefault
 public class TestRecipeViewerGuis {
 
+    private static final IItemHandler EMPTY_INFINITE_ITEM_HANDLER = new EmptyHandler() {
+        @Override
+        public int getSlots() {
+            return Integer.MAX_VALUE; // pls don't iterate UwU
+        }
+    };
+    private static final IMultiTankFluidHandler EMPTY_MULTI_TANK_FLUID_HANDLER = new MultiTankFluidHandler() {
+        @Override
+        public int getTanks() {
+            return Integer.MAX_VALUE; // pls don't iterate UwU
+        }
+
+        @Override
+        public IFluidTank getFluidTank(int index) {
+            return EmptyFluidTank.INSTANCE;
+        }
+    };
+
     public static IWidget buildViewerUI(TestMachine.Recipe recipe) {
         var panel = new ModularPanel<>("recipe_viewer_recipe")
                 .coverChildren(60, 40)
                 .invisible();
-        IWidget recipeUI = TestMachine.Recipes.buildMachineUI(panel, null, null, null, null, DoubleValue.simulateProgress(5000), true);
+        IWidget recipeUI = TestMachine.Recipes.buildMachineUI(panel,
+                EMPTY_INFINITE_ITEM_HANDLER, EMPTY_INFINITE_ITEM_HANDLER,
+                EMPTY_MULTI_TANK_FLUID_HANDLER, EMPTY_MULTI_TANK_FLUID_HANDLER,
+                DoubleValue.simulateProgress(5000), true);
+
         recipeUI.visitTransformAllChildren(w -> {
             if (w instanceof ItemSlot slot) {
                 List<ItemStack> l = slot.getRecipeRole() == RecipeSlotRole.INPUT ? recipe.inItems : recipe.outItems;

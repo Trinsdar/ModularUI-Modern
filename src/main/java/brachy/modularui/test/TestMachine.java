@@ -403,18 +403,10 @@ public class TestMachine {
                             .child(Flow.col().name("input")
                                     .coverChildren()
                                     .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
-                                            .configure(w -> {
-                                                if (!isRecipeViewerUI) {
-                                                    w.slot(new ModularSlot(inItems, i));
-                                                }
-                                            })
+                                            .slot(new ModularSlot(inItems, i))
                                             .recipeRole(RecipeSlotRole.INPUT)))
                                     .child(SlotGroupWidget.rect(2, 1, i -> new FluidSlot()
-                                            .configure(w -> {
-                                                if (!isRecipeViewerUI) {
-                                                    w.syncHandler(new FluidSlotSyncHandler(inFluids, i));
-                                                }
-                                            })
+                                            .syncHandler(new FluidSlotSyncHandler(inFluids, i))
                                             .recipeRole(RecipeSlotRole.INPUT))))
                             .child(new ProgressWidget()
                                     .value(progress)
@@ -432,18 +424,10 @@ public class TestMachine {
                             .child(Flow.col().name("output")
                                     .coverChildren()
                                     .child(SlotGroupWidget.rect(2, 2, i -> new ItemSlot()
-                                            .configure(w -> {
-                                                if (!isRecipeViewerUI) {
-                                                    w.slot(new ModularSlot(outItems, i).canPut(false).canDragInto(false));
-                                                }
-                                            })
+                                            .slot(new ModularSlot(outItems, i).canPut(false).canDragInto(false))
                                             .recipeRole(RecipeSlotRole.OUTPUT)))
                                     .child(SlotGroupWidget.rect(2, 1, i -> new FluidSlot()
-                                            .configure(w -> {
-                                                if (!isRecipeViewerUI) {
-                                                    w.syncHandler(new FluidSlotSyncHandler(outFluids, i).canFillSlot(false));
-                                                }
-                                            })
+                                            .syncHandler(new FluidSlotSyncHandler(outFluids, i).canFillSlot(false))
                                             .recipeRole(RecipeSlotRole.OUTPUT)))));
         }
     }
