@@ -62,8 +62,8 @@ public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeV
         return this.slotWidget.keyPressed(keyCode, scanCode, modifiers) ? Result.SUCCESS : Result.ACCEPT;
     }
 
-    public class MuiEntryWidget extends EntryWidget{
-        public MuiEntryWidget(Point point) {
+    private class MuiEntryWidget extends EntryWidget{
+        private MuiEntryWidget(Point point) {
             super(point);
         }
 
