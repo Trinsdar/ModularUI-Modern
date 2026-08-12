@@ -58,6 +58,14 @@ public class JeiRecipeViewerSlot<I, T> extends RecipeViewerSlotWidget<I, JeiReci
         super(ingredientClass);
 
         size(18, 18);
+        tooltipAutoUpdate(true);
+        tooltipDynamic(tooltip -> {
+            if (slotWidget != null){
+                for (Component component : slotWidget.getTooltip()){
+                    tooltip.addLine(component);
+                }
+            }
+        });
     }
 
     public void setSlotWidget(IRecipeSlotDrawable slotWidget) {

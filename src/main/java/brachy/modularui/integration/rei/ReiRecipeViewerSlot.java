@@ -9,6 +9,8 @@ import brachy.modularui.theme.WidgetThemeEntry;
 import lombok.Getter;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -23,6 +25,18 @@ public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeV
         super(ingredientClass);
         this.slotWidget = new EntryWidget(ONE).disableBackground().disableTooltips();
 
+        this.tooltipAutoUpdate(true);
+        this.tooltipDynamic(r -> {
+            if (slotWidget != null){
+                Tooltip tooltip = slotWidget.getCurrentTooltip(TooltipContext.ofMouse());
+                if (tooltip == null) return;
+                tooltip.entries().forEach(e -> {
+                    if (e.isText()){
+                        r.addLine(e.getAsText());
+                    }
+                });
+            }
+        });
         size(18, 18);
     }
 

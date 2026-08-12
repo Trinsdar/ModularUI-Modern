@@ -183,13 +183,6 @@ public abstract class ModularUIReiDisplay implements Display {
                 if (richTextBuilder instanceof RichText richText) {
                     // scuffed conversion, but it mostly works
                     Tooltip tooltipBuilder = Tooltip.create(context.getPoint());
-                    if (hovered instanceof ReiRecipeViewerSlot<?> recipeViewerSlot) {
-                        Tooltip originalTooltip = recipeViewerSlot.getSlotWidget().getCurrentTooltip(context);
-                        if (originalTooltip != null) {
-                            tooltipBuilder.entries().addAll(originalTooltip.entries());
-                        }
-                    }
-
                     for (var line : richText.getAsText()) {
                         line.ifLeft(tooltipBuilder::add).ifRight(tooltipBuilder::add);
                     }
