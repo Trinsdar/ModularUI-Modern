@@ -1,5 +1,6 @@
 package brachy.modularui.integration.rei;
 
+import brachy.modularui.core.mixins.rei.EntryWidgetAccessor;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
 import brachy.modularui.integration.recipeviewer.RecipeViewerSlotWidget;
 import brachy.modularui.screen.viewport.ModularGuiContext;
@@ -57,6 +58,9 @@ public class ReiRecipeViewerSlot<I> extends RecipeViewerSlotWidget<I, ReiRecipeV
     @Override
     public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
         this.slotWidget.render(context.getGraphics(), context.getMouseX(), context.getMouseY(), context.getRenderPartialTicks());
+        if (this.isHovering() && slotWidget instanceof EntryWidgetAccessor accessor){
+            accessor.modularui$invokeDrawHighlighted(context.getGraphics(), context.getMouseX(), context.getMouseY(), context.getRenderPartialTicks());
+        }
     }
 
     @Override
