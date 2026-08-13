@@ -4,9 +4,11 @@ import brachy.modularui.utils.handlers.fluid.EmptyFluidTank;
 import brachy.modularui.utils.handlers.fluid.IMultiTankFluidHandler;
 import brachy.modularui.utils.handlers.fluid.MultiTankFluidHandler;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.fluids.FluidStack;
 
 import brachy.modularui.ModularUI;
@@ -102,7 +104,13 @@ public class TestRecipeViewerGuis {
                 int index = slot.getSyncHandler().getTankIndex();
                 FluidStack fluid = index < 0 || index >= l.size() ? FluidStack.EMPTY : l.get(index);
                 return slot.toRecipeViewerSlot()
-                        .value(fluid);
+                        .value(fluid)
+                        .tooltipBuilder(tooltip -> {
+                            tooltip.addLine(Component.literal("Amount: " + fluid.getAmount() + " L").withStyle(ChatFormatting.BLUE));
+                            tooltip.addLine(Component.literal("Temperature: " + fluid.getFluid().getFluidType().getTemperature() + " K").withStyle(ChatFormatting.RED));
+                            String liquid = !fluid.getFluid().is(Tags.Fluids.GASEOUS) ? "liquid" : "gas";
+                            tooltip.addLine(Component.literal("State: " + liquid).withStyle(ChatFormatting.GREEN));
+                        });
             } else if (w instanceof IngredientProvider<?> slot) {
                 return slot.toRecipeViewerSlot();
             }
