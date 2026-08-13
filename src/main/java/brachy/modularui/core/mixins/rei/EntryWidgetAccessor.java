@@ -10,6 +10,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(EntryWidget.class)
 public interface EntryWidgetAccessor {
 
-    @Invoker("drawHighlighted")
+    @Invoker(value = "drawHighlighted", remap = false)
     void modularui$invokeDrawHighlighted(GuiGraphics graphics, int mouseX, int mouseY, float delta);
 }
