@@ -13,18 +13,14 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import com.mojang.datafixers.util.Either;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * A list that lazily parses a list of text-like and drawable types into a vanilla compatible types.
  */
-public class TooltipLines implements Iterable<Either<Component, TooltipComponent>> {
+public class TooltipLines extends AbstractList<Either<Component, TooltipComponent>> {
 
     private final List<Object> elements;
     private final List<Line> lines = new ArrayList<>(8);
@@ -99,19 +95,19 @@ public class TooltipLines implements Iterable<Either<Component, TooltipComponent
         return null;
     }
 
-    //@Override
+    @Override
     public Either<Component, TooltipComponent> get(int index) {
         buildUntil(index);
         return lines.get(index).text;
     }
 
-    //@Override
+    @Override
     public int size() {
         buildUntil(Integer.MAX_VALUE);
         return lines.size();
     }
 
-    //@Override
+    @Override
     public Either<Component, TooltipComponent> remove(int index) {
         buildUntil(index);
         Line line = lines.remove(index);
@@ -129,7 +125,7 @@ public class TooltipLines implements Iterable<Either<Component, TooltipComponent
         return line.text;
     }
 
-    //@Override
+    @Override
     public void add(int index, Either<Component, TooltipComponent> s) {
         buildUntil(index);
         int elementIndex = index >= this.lines.size() ? this.lastElementIndex : this.lines.get(index).index;
@@ -152,7 +148,7 @@ public class TooltipLines implements Iterable<Either<Component, TooltipComponent
         add(size(), Either.left(s));
     }
 
-    //@Override
+    @Override
     public Either<Component, TooltipComponent> set(int index, Either<Component, TooltipComponent> element) {
         Line line = lines.get(index);
         if (line.length == 1) {
@@ -165,7 +161,7 @@ public class TooltipLines implements Iterable<Either<Component, TooltipComponent
         return line.text;
     }
 
-    //@Override
+    @Override
     public void clear() {
         this.elements.clear();
         this.lines.clear();
@@ -174,7 +170,7 @@ public class TooltipLines implements Iterable<Either<Component, TooltipComponent
 
     public List<ClientTooltipComponent> toClientTooltipComponents() {
         buildUntil(Integer.MAX_VALUE);
-        return lines.stream().map(l -> l.text)
+        return stream()
                 .map(either -> either.map(TooltipLines::textToCTC, TooltipLines::tooltipComponentToCTC))
                 .toList();
     }
@@ -194,17 +190,6 @@ public class TooltipLines implements Iterable<Either<Component, TooltipComponent
         if (components.isEmpty()) return Text.EMPTY;
         else if (components.size() == 1) return components.get(0);
         else return Text.comp(components.toArray(Component[]::new));
-    }
-
-
-
-    @Override
-    public @NotNull Iterator<Either<Component, TooltipComponent>> iterator() {
-        return toList().iterator();
-    }
-
-    public List<Either<Component, TooltipComponent>> toList(){
-        return new ArrayList<>(lines.stream().map(l -> l.text).toList());
     }
 
     private static class Line {

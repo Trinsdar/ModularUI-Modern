@@ -11,8 +11,6 @@ import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.screen.ModularScreen;
 import brachy.modularui.screen.RichTooltip;
 
-import brachy.modularui.utils.TooltipLines;
-
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -220,8 +218,7 @@ public abstract class ModularUIEmiRecipe implements EmiRecipe {
 
                 if (richTooltip.getRichText() instanceof RichText richText) {
                     // scuffed conversion, but it mostly works
-                    TooltipLines test = richText.getAsText();
-                    return test.toClientTooltipComponents();
+                    return richText.getAsText().toClientTooltipComponents();
                 }
             }
             return List.of();

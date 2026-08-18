@@ -168,7 +168,7 @@ public class RichTooltip implements IRichTextBuilder<RichTooltip> {
         // convert the List<Either<Component, TooltipComponent>> to the type vanilla wants. Technically it's already valid,
         //  but some mods (looking at you REI) want Components that they do nothing with except downcast them into FormattedText anyway.
         @SuppressWarnings("unchecked")
-        List<Either<FormattedText, TooltipComponent>> tooltipElements = (List<Either<FormattedText, TooltipComponent>>) (List<?>) textLines.toList();
+        List<Either<FormattedText, TooltipComponent>> tooltipElements = (List<Either<FormattedText, TooltipComponent>>) (List<?>) textLines;
         // noinspection UnstableApiUsage
         var vanillaGatherEvent = new RenderTooltipEvent.GatherComponents(stack, screen.width, screen.height, tooltipElements, this.maxWidth);
         if (MinecraftForge.EVENT_BUS.post(vanillaGatherEvent)) return;
