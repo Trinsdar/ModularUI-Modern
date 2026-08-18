@@ -60,7 +60,7 @@ public class TooltipLines implements Iterable<Either<Component, TooltipComponent
                     continue;
                 }
                 Line line = new Line(collapse(currentLine), this.lastElementIndex, currentLength);
-                this.lastElementIndex += currentLength;
+                this.lastElementIndex = i + 1;
                 return line;
             }
             Component c = null;
