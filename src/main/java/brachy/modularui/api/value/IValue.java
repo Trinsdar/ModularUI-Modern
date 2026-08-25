@@ -1,12 +1,14 @@
 package brachy.modularui.api.value;
 
 import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.NullUnmarked;
 
 /**
  * A value wrapper for widgets.
  *
  * @param <T> value type
  */
+@NullUnmarked
 public interface IValue<T> extends ISyncOrValue {
 
     /**
