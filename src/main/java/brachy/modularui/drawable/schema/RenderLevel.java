@@ -1,6 +1,5 @@
 package brachy.modularui.drawable.schema;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -30,10 +29,7 @@ import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
-import javax.annotation.ParametersAreNonnullByDefault;
 
-@ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class RenderLevel implements LevelTimeAccess {
 
     @Getter private final ISchema schema;
