@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 
 import lombok.Getter;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,16 +27,13 @@ public class DynamicComponent implements Component, IDrawable {
     private final Supplier<Component> supplier;
     private Style style = Style.EMPTY;
     @Getter private float scale = 1f;
-    private Component lastComp;
+    private Component lastComp = Component.empty();
 
     public DynamicComponent(Supplier<Component> supplier) {
         this.supplier = supplier;
     }
 
     private Component getComp() {
-        if (supplier == null) {
-            return Component.empty();
-        }
         if (!ModularUI.isClientSide()) {
             this.lastComp = this.supplier.get();
             if (this.lastComp instanceof MutableComponent mutableComponent) {
@@ -53,22 +50,22 @@ public class DynamicComponent implements Component, IDrawable {
     }
 
     @Override
-    public @NonNull Style getStyle() {
+    public Style getStyle() {
         return getComp().getStyle();
     }
 
     @Override
-    public @NonNull ComponentContents getContents() {
+    public ComponentContents getContents() {
         return getComp().getContents();
     }
 
     @Override
-    public @NonNull List<Component> getSiblings() {
+    public List<Component> getSiblings() {
         return getComp().getSiblings();
     }
 
     @Override
-    public @NonNull FormattedCharSequence getVisualOrderText() {
+    public FormattedCharSequence getVisualOrderText() {
         return getComp().getVisualOrderText();
     }
 

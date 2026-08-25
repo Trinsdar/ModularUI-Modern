@@ -24,7 +24,6 @@ import net.minecraft.util.ExtraCodecs;
 import com.mojang.serialization.Codec;
 
 import lombok.Getter;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -84,7 +83,7 @@ public class ModularComponent extends MutableComponent implements Text {
         return ModularComponent.create(new SelectorContents(pattern, separator));
     }
 
-    public static ModularComponent create(@NonNull ComponentContents contents) {
+    public static ModularComponent create(ComponentContents contents) {
         return new ModularComponent(contents, new ArrayList<>(), Style.EMPTY);
     }
 
@@ -95,8 +94,8 @@ public class ModularComponent extends MutableComponent implements Text {
 
     @Getter private Alignment alignment = Alignment.CENTER;
     @Getter private float scale = 1f;
-    @Getter private Boolean shadow;
-    @Getter private IntSupplier dynamicColor;
+    @Getter @Nullable private Boolean shadow;
+    @Getter @Nullable private IntSupplier dynamicColor;
 
     protected ModularComponent(ComponentContents contents, List<Component> siblings, Style style) {
         super(contents, siblings, style);
@@ -139,12 +138,12 @@ public class ModularComponent extends MutableComponent implements Text {
     }
 
     @Override
-    public @NonNull MutableComponent plainCopy() {
+    public MutableComponent plainCopy() {
         return ModularComponent.create(getContents());
     }
 
     @Override
-    public @NonNull MutableComponent copy() {
+    public MutableComponent copy() {
         return new ModularComponent(getContents(), new ArrayList<>(getSiblings()), getStyle())
                 .alignment(this.alignment)
                 .scale(this.scale)
@@ -169,12 +168,12 @@ public class ModularComponent extends MutableComponent implements Text {
     }
 
     @Override
-    public @NonNull ModularComponent color(int color) {
+    public ModularComponent color(int color) {
         withStyle(getStyle().withColor(color));
         return this;
     }
 
-    public ModularComponent color(Integer color) {
+    public ModularComponent color(@Nullable Integer color) {
         return color != null ? color((int) color) : color((IntSupplier) null);
     }
 
@@ -196,32 +195,32 @@ public class ModularComponent extends MutableComponent implements Text {
     }
 
     @Override
-    public @NonNull ModularComponent append(@NonNull String string) {
+    public ModularComponent append(String string) {
         return (ModularComponent) super.append(string);
     }
 
     @Override
-    public @NonNull ModularComponent append(@NonNull Component sibling) {
+    public ModularComponent append(Component sibling) {
         return (ModularComponent) super.append(sibling);
     }
 
     @Override
-    public @NonNull ModularComponent withStyle(ChatFormatting @NonNull ... formats) {
+    public ModularComponent withStyle(ChatFormatting... formats) {
         return (ModularComponent) super.withStyle(formats);
     }
 
     @Override
-    public @NonNull ModularComponent withStyle(@NonNull Style style) {
+    public ModularComponent withStyle(Style style) {
         return (ModularComponent) super.withStyle(style);
     }
 
     @Override
-    public @NonNull ModularComponent withStyle(@NonNull ChatFormatting format) {
+    public ModularComponent withStyle(ChatFormatting format) {
         return (ModularComponent) super.withStyle(format);
     }
 
     @Override
-    public @NonNull ModularComponent withStyle(@NonNull UnaryOperator<Style> modifyFunc) {
+    public ModularComponent withStyle(UnaryOperator<Style> modifyFunc) {
         return (ModularComponent) super.withStyle(modifyFunc);
     }
 
