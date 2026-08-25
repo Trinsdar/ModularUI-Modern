@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
@@ -53,7 +53,7 @@ public class BlockEntityUIFactory extends AbstractUIFactory<PosGuiData> {
     }
 
     @Override
-    public @NotNull IUIHolder<PosGuiData> getGuiHolder(PosGuiData data) {
+    public @NonNull IUIHolder<PosGuiData> getGuiHolder(PosGuiData data) {
         return Objects.requireNonNull(castUIHolder(data.getBlockEntity()), "Found BlockEntity is not a gui holder!");
     }
 
@@ -69,7 +69,7 @@ public class BlockEntityUIFactory extends AbstractUIFactory<PosGuiData> {
     }
 
     @Override
-    public @NotNull PosGuiData readGuiData(Player player, FriendlyByteBuf buffer) {
+    public @NonNull PosGuiData readGuiData(Player player, FriendlyByteBuf buffer) {
         return new PosGuiData(player, buffer.readBlockPos());
     }
 

@@ -8,7 +8,7 @@ import brachy.modularui.widget.sizer.Area;
 
 import net.minecraft.client.gui.GuiGraphics;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Marks a widget as draggable.

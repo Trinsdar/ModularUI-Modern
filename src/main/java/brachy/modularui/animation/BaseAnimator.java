@@ -1,6 +1,6 @@
 package brachy.modularui.animation;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class BaseAnimator<A extends BaseAnimator<A>> implements IAnimator {
 

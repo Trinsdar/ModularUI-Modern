@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
@@ -37,11 +37,11 @@ public abstract class AbstractUIFactory<T extends GuiData> implements UIFactory<
     }
 
     @Override
-    public final @NotNull ResourceLocation getFactoryName() {
+    public final @NonNull ResourceLocation getFactoryName() {
         return this.name;
     }
 
-    @NotNull
+    @NonNull
     public abstract IUIHolder<T> getGuiHolder(T data);
 
     @Override

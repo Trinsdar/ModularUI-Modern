@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Objects;
@@ -53,22 +53,22 @@ public class DynamicComponent implements Component, IDrawable {
     }
 
     @Override
-    public @NotNull Style getStyle() {
+    public @NonNull Style getStyle() {
         return getComp().getStyle();
     }
 
     @Override
-    public @NotNull ComponentContents getContents() {
+    public @NonNull ComponentContents getContents() {
         return getComp().getContents();
     }
 
     @Override
-    public @NotNull List<Component> getSiblings() {
+    public @NonNull List<Component> getSiblings() {
         return getComp().getSiblings();
     }
 
     @Override
-    public @NotNull FormattedCharSequence getVisualOrderText() {
+    public @NonNull FormattedCharSequence getVisualOrderText() {
         return getComp().getVisualOrderText();
     }
 

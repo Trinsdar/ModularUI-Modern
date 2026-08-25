@@ -3,8 +3,8 @@ package brachy.modularui.api.value;
 import brachy.modularui.value.sync.SyncHandler;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An interface that is implemented on {@link IValue} and {@link SyncHandler
@@ -36,7 +36,7 @@ public interface ISyncOrValue {
      * @param syncOrValue sync handler or value
      * @return a non-null representation of the given sync handler or value
      */
-    @NotNull
+    @NonNull
     static ISyncOrValue orEmpty(@Nullable ISyncOrValue syncOrValue) {
         return syncOrValue != null ? syncOrValue : EMPTY;
     }

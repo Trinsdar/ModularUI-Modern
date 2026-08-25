@@ -17,8 +17,8 @@ import brachy.modularui.widget.sizer.StandardResizer;
 import com.mojang.serialization.Codec;
 
 import com.google.common.base.CharMatcher;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +57,7 @@ public interface IWidget extends ITreeNode<IWidget> {
     /**
      * @return the parent of this widget
      */
-    @NotNull
+    @NonNull
     @Override
     IWidget getParent();
 
@@ -74,7 +74,7 @@ public interface IWidget extends ITreeNode<IWidget> {
     /**
      * @return the panel this widget is in
      */
-    @NotNull ModularPanel<?> getPanel();
+    @NonNull ModularPanel<?> getPanel();
 
     /**
      * @return the area this widget occupies
@@ -230,7 +230,7 @@ public interface IWidget extends ITreeNode<IWidget> {
      * @param parent the parent this element belongs to
      * @param late   true if this is called some time after the widget tree of the parent has been initialised
      */
-    void initialise(@NotNull IWidget parent, boolean late);
+    void initialise(@NonNull IWidget parent, boolean late);
 
     /**
      * Invalidates this element.
@@ -298,7 +298,7 @@ public interface IWidget extends ITreeNode<IWidget> {
     /**
      * @return all children of this widget
      */
-    @NotNull
+    @NonNull
     @Override
     default List<IWidget> getChildren() {
         return Collections.emptyList();
@@ -332,7 +332,7 @@ public interface IWidget extends ITreeNode<IWidget> {
     /**
      * @return resizer of this widget
      */
-    @NotNull
+    @NonNull
     StandardResizer resizer();
 
     default IWidget resizerBuilder(Consumer<StandardResizer> builder) {

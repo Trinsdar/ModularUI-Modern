@@ -18,8 +18,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -134,7 +134,7 @@ public class BlockHighlight {
         }
     }
 
-    protected static void buildFrameFace(Matrix4f pose, @NotNull Direction side, float offset) {
+    protected static void buildFrameFace(Matrix4f pose, @NonNull Direction side, float offset) {
         float[] vert = vertices[side.get3DDataValue()];
 
         Tesselator tesselator = Tesselator.getInstance();
@@ -162,7 +162,7 @@ public class BlockHighlight {
     }
 
     private static void buildInnerVertex(Matrix4f pose, BufferBuilder builder, float[] vertices, int vertexIndex,
-                                         @NotNull Direction side, float offset) {
+                                         @NonNull Direction side, float offset) {
         float x = vertices[vertexIndex];
         float y = vertices[vertexIndex + 1];
         float z = vertices[vertexIndex + 2];
@@ -181,7 +181,7 @@ public class BlockHighlight {
         builder.vertex(pose, x, y, z).endVertex();
     }
 
-    protected static void buildFace(Matrix4f pose, BufferBuilder builder, @NotNull Direction side) {
+    protected static void buildFace(Matrix4f pose, BufferBuilder builder, @NonNull Direction side) {
         float[] vert = vertices[side.ordinal()];
         buildVertex(pose, builder, vert, 0);
         buildVertex(pose, builder, vert, 3);

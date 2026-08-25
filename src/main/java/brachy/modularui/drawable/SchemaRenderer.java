@@ -11,7 +11,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.experimental.Tolerate;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -78,7 +78,7 @@ public class SchemaRenderer extends BaseSchemaRenderer {
     }
 
     @Override
-    protected void onSuccessfulRayTrace(PoseStack poseStack, @NotNull BlockHitResult result) {
+    protected void onSuccessfulRayTrace(PoseStack poseStack, @NonNull BlockHitResult result) {
         if (this.highlight != null) {
             this.highlight.get().renderHighlight(poseStack, result, camera().pos());
         }

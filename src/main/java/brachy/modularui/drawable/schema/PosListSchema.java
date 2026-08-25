@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -27,7 +27,7 @@ public abstract class PosListSchema implements ISchema {
         this.posList = posList;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Iterator<Map.Entry<BlockPos, BlockState>> iterator() {
         return new Iterator<>() {

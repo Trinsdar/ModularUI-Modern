@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.TextureAtlasHolder;
 import net.minecraft.resources.ResourceLocation;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * 1.21 has this class in vanilla, it can be used via {@code Minecraft.getGuiSprites()}.<br>
@@ -42,7 +42,7 @@ public class GuiSpriteManager extends TextureAtlasHolder {
      * Gets a sprite associated with the passed resource location.
      */
     @Override
-    public @NotNull TextureAtlasSprite getSprite(@NotNull ResourceLocation location) {
+    public @NonNull TextureAtlasSprite getSprite(@NonNull ResourceLocation location) {
         return super.getSprite(location);
     }
 

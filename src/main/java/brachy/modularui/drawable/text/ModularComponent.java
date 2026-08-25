@@ -24,8 +24,8 @@ import net.minecraft.util.ExtraCodecs;
 import com.mojang.serialization.Codec;
 
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +84,7 @@ public class ModularComponent extends MutableComponent implements Text {
         return ModularComponent.create(new SelectorContents(pattern, separator));
     }
 
-    public static ModularComponent create(@NotNull ComponentContents contents) {
+    public static ModularComponent create(@NonNull ComponentContents contents) {
         return new ModularComponent(contents, new ArrayList<>(), Style.EMPTY);
     }
 
@@ -139,12 +139,12 @@ public class ModularComponent extends MutableComponent implements Text {
     }
 
     @Override
-    public @NotNull MutableComponent plainCopy() {
+    public @NonNull MutableComponent plainCopy() {
         return ModularComponent.create(getContents());
     }
 
     @Override
-    public @NotNull MutableComponent copy() {
+    public @NonNull MutableComponent copy() {
         return new ModularComponent(getContents(), new ArrayList<>(getSiblings()), getStyle())
                 .alignment(this.alignment)
                 .scale(this.scale)
@@ -169,7 +169,7 @@ public class ModularComponent extends MutableComponent implements Text {
     }
 
     @Override
-    public @NotNull ModularComponent color(int color) {
+    public @NonNull ModularComponent color(int color) {
         withStyle(getStyle().withColor(color));
         return this;
     }
@@ -196,32 +196,32 @@ public class ModularComponent extends MutableComponent implements Text {
     }
 
     @Override
-    public @NotNull ModularComponent append(@NotNull String string) {
+    public @NonNull ModularComponent append(@NonNull String string) {
         return (ModularComponent) super.append(string);
     }
 
     @Override
-    public @NotNull ModularComponent append(@NotNull Component sibling) {
+    public @NonNull ModularComponent append(@NonNull Component sibling) {
         return (ModularComponent) super.append(sibling);
     }
 
     @Override
-    public @NotNull ModularComponent withStyle(ChatFormatting @NotNull ... formats) {
+    public @NonNull ModularComponent withStyle(ChatFormatting @NonNull ... formats) {
         return (ModularComponent) super.withStyle(formats);
     }
 
     @Override
-    public @NotNull ModularComponent withStyle(@NotNull Style style) {
+    public @NonNull ModularComponent withStyle(@NonNull Style style) {
         return (ModularComponent) super.withStyle(style);
     }
 
     @Override
-    public @NotNull ModularComponent withStyle(@NotNull ChatFormatting format) {
+    public @NonNull ModularComponent withStyle(@NonNull ChatFormatting format) {
         return (ModularComponent) super.withStyle(format);
     }
 
     @Override
-    public @NotNull ModularComponent withStyle(@NotNull UnaryOperator<Style> modifyFunc) {
+    public @NonNull ModularComponent withStyle(@NonNull UnaryOperator<Style> modifyFunc) {
         return (ModularComponent) super.withStyle(modifyFunc);
     }
 

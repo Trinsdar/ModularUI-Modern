@@ -8,7 +8,7 @@ import brachy.modularui.utils.Rectangle;
 import brachy.modularui.utils.math.MathUtils;
 
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,7 +140,7 @@ public class CompositeProgress extends BaseProgressDrawable<CompositeProgress> {
         }
 
         @Override
-        public int compareTo(@NotNull CompositeProgress.Part o) {
+        public int compareTo(CompositeProgress.@NonNull Part o) {
             return Float.compare(this.until, o.until);
         }
     }

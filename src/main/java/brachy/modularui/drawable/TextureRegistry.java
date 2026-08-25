@@ -4,7 +4,7 @@ import brachy.modularui.ModularUI;
 import brachy.modularui.ModularUIConfig;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 

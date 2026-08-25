@@ -21,7 +21,7 @@ import it.unimi.dsi.fastutil.chars.CharArraySet;
 import it.unimi.dsi.fastutil.chars.CharSet;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -108,7 +108,7 @@ public class ArraySchema implements ISchema {
         return BlockPos.ZERO;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Iterator<Map.Entry<BlockPos, BlockState>> iterator() {
         return new AbstractIterator<>() {

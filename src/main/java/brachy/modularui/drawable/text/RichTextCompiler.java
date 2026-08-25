@@ -19,7 +19,7 @@ import net.minecraft.util.FormattedCharSink;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -256,7 +256,7 @@ public class RichTextCompiler {
         }
 
         @Override
-        public boolean accept(int positionInCurrentSequence, @NotNull Style style, int codePoint) {
+        public boolean accept(int positionInCurrentSequence, @NonNull Style style, int codePoint) {
             this.styleChanged = false;
             int i = positionInCurrentSequence;
             switch (codePoint) {

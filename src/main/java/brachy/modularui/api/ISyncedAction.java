@@ -3,11 +3,11 @@ package brachy.modularui.api;
 import net.minecraft.network.FriendlyByteBuf;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 @FunctionalInterface
 public interface ISyncedAction {
 
     @ApiStatus.OverrideOnly
-    void invoke(@NotNull FriendlyByteBuf packet);
+    void invoke(@NonNull FriendlyByteBuf packet);
 }

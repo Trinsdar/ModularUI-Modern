@@ -28,7 +28,7 @@ import brachy.modularui.widgets.menu.Menu;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class DebugOverlay extends CustomModularScreen {
     }
 
     @Override
-    public @NotNull ModularPanel<?> buildUI(ModularGuiContext context) {
+    public @NonNull ModularPanel<?> buildUI(ModularGuiContext context) {
         return new ModularPanel<>("debug")
                 .fullScreenInvisible()
                 .child(new ContextMenuButton<>("menu_debug_options")

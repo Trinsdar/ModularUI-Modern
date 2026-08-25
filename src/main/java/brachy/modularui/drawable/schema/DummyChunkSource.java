@@ -9,8 +9,8 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.BooleanSupplier;
 
@@ -28,7 +28,7 @@ public class DummyChunkSource extends ChunkSource {
     }
 
     @Override
-    public @Nullable ChunkAccess getChunk(int chunkX, int chunkZ, @NotNull ChunkStatus requiredStatus, boolean load) {
+    public @Nullable ChunkAccess getChunk(int chunkX, int chunkZ, @NonNull ChunkStatus requiredStatus, boolean load) {
         ChunkPos pos = new ChunkPos(chunkX, chunkZ);
         return chunks.computeIfAbsent(pos.toLong(), posLong1 -> {
             DummyChunk newChunk = new DummyChunk(level, pos);
@@ -43,10 +43,10 @@ public class DummyChunkSource extends ChunkSource {
     }
 
     @Override
-    public void tick(@NotNull BooleanSupplier hasTimeLeft, boolean tickChunks) {}
+    public void tick(@NonNull BooleanSupplier hasTimeLeft, boolean tickChunks) {}
 
     @Override
-    public @NotNull String gatherStats() {
+    public @NonNull String gatherStats() {
         return "Dummy";
     }
 

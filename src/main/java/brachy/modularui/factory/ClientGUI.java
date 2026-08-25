@@ -10,8 +10,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.IntFunction;
 
@@ -28,7 +28,7 @@ public class ClientGUI {
      *
      * @param screen new modular screen
      */
-    public static void open(@NotNull ModularScreen screen) {
+    public static void open(@NonNull ModularScreen screen) {
         open(screen, new UISettings());
     }
 
@@ -39,7 +39,7 @@ public class ClientGUI {
      * @param screen      new modular screen
      * @param jeiSettings custom jei settings
      */
-    public static void open(@NotNull ModularScreen screen, @NotNull RecipeViewerSettingsImpl jeiSettings) {
+    public static void open(@NonNull ModularScreen screen, @NonNull RecipeViewerSettingsImpl jeiSettings) {
         GuiManager.openScreen(screen, new UISettings(jeiSettings));
     }
 
@@ -50,7 +50,7 @@ public class ClientGUI {
      * @param screen    new modular screen
      * @param container custom container
      */
-    public static void open(@NotNull ModularScreen screen, @Nullable IntFunction<ModularContainerMenu> container) {
+    public static void open(@NonNull ModularScreen screen, @Nullable IntFunction<ModularContainerMenu> container) {
         UISettings settings = new UISettings();
         settings.customContainer(container);
         GuiManager.openScreen(screen, settings);
@@ -64,7 +64,7 @@ public class ClientGUI {
      * @param jeiSettings custom jei settings
      * @param container   custom container
      */
-    public static void open(@NotNull ModularScreen screen, @NotNull RecipeViewerSettingsImpl jeiSettings,
+    public static void open(@NonNull ModularScreen screen, @NonNull RecipeViewerSettingsImpl jeiSettings,
                             @Nullable IntFunction<ModularContainerMenu> container) {
         UISettings settings = new UISettings(jeiSettings);
         settings.customContainer(container);
@@ -78,7 +78,7 @@ public class ClientGUI {
      * @param screen   new modular screen
      * @param settings ui settings
      */
-    public static void open(@NotNull ModularScreen screen, @NotNull UISettings settings) {
+    public static void open(@NonNull ModularScreen screen, @NonNull UISettings settings) {
         GuiManager.openScreen(screen, settings);
     }
 

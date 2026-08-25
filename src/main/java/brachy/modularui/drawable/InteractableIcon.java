@@ -9,7 +9,7 @@ import brachy.modularui.screen.viewport.GuiContext;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
@@ -45,7 +45,7 @@ public class InteractableIcon extends DelegateIcon implements Interactable {
     }
 
     @Override
-    public @NotNull Result onMousePressed(int button) {
+    public @NonNull Result onMousePressed(int button) {
         if (this.mousePressed != null && this.mousePressed.press(getContext(), button)) {
             playClickSound();
             return Result.SUCCESS;
@@ -58,7 +58,7 @@ public class InteractableIcon extends DelegateIcon implements Interactable {
         return this.mouseReleased != null && this.mouseReleased.release(getContext(), button);
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Result onMouseTapped(int button) {
         if (this.mouseTapped != null && this.mouseTapped.press(getContext(), button)) {
@@ -69,7 +69,7 @@ public class InteractableIcon extends DelegateIcon implements Interactable {
     }
 
     @Override
-    public @NotNull Result onKeyPressed(int keyCode, int scanCode, int modifiers) {
+    public @NonNull Result onKeyPressed(int keyCode, int scanCode, int modifiers) {
         if (this.keyPressed != null && this.keyPressed.press(getContext(), modifiers)) {
             return Result.SUCCESS;
         }
@@ -81,7 +81,7 @@ public class InteractableIcon extends DelegateIcon implements Interactable {
         return this.keyReleased != null && this.keyReleased.release(getContext(), keyCode, scanCode, modifiers);
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Result onKeyTapped(int keyCode, int scanCode, int modifiers) {
         if (this.keyTapped != null && this.keyTapped.press(getContext(), modifiers)) {

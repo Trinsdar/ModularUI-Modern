@@ -66,7 +66,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
@@ -620,7 +620,7 @@ public class BaseSchemaRenderer implements IDrawable {
     protected void onRendered() {}
 
     @ApiStatus.OverrideOnly
-    protected void onSuccessfulRayTrace(PoseStack poseStack, @NotNull BlockHitResult result) {}
+    protected void onSuccessfulRayTrace(PoseStack poseStack, @NonNull BlockHitResult result) {}
 
     @ApiStatus.OverrideOnly
     protected void onRayTraceFailed() {}
@@ -826,7 +826,7 @@ public class BaseSchemaRenderer implements IDrawable {
         protected final Set<RenderType> hasBlocks = new ObjectArraySet<>(RenderType.chunkBufferLayers().size());
         private Map<RenderType, VertexBuffer> chunkBuffers = getOrCreateChunkBuffers();
 
-        protected @NotNull Map<RenderType, VertexBuffer> getOrCreateChunkBuffers() {
+        protected @NonNull Map<RenderType, VertexBuffer> getOrCreateChunkBuffers() {
             if (this.chunkBuffers == null || this.chunkBuffers.isEmpty()) {
                 List<RenderType> chunkRenderTypes = RenderType.chunkBufferLayers();
                 this.chunkBuffers = new Reference2ObjectLinkedOpenHashMap<>();

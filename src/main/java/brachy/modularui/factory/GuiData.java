@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
@@ -24,11 +24,11 @@ import java.util.Objects;
  */
 public class GuiData {
 
-    @NotNull
+    @NonNull
     @Getter
     private final Player player;
 
-    public GuiData(@NotNull Player player) {
+    public GuiData(@NonNull Player player) {
         this.player = Objects.requireNonNull(player);
     }
 

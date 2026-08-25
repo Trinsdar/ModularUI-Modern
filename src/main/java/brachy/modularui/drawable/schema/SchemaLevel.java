@@ -49,8 +49,8 @@ import net.minecraft.world.ticks.LevelTickAccess;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.joml.Vector3fc;
 
 import java.util.Iterator;
@@ -167,7 +167,7 @@ public class SchemaLevel extends Level implements ISchema {
     }
 
     @Override
-    public @NotNull Iterator<Map.Entry<BlockPos, BlockState>> iterator() {
+    public @NonNull Iterator<Map.Entry<BlockPos, BlockState>> iterator() {
         return getFilledBlocks()
                 .map(pos -> Map.entry(pos, this.getBlockState(pos)))
                 .iterator();
@@ -281,7 +281,7 @@ public class SchemaLevel extends Level implements ISchema {
     public void gameEvent(GameEvent event, Vec3 position, GameEvent.Context context) {}
 
     @Override
-    public float getShade(@NotNull Direction direction, boolean shade) {
+    public float getShade(@NonNull Direction direction, boolean shade) {
         if (!shade) {
             return 1.0f;
         } else {

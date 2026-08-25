@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -63,12 +63,12 @@ public class SimpleUIFactory extends AbstractUIFactory<GuiData> {
     public void writeGuiData(GuiData guiData, FriendlyByteBuf buffer) {}
 
     @Override
-    public @NotNull GuiData readGuiData(Player player, FriendlyByteBuf buffer) {
+    public @NonNull GuiData readGuiData(Player player, FriendlyByteBuf buffer) {
         return new GuiData(player);
     }
 
     @Override
-    public @NotNull IUIHolder<GuiData> getGuiHolder(GuiData data) {
+    public @NonNull IUIHolder<GuiData> getGuiHolder(GuiData data) {
         if (this.guiHolder == null) {
             this.guiHolder = this.guiHolderSupplier.get();
             Objects.requireNonNull(this.guiHolder, "IUIHolder must not be null");

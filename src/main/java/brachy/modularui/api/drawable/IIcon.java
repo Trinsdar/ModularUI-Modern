@@ -8,7 +8,7 @@ import brachy.modularui.widget.sizer.Box;
 
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link IDrawable} with a fixed size.
