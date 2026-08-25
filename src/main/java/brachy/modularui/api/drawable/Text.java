@@ -82,7 +82,7 @@ public interface Text extends IDrawable {
      * @param args translation arguments
      * @return text key
      */
-    static ModularComponent lang(String key, @Nullable Object... args) {
+    static ModularComponent lang(String key, Object @Nullable... args) {
         return ModularComponent.translatable(key, args);
     }
 
