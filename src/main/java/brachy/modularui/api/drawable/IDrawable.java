@@ -31,7 +31,7 @@ import org.jspecify.annotations.Nullable;
  */
 public interface IDrawable {
 
-    static IDrawable of(IDrawable... drawables) {
+    static @Nullable IDrawable of(IDrawable @Nullable... drawables) {
         if (drawables == null || drawables.length == 0) {
             return null;
         } else if (drawables.length == 1) {
