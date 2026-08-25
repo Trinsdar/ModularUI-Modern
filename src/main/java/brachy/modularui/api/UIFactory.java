@@ -30,7 +30,6 @@ public interface UIFactory<D extends GuiData> {
      *
      * @return the factory name
      */
-    @NonNull
     ResourceLocation getFactoryName();
 
     /**

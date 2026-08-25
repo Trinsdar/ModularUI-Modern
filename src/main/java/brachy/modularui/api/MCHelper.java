@@ -55,21 +55,22 @@ public class MCHelper {
         }
     }
 
-    public static void setScreen(Screen screen) {
+    public static void setScreen(@Nullable Screen screen) {
         if (screen == null) {
             closeScreen();
         } else {
-            getMc().setScreen(screen);
+            Minecraft mc = getMc();
+            if (mc != null) mc.setScreen(screen);
         }
     }
 
     @SideOnly(Side.CLIENT)
-    public static Screen getCurrentScreen() {
+    public static @Nullable Screen getCurrentScreen() {
         return getMc() == null ? null : getMc().screen;
     }
 
     @SideOnly(Side.CLIENT)
-    public static Font getFont() {
+    public static  @Nullable Font getFont() {
         return getMc() == null ? null : getMc().font;
     }
 
