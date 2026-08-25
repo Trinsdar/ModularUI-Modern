@@ -4,7 +4,7 @@ import org.jspecify.annotations.Nullable;
 
 public abstract class BaseAnimator<A extends BaseAnimator<A>> implements IAnimator {
 
-    private IAnimator parent;
+    @Nullable private IAnimator parent;
     protected boolean reverseOnFinish = false;
     protected int repeats = 0;
 
