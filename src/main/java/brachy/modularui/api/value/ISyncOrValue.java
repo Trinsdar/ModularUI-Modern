@@ -36,7 +36,6 @@ public interface ISyncOrValue {
      * @param syncOrValue sync handler or value
      * @return a non-null representation of the given sync handler or value
      */
-    @NonNull
     static ISyncOrValue orEmpty(@Nullable ISyncOrValue syncOrValue) {
         return syncOrValue != null ? syncOrValue : EMPTY;
     }
