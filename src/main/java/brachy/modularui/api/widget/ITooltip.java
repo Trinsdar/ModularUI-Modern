@@ -6,7 +6,6 @@ import brachy.modularui.api.drawable.Text;
 import brachy.modularui.screen.RichTooltip;
 import brachy.modularui.utils.Alignment;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -27,7 +26,6 @@ public interface ITooltip<W extends ITooltip<W>> {
     /**
      * @return the current tooltip of this widget. Creates a new one if there is none
      */
-    @NonNull
     RichTooltip tooltip();
 
     /**
