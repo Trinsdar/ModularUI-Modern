@@ -5,7 +5,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 
 import lombok.Getter;
-import org.jspecify.annotations.NonNull;
 
 /**
  * See {@link GuiData} for an explanation for what this is for.
@@ -13,10 +12,9 @@ import org.jspecify.annotations.NonNull;
 @Getter
 public class SidedPosGuiData extends PosGuiData {
 
-    @NonNull
     private final Direction side;
 
-    public SidedPosGuiData(@NonNull Player player, BlockPos pos, @NonNull Direction side) {
+    public SidedPosGuiData(Player player, BlockPos pos, Direction side) {
         super(player, pos);
         this.side = side;
     }
