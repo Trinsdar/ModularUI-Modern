@@ -9,7 +9,7 @@ public class MutableObjectAnimator<T extends IAnimatable<T>> extends Animator {
     private final T from;
     private final T to;
     private final T animatable;
-    @Nullable private Consumer<T> intermediateConsumer;
+    private @Nullable Consumer<T> intermediateConsumer;
 
     public MutableObjectAnimator(T animatable, T from, T to) {
         this.from = from;

@@ -11,8 +11,8 @@ import java.util.Objects;
 
 public abstract class AbstractProgressDrawable<D extends AbstractProgressDrawable<D>> extends BaseProgressDrawable<D> {
 
-    @Getter @Nullable
-    private IDrawable filledTexture;
+    @Getter
+    private @Nullable IDrawable filledTexture;
 
     @Override
     public void draw(GuiContext context, int x, int y, int width, int height, WidgetTheme widgetTheme) {

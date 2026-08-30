@@ -94,8 +94,8 @@ public class ModularComponent extends MutableComponent implements Text {
 
     @Getter private Alignment alignment = Alignment.CENTER;
     @Getter private float scale = 1f;
-    @Getter @Nullable private Boolean shadow;
-    @Getter @Nullable private IntSupplier dynamicColor;
+    @Getter private @Nullable Boolean shadow;
+    @Getter private @Nullable IntSupplier dynamicColor;
 
     protected ModularComponent(ComponentContents contents, List<Component> siblings, Style style) {
         super(contents, siblings, style);

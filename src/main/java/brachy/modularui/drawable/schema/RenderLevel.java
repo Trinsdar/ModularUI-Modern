@@ -45,9 +45,8 @@ public class RenderLevel implements LevelTimeAccess {
         this.thread = Thread.currentThread();
     }
 
-    @Nullable
     @Override
-    public BlockEntity getBlockEntity(BlockPos pos) {
+    public @Nullable BlockEntity getBlockEntity(BlockPos pos) {
         BlockState state = this.level.getBlockState(pos);
         if (!this.renderFilter.shouldRender(pos, state)) {
             return null;

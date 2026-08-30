@@ -20,8 +20,7 @@ public interface IHoverable extends IIcon {
      */
     default void onHover() {}
 
-    @Nullable
-    default RichTooltip getTooltip() {
+    default @Nullable RichTooltip getTooltip() {
         return null;
     }
 

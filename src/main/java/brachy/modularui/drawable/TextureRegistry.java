@@ -60,13 +60,11 @@ public class TextureRegistry {
         registerTexture(name, texture);
     }
 
-    @Nullable
-    public static UITexture getTexture(String s) {
+    public static @Nullable UITexture getTexture(String s) {
         return TEXTURES.get(s);
     }
 
-    @Nullable
-    public static String getTextureId(UITexture texture) {
+    public static @Nullable String getTextureId(UITexture texture) {
         return REVERSE_TEXTURES.get(texture);
     }
 }

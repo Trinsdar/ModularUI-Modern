@@ -18,15 +18,13 @@ import java.util.List;
 public class MCHelper {
 
     @SuppressWarnings("DataFlowIssue")
-    @Nullable
     @SideOnly(Side.CLIENT)
-    public static Minecraft getMc() {
+    public static @Nullable Minecraft getMc() {
         return Minecraft.getInstance();
     }
 
-    @Nullable
     @SideOnly(Side.CLIENT)
-    public static Player getPlayer() {
+    public static @Nullable Player getPlayer() {
         return getMc() == null ? null : getMc().player;
     }
 

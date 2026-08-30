@@ -37,7 +37,7 @@ public class RichTextCompiler {
 
     private static final FormattedCharSequence SPACE = FormattedCharSequence.codepoint(' ', Style.EMPTY);
 
-    @Nullable private Font fr;
+    private @Nullable Font fr;
     private int maxWidth;
 
     private List<ITextLine> lines = new ArrayList<>();

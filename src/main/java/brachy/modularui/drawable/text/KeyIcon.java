@@ -22,7 +22,7 @@ public class KeyIcon implements IIcon {
 
     @Getter
     private final Text key;
-    @Nullable private Font overrideFont;
+    private @Nullable Font overrideFont;
     private final Box margin = new Box();
     private boolean expandWidth, expandHeight;
 

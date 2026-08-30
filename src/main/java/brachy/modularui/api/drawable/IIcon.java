@@ -18,8 +18,7 @@ public interface IIcon extends IDrawable, TooltipComponent {
     /**
      * @return the drawable this icon wraps or null if it doesn't wrap anything
      */
-    @Nullable
-    IDrawable getWrappedDrawable();
+    @Nullable IDrawable getWrappedDrawable();
 
     /**
      * @return width of this icon or 0 if the width should be dynamic

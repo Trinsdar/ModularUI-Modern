@@ -63,8 +63,7 @@ public class UITexture implements IDrawable {
     public final ResourceLocation location;
     @Getter public final float u0, v0, u1, v1;
     @Getter
-    @Nullable
-    public final ColorType colorType;
+    public final @Nullable ColorType colorType;
     @Getter public final boolean nonOpaque;
 
     @Getter protected int colorOverride = 0;
@@ -290,7 +289,7 @@ public class UITexture implements IDrawable {
                 .addOpt("colorOverride", Builder::colorOverride, Builder::getColorOverride, Codec.INT, 0)
                 .build();
 
-        @Getter @Nullable private ResourceLocation location;
+        @Getter private @Nullable ResourceLocation location;
         @Getter
         @Setter
         private int iw = -1, ih = -1;
@@ -298,9 +297,9 @@ public class UITexture implements IDrawable {
         @Getter private float u0 = 0, v0 = 0, u1 = 1, v1 = 1;
         @Getter private Mode mode = Mode.FULL;
         @Getter private int bl = 0, bt = 0, br = 0, bb = 0;
-        @Getter @Nullable private String name;
+        @Getter private @Nullable String name;
         @Getter private boolean tiled = false;
-        @Getter @Nullable private ColorType colorType = null;
+        @Getter private @Nullable ColorType colorType = null;
         @Getter private boolean nonOpaque = false;
         @Getter private int colorOverride = 0;
 

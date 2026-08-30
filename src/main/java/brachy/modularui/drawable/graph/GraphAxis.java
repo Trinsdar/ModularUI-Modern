@@ -39,7 +39,7 @@ public class GraphAxis {
     @Getter
     public MinorTickFinder minorTickFinder = new AutoMinorTickFinder(2);
     @Getter
-    @Nullable public String label;
+    public @Nullable String label;
     @Getter
     public double min, max;
     public boolean autoLimits = true;

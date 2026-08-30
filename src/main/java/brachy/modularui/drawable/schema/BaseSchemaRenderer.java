@@ -98,10 +98,10 @@ public class BaseSchemaRenderer implements IDrawable {
     private final RenderLevel renderLevel;
     private final Viewport viewport = new Viewport();
     @Getter private final Camera camera = new Camera();
-    @Getter @Nullable private BlockHitResult lastRayTrace = null;
+    @Getter private @Nullable BlockHitResult lastRayTrace = null;
     @Getter private RenderFilter renderFilter = RenderFilter.ALL;
 
-    @Nullable private RenderCompileTask lastRenderCompileTask = null;
+    private @Nullable RenderCompileTask lastRenderCompileTask = null;
     private final ChunkBufferBuilderPack chunkBufferBuilders;
     private final AtomicReference<@Nullable CompileStatus> compileStatus = new AtomicReference<>();
     private final AtomicReference<@Nullable RenderCompileResults> compiledRenderResult = new AtomicReference<>();

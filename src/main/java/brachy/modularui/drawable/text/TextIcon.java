@@ -41,8 +41,7 @@ public class TextIcon implements IIcon {
     }
 
     @Override
-    @Nullable
-    public IIcon getWrappedDrawable() {
+    public @Nullable IIcon getWrappedDrawable() {
         return null;
     }
 

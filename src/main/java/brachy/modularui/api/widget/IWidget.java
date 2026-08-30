@@ -376,8 +376,7 @@ public interface IWidget extends ITreeNode<IWidget> {
         return true;
     }
 
-    @Nullable
-    String getName();
+    @Nullable String getName();
 
     /**
      * The type name of this widget. This is used for codecs.

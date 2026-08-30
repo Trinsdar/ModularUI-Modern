@@ -20,8 +20,8 @@ public class Animator extends BaseAnimator<Animator> implements IAnimator {
     private int duration = 250;
     @Getter
     private IInterpolation curve = Interpolation.LINEAR;
-    @Nullable private DoublePredicate onUpdate;
-    @Nullable private Runnable onFinish;
+    private @Nullable DoublePredicate onUpdate;
+    private @Nullable Runnable onFinish;
 
     private int progress = 0;
 

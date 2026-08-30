@@ -71,15 +71,15 @@ public class RichText implements IDrawable, IRichTextBuilder<RichText> {
             .build();
 
     private final List<Object> elements = new ArrayList<>();
-    @Nullable private TooltipLines componentList;
+    private @Nullable TooltipLines componentList;
     @Getter private Alignment alignment = Alignment.CenterLeft;
     @Getter private float scale = 1f;
-    @Getter @Nullable private Integer color = null;
-    @Getter @Nullable private Boolean shadow = null;
+    @Getter private @Nullable Integer color = null;
+    @Getter private @Nullable Boolean shadow = null;
 
     private int cursor = 0;
     private boolean cursorLocked = false;
-    @Nullable private List<ITextLine> cachedText;
+    private @Nullable List<ITextLine> cachedText;
 
     private boolean verified = false;
 

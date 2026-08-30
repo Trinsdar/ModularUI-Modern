@@ -56,8 +56,7 @@ public interface IDraggable {
     /**
      * @return the size and pos during move
      */
-    @Nullable
-    Area getMovingArea();
+    @Nullable Area getMovingArea();
 
     boolean isMoving();
 

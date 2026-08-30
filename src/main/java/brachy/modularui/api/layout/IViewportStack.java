@@ -213,6 +213,5 @@ public interface IViewportStack {
     /**
      * @return the top matrix or null if stack is empty
      */
-    @Nullable
-    TransformationMatrix peek();
+    @Nullable TransformationMatrix peek();
 }

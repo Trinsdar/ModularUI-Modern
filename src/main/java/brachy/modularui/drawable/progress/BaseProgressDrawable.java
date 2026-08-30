@@ -17,9 +17,8 @@ import java.util.function.DoubleSupplier;
 
 public abstract class BaseProgressDrawable<D extends BaseProgressDrawable<D>> implements IDrawable {
 
-    @Getter @Nullable
-    private IDrawable emptyBackground;
-    @Getter @Nullable private DoubleSupplier progress;
+    @Getter private @Nullable IDrawable emptyBackground;
+    @Getter private @Nullable DoubleSupplier progress;
     @Getter protected float progressStepSize = 0;
 
     @Override

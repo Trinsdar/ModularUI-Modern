@@ -7,8 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 public interface IAnimator {
 
-    @Nullable
-    IAnimator getParent();
+    @Nullable IAnimator getParent();
 
     default void animate(boolean reverse) {
         reset(reverse);

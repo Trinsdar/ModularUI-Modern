@@ -20,8 +20,7 @@ public interface ITooltip<W extends ITooltip<W>> {
     /**
      * @return the current tooltip of this widget. Null if there is none
      */
-    @Nullable
-    RichTooltip getTooltip();
+    @Nullable RichTooltip getTooltip();
 
     /**
      * @return the current tooltip of this widget. Creates a new one if there is none

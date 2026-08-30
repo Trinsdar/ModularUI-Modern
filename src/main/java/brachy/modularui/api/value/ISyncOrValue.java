@@ -59,9 +59,8 @@ public interface ISyncOrValue {
      * @param <T>  type to cast to
      * @return this cast sync handler or value
      */
-    @Nullable
     @SuppressWarnings("unchecked")
-    default <T> T castNullable(Class<T> type) {
+    default <T> @Nullable T castNullable(Class<T> type) {
         return type.isAssignableFrom(getClass()) ? (T) this : null;
     }
 
@@ -74,8 +73,7 @@ public interface ISyncOrValue {
      * @param <V>       expected type of the containing value
      * @return a {@link IValue IValue&lt;V&gt;} if types match or null
      */
-    @Nullable
-    default <V> IValue<V> castValueNullable(Class<V> valueType) {
+    default <V> @Nullable IValue<V> castValueNullable(Class<V> valueType) {
         return null;
     }
 

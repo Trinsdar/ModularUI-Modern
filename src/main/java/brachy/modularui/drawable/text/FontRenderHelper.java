@@ -52,8 +52,7 @@ public class FontRenderHelper {
      * @param c formatting character
      * @return formatting for character or null
      */
-    @Nullable
-    public static ChatFormatting getForCharacter(char c) {
+    public static @Nullable ChatFormatting getForCharacter(char c) {
         if (c < min || c > max) return null;
         return formattingMap[c - min];
     }
