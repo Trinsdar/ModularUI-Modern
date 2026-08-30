@@ -2,21 +2,20 @@ package brachy.modularui.api.value;
 
 import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A value wrapper for widgets.
  *
  * @param <T> value type
  */
-@NullUnmarked
-public interface IValue<T> extends ISyncOrValue {
+public interface IValue<T extends @Nullable Object> extends ISyncOrValue {
 
     /**
      * Gets the current value.
      *
      * @return the current value
      */
-    @UnknownNullability
     T getValue();
 
     /**
@@ -24,7 +23,7 @@ public interface IValue<T> extends ISyncOrValue {
      *
      * @param value new value
      */
-    void setValue(@UnknownNullability T value);
+    void setValue(T value);
 
     default T getOrDefault(T defaultValue) {
         T t = getValue();
