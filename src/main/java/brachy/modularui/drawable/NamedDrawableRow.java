@@ -15,9 +15,9 @@ import java.util.Objects;
 public class NamedDrawableRow implements IDrawable {
 
     @Getter
-    private Text name;
+    private @Nullable Text name;
     @Getter
-    private IIcon drawable;
+    private @Nullable IIcon drawable;
 
     public NamedDrawableRow() {
         this(null, null);

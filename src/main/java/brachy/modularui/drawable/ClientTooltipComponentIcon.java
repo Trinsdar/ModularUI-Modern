@@ -16,7 +16,7 @@ import org.jspecify.annotations.Nullable;
 public class ClientTooltipComponentIcon implements IIcon {
 
     @Getter private final ClientTooltipComponent clientTooltipComponent;
-    private Font lastFont;
+    private @Nullable Font lastFont;
 
     public ClientTooltipComponentIcon(ClientTooltipComponent clientTooltipComponent) {
         this.clientTooltipComponent = clientTooltipComponent;

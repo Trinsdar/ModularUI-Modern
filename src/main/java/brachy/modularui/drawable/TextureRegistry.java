@@ -22,7 +22,7 @@ public class TextureRegistry {
         }
     }
 
-    public static synchronized void registerTexture(String name, UITexture texture) {
+    public static synchronized void registerTexture(@Nullable String name, UITexture texture) {
         String current = REVERSE_TEXTURES.get(texture);
         if (current != null) {
             if (name != null && !current.equals(name)) {

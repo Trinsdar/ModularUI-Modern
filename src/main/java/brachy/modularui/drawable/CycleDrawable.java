@@ -40,6 +40,7 @@ public class CycleDrawable implements IDrawable {
     }
 
     public CycleDrawable(Iterable<IDrawable> drawables) {
+        //noinspection NullableProblems
         this(Iterables.toArray(drawables, IDrawable.class));
     }
 
@@ -75,6 +76,7 @@ public class CycleDrawable implements IDrawable {
     }
 
     public CycleDrawable drawables(Iterable<IDrawable> drawables) {
+        //noinspection NullableProblems
         return drawables(Iterables.toArray(drawables, IDrawable.class));
     }
 

@@ -290,7 +290,7 @@ public class UITexture implements IDrawable {
                 .addOpt("colorOverride", Builder::colorOverride, Builder::getColorOverride, Codec.INT, 0)
                 .build();
 
-        @Getter private ResourceLocation location;
+        @Getter @Nullable private ResourceLocation location;
         @Getter
         @Setter
         private int iw = -1, ih = -1;
@@ -298,9 +298,9 @@ public class UITexture implements IDrawable {
         @Getter private float u0 = 0, v0 = 0, u1 = 1, v1 = 1;
         @Getter private Mode mode = Mode.FULL;
         @Getter private int bl = 0, bt = 0, br = 0, bb = 0;
-        @Getter private String name;
+        @Getter @Nullable private String name;
         @Getter private boolean tiled = false;
-        @Getter private ColorType colorType = null;
+        @Getter @Nullable private ColorType colorType = null;
         @Getter private boolean nonOpaque = false;
         @Getter private int colorOverride = 0;
 
@@ -528,7 +528,7 @@ public class UITexture implements IDrawable {
          *
          * @param name texture name
          */
-        public Builder name(String name) {
+        public Builder name(@Nullable String name) {
             this.name = name;
             return this;
         }
@@ -560,7 +560,7 @@ public class UITexture implements IDrawable {
                     .resultOrPartial(s -> {
                         throw new IllegalArgumentException(s);
                     }).map(texture -> {
-                        TextureRegistry.registerTexture(this.name, texture);
+                        if (this.name != null) TextureRegistry.registerTexture(this.name, texture);
                         return texture;
                     }).map(texture -> this.colorOverride != 0 ? texture.withColorOverride(this.colorOverride) : texture)
                     .orElseThrow();
