@@ -121,7 +121,7 @@ public class OverlayStack {
         return getHoveredElement() != null;
     }
 
-    public static void onOpenScreen(Screen newScreen) {
+    public static void onOpenScreen(@Nullable Screen newScreen) {
         closeAll();
         if (newScreen != null) {
             OpenScreenEvent event = new OpenScreenEvent(newScreen);
