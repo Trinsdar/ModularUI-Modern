@@ -12,15 +12,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
-import org.jspecify.annotations.NonNull;
 
 @OnlyIn(Dist.CLIENT)
 public class ContainerScreenWrapper extends AbstractContainerScreen<ModularContainerMenu> implements IMuiScreen {
 
     @Getter
-    private final @NonNull ModularScreen screen;
+    private final ModularScreen screen;
 
-    public ContainerScreenWrapper(ModularContainerMenu container, @NonNull ModularScreen screen) {
+    public ContainerScreenWrapper(ModularContainerMenu container, ModularScreen screen) {
         super(container, container.getPlayer().getInventory(), Component.empty());
         this.screen = screen;
         this.screen.construct(this);
@@ -45,15 +44,15 @@ public class ContainerScreenWrapper extends AbstractContainerScreen<ModularConta
     }
 
     @Override
-    public void renderBackground(@NonNull GuiGraphics guiGraphics) {
+    public void renderBackground(GuiGraphics guiGraphics) {
         handleDrawBackground(guiGraphics, super::renderBackground);
     }
 
     @Override
-    protected void renderBg(@NonNull GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {}
+    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {}
 
     @Override
-    public @NonNull ModularScreen screen() {
+    public ModularScreen screen() {
         return screen;
     }
 

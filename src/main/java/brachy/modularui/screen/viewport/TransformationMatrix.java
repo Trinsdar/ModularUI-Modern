@@ -61,7 +61,7 @@ public class TransformationMatrix {
         return construct(null, null, parent, false);
     }
 
-    TransformationMatrix construct(IViewport viewport, Area area, @Nullable Matrix4f parent) {
+    TransformationMatrix construct(@Nullable IViewport viewport, Area area, @Nullable Matrix4f parent) {
         return construct(viewport, area, parent, true);
     }
 

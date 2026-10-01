@@ -40,7 +40,7 @@ public class GuiViewportStack implements IViewportStack {
     }
 
     @Override
-    public void pushViewport(IViewport viewport, Area area) {
+    public void pushViewport(@Nullable IViewport viewport, Area area) {
         Matrix4f parent = this.top == null ? null : this.top.getMatrix();
         Area child = getCurrentViewportArea();
         child.set(area);
