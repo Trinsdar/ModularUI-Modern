@@ -8,7 +8,6 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import lombok.Getter;
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -20,17 +19,17 @@ public class EnumSyncValue<T extends Enum<T>> extends ValueSyncHandler<T, EnumSy
     @Getter
     protected final Class<T> enumClass;
     private final Supplier<T> getter;
-    private final Consumer<T> setter;
+    private final @Nullable Consumer<T> setter;
     protected T cache;
 
-    public EnumSyncValue(@NonNull Class<T> enumClass, @NonNull Supplier<T> getter, @Nullable Consumer<T> setter) {
+    public EnumSyncValue(Class<T> enumClass, Supplier<T> getter, @Nullable Consumer<T> setter) {
         this.enumClass = Objects.requireNonNull(enumClass);
         this.getter = Objects.requireNonNull(getter);
         this.setter = setter;
         this.cache = getter.get();
     }
 
-    public EnumSyncValue(@NonNull Class<T> enumClass, @NonNull Supplier<T> getter) {
+    public EnumSyncValue(Class<T> enumClass, Supplier<T> getter) {
         this(enumClass, getter, (Consumer<T>) null);
     }
 

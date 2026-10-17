@@ -8,7 +8,6 @@ import brachy.modularui.utils.serialization.network.IByteBufSerializer;
 
 import net.minecraft.network.FriendlyByteBuf;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
@@ -22,9 +21,9 @@ public class GenericListSyncHandler<T> extends GenericCollectionSyncHandler<T, L
 
     private final ObjectList<T> cache = ObjectList.create();
 
-    public GenericListSyncHandler(@NonNull Supplier<List<T>> getter, @Nullable Consumer<List<T>> setter,
-                                  @NonNull IByteBufDeserializer<T> deserializer,
-                                  @NonNull IByteBufSerializer<T> serializer, @Nullable EqualityTest<T> equals,
+    public GenericListSyncHandler(Supplier<List<T>> getter, @Nullable Consumer<List<T>> setter,
+                                  IByteBufDeserializer<T> deserializer,
+                                  IByteBufSerializer<T> serializer, @Nullable EqualityTest<T> equals,
                                   @Nullable ICopy<T> copy) {
         super(getter, setter, deserializer, serializer, equals, copy);
     }

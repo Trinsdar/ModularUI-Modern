@@ -25,7 +25,6 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import static net.minecraftforge.common.capabilities.ForgeCapabilities.ITEM_HANDLER;
@@ -42,7 +41,7 @@ public class TestItem extends Item implements IUIHolder<PlayerInventoryGuiData<?
     }
 
     @Override
-    public ModularPanel<?> buildUI(PlayerInventoryGuiData<?> data, PanelSyncManager syncManager, UISettings settings) {
+    public  @Nullable ModularPanel<?> buildUI(PlayerInventoryGuiData<?> data, PanelSyncManager syncManager, UISettings settings) {
         var cap = data.getUsedItemStack().getCapability(ITEM_HANDLER);
         if (!cap.isPresent() || cap.resolve().isEmpty()) return null;
         IItemHandler itemHandler = cap.resolve().get();
@@ -75,7 +74,7 @@ public class TestItem extends Item implements IUIHolder<PlayerInventoryGuiData<?
         return new ICapabilityProvider() {
 
             @Override
-            public @NonNull <T> LazyOptional<T> getCapability(@NonNull Capability<T> cap, @Nullable Direction side) {
+            public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
                 if (cap == ITEM_HANDLER) {
                     var handler = new ItemStackHandler(4);
                     return LazyOptional.of(() -> handler).cast();

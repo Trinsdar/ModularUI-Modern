@@ -6,7 +6,6 @@ import brachy.modularui.utils.NetworkUtils;
 import net.minecraft.network.FriendlyByteBuf;
 
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -19,7 +18,7 @@ public class StringSyncValue extends AbstractGenericSyncValue<String, StringSync
         super(String.class, getter, setter);
     }
 
-    public StringSyncValue(@NonNull Supplier<String> getter) {
+    public StringSyncValue(Supplier<String> getter) {
         this(getter, (Consumer<String>) null);
     }
 

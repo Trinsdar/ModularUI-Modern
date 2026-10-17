@@ -10,7 +10,6 @@ import brachy.modularui.utils.FloatSupplier;
 import net.minecraft.network.FriendlyByteBuf;
 
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -18,16 +17,16 @@ import java.util.Objects;
 public class FloatSyncValue extends ValueSyncHandler<Float, FloatSyncValue> implements IFloatSyncValue<Float>, IDoubleSyncValue<Float>, IStringSyncValue<Float> {
 
     private final FloatSupplier getter;
-    private final FloatConsumer setter;
+    private final @Nullable FloatConsumer setter;
     private float cache;
 
-    public FloatSyncValue(@NonNull FloatSupplier getter, @Nullable FloatConsumer setter) {
+    public FloatSyncValue(FloatSupplier getter, @Nullable FloatConsumer setter) {
         this.getter = Objects.requireNonNull(getter);
         this.setter = setter;
         this.cache = getter.getAsFloat();
     }
 
-    public FloatSyncValue(@NonNull FloatSupplier getter) {
+    public FloatSyncValue(FloatSupplier getter) {
         this(getter, (FloatConsumer) null);
     }
 
@@ -59,7 +58,7 @@ public class FloatSyncValue extends ValueSyncHandler<Float, FloatSyncValue> impl
     }
 
     @Override
-    public void setValue(@NonNull Float value, boolean setSource, boolean sync) {
+    public void setValue(Float value, boolean setSource, boolean sync) {
         setFloatValue(value, setSource, sync);
     }
 

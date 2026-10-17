@@ -22,10 +22,10 @@ import java.util.function.Supplier;
  */
 public class DynamicLinkedSyncHandler<S extends ValueSyncHandler<?, ?>> extends SyncHandler<DynamicLinkedSyncHandler<S>> implements IDynamicHandler {
 
-    private IWidgetProvider<S> widgetProvider;
-    private Consumer<IWidget> onWidgetUpdate;
+    private @Nullable IWidgetProvider<S> widgetProvider;
+    private @Nullable Consumer<IWidget> onWidgetUpdate;
 
-    private IWidget lastRejectedWidget;
+    private @Nullable IWidget lastRejectedWidget;
 
     private final S linkedValue;
 
@@ -56,7 +56,7 @@ public class DynamicLinkedSyncHandler<S extends ValueSyncHandler<?, ?>> extends 
         notifyUpdate(false);
     }
 
-    private IWidget parseWidget() {
+    private @Nullable IWidget parseWidget() {
         getSyncManager().allowTemporarySyncHandlerRegistration(true);
         IWidget widget = this.widgetProvider.createWidget(getSyncManager(), this.linkedValue);
         getSyncManager().allowTemporarySyncHandlerRegistration(false);

@@ -26,11 +26,11 @@ import java.util.function.Supplier;
 @ApiStatus.Obsolete
 public class DynamicSyncHandler extends SyncHandler<DynamicSyncHandler> implements IDynamicHandler {
 
-    private IWidgetProvider widgetProvider;
-    private Consumer<IWidget> onWidgetUpdate;
+    private @Nullable IWidgetProvider widgetProvider;
+    private @Nullable Consumer<IWidget> onWidgetUpdate;
 
-    private IPacketWriter lastRejectedPacket;
-    private IWidget lastRejectedWidget;
+    private @Nullable IPacketWriter lastRejectedPacket;
+    private @Nullable IWidget lastRejectedWidget;
 
     public DynamicSyncHandler() {
         allowC2S();
@@ -60,7 +60,7 @@ public class DynamicSyncHandler extends SyncHandler<DynamicSyncHandler> implemen
         }
     }
 
-    private IWidget parseWidget(FriendlyByteBuf buf) {
+    private @Nullable IWidget parseWidget(FriendlyByteBuf buf) {
         getSyncManager().allowTemporarySyncHandlerRegistration(true);
         IWidget widget = this.widgetProvider.createWidget(getSyncManager(), buf);
         getSyncManager().allowTemporarySyncHandlerRegistration(false);

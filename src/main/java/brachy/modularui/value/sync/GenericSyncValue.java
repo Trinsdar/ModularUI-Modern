@@ -12,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -47,12 +46,12 @@ import java.util.function.Supplier;
  */
 public class GenericSyncValue<T> extends AbstractGenericSyncValue<T, GenericSyncValue<T>> {
 
-    public static GenericSyncValue<ItemStack> forItem(@NonNull Supplier<ItemStack> getter,
+    public static GenericSyncValue<ItemStack> forItem(Supplier<ItemStack> getter,
                                                       @Nullable Consumer<ItemStack> setter) {
         return new GenericSyncValue<>(ItemStack.class, getter, setter, ByteBufAdapters.ITEM_STACK);
     }
 
-    public static GenericSyncValue<FluidStack> forFluid(@NonNull Supplier<FluidStack> getter,
+    public static GenericSyncValue<FluidStack> forFluid(Supplier<FluidStack> getter,
                                                         @Nullable Consumer<FluidStack> setter) {
         return new GenericSyncValue<>(FluidStack.class, getter, setter, ByteBufAdapters.FLUID_STACK);
     }
@@ -63,29 +62,29 @@ public class GenericSyncValue<T> extends AbstractGenericSyncValue<T, GenericSync
     private final ICopy<T> copy;
 
     @ApiStatus.Obsolete
-    public GenericSyncValue(@NonNull Class<T> type,
-                            @NonNull Supplier<T> getter,
+    public GenericSyncValue(Class<T> type,
+                            Supplier<T> getter,
                             @Nullable Consumer<T> setter,
-                            @NonNull IByteBufAdapter<T> adapter,
+                            IByteBufAdapter<T> adapter,
                             @Nullable ICopy<T> copy,
                             boolean nullable) {
         this(type, getter, setter, adapter, adapter, adapter, copy, nullable);
     }
 
     @ApiStatus.Obsolete
-    public GenericSyncValue(@NonNull Class<T> type,
-                            @NonNull Supplier<T> getter,
+    public GenericSyncValue(Class<T> type,
+                            Supplier<T> getter,
                             @Nullable Consumer<T> setter,
-                            @NonNull IByteBufAdapter<T> adapter) {
+                            IByteBufAdapter<T> adapter) {
         this(type, getter, setter, adapter, adapter, adapter, null, false);
     }
 
     @ApiStatus.Obsolete
-    public GenericSyncValue(@NonNull Class<T> type,
-                            @NonNull Supplier<T> getter,
+    public GenericSyncValue(Class<T> type,
+                            Supplier<T> getter,
                             @Nullable Consumer<T> setter,
-                            @NonNull IByteBufDeserializer<T> deserializer,
-                            @NonNull IByteBufSerializer<T> serializer,
+                            IByteBufDeserializer<T> deserializer,
+                            IByteBufSerializer<T> serializer,
                             @Nullable EqualityTest<T> equals,
                             @Nullable ICopy<T> copy,
                             boolean nullable) {

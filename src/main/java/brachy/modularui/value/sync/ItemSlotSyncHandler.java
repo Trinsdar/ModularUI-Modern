@@ -23,7 +23,7 @@ public class ItemSlotSyncHandler extends SyncHandler<ItemSlotSyncHandler> {
     @Nullable
     @Getter
     private final PlayerSlotType playerSlotType;
-    private ItemStack lastStoredItem;
+    private ItemStack lastStoredItem = ItemStack.EMPTY;
     private boolean registered = false;
 
     public ItemSlotSyncHandler(ModularSlot slot) {

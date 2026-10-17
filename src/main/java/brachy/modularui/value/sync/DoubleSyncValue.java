@@ -8,7 +8,6 @@ import brachy.modularui.api.value.sync.IStringSyncValue;
 import net.minecraft.network.FriendlyByteBuf;
 
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -18,16 +17,16 @@ import java.util.function.DoubleSupplier;
 public class DoubleSyncValue extends ValueSyncHandler<Double, DoubleSyncValue> implements IDoubleSyncValue<Double>, IFloatSyncValue<Double>, IStringSyncValue<Double> {
 
     private final DoubleSupplier getter;
-    private final DoubleConsumer setter;
+    private final @Nullable DoubleConsumer setter;
     private double cache;
 
-    public DoubleSyncValue(@NonNull DoubleSupplier getter, @Nullable DoubleConsumer setter) {
+    public DoubleSyncValue(DoubleSupplier getter, @Nullable DoubleConsumer setter) {
         this.getter = Objects.requireNonNull(getter);
         this.setter = setter;
         this.cache = getter.getAsDouble();
     }
 
-    public DoubleSyncValue(@NonNull DoubleSupplier getter) {
+    public DoubleSyncValue(DoubleSupplier getter) {
         this(getter, (DoubleConsumer) null);
     }
 
@@ -64,7 +63,7 @@ public class DoubleSyncValue extends ValueSyncHandler<Double, DoubleSyncValue> i
     }
 
     @Override
-    public void setValue(@NonNull Double value, boolean setSource, boolean sync) {
+    public void setValue(Double value, boolean setSource, boolean sync) {
         setDoubleValue(value, setSource, sync);
     }
 

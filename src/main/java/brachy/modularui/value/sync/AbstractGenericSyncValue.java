@@ -15,10 +15,10 @@ public abstract class AbstractGenericSyncValue<T, S extends AbstractGenericSyncV
 
     private final Class<T> type;
     private final Supplier<T> getter;
-    private final Consumer<T> setter;
+    private final @Nullable Consumer<T> setter;
     private T cache;
 
-    protected AbstractGenericSyncValue(Class<T> type, Supplier<T> getter, Consumer<T> setter) {
+    protected AbstractGenericSyncValue(Class<T> type, Supplier<T> getter, @Nullable Consumer<T> setter) {
         this.getter = Objects.requireNonNull(getter);
         this.setter = setter;
         this.cache = getter.get();

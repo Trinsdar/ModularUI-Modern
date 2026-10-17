@@ -15,7 +15,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Map;
 import java.util.Objects;
 
-public class WidgetThemeKey<T extends WidgetTheme> implements Comparable<WidgetThemeKey<?>> {
+public class WidgetThemeKey<T extends @Nullable WidgetTheme> implements Comparable<WidgetThemeKey<?>> {
 
     private static final Map<String, WidgetThemeKey<?>> KEYS = new Object2ReferenceOpenHashMap<>();
     public static final Codec<WidgetThemeKey<?>> CODEC = CodecUtil.chainedCodec(CodecUtil.nullCodec(), ExtraCodecs.stringResolverCodec(WidgetThemeKey::getFullName, KEYS::get));

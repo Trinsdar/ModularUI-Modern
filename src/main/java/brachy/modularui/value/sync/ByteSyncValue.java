@@ -7,7 +7,6 @@ import brachy.modularui.value.ByteValue;
 import net.minecraft.network.FriendlyByteBuf;
 
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -16,13 +15,13 @@ public class ByteSyncValue extends ValueSyncHandler<Byte, ByteSyncValue> impleme
 
     private byte cache;
     private final ByteValue.Supplier getter;
-    private final ByteValue.Consumer setter;
+    private final ByteValue.@Nullable Consumer setter;
 
-    public ByteSyncValue(ByteValue.@NonNull Supplier getter) {
+    public ByteSyncValue(ByteValue.Supplier getter) {
         this(getter, (ByteValue.Consumer) null);
     }
 
-    public ByteSyncValue(ByteValue.@NonNull Supplier getter, ByteValue.@Nullable Consumer setter) {
+    public ByteSyncValue(ByteValue.Supplier getter, ByteValue.@Nullable Consumer setter) {
         this.getter = Objects.requireNonNull(getter);
         this.setter = setter;
         this.cache = getter.getByte();

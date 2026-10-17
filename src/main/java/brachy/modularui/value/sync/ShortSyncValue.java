@@ -9,7 +9,6 @@ import brachy.modularui.value.ShortValue;
 import net.minecraft.network.FriendlyByteBuf;
 
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -18,15 +17,15 @@ public class ShortSyncValue extends ValueSyncHandler<Short, ShortSyncValue> impl
 
     private short cache;
     private final ShortValue.Supplier getter;
-    private final ShortValue.Consumer setter;
+    private final ShortValue.@Nullable Consumer setter;
 
-    public ShortSyncValue(ShortValue.@NonNull Supplier getter, ShortValue.@Nullable Consumer setter) {
+    public ShortSyncValue(ShortValue.Supplier getter, ShortValue.@Nullable Consumer setter) {
         this.getter = Objects.requireNonNull(getter);
         this.setter = setter;
         this.cache = getter.getShort();
     }
 
-    public ShortSyncValue(ShortValue.@NonNull Supplier getter) {
+    public ShortSyncValue(ShortValue.Supplier getter) {
         this(getter, (ShortValue.Consumer) null);
     }
 

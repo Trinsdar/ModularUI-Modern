@@ -36,9 +36,9 @@ public class ModularSyncManager implements ISyncRegistrar<ModularSyncManager> {
     // This is used to detect if
     private final Set<String> panelHistory = new ObjectOpenHashSet<>();
     @Getter
-    private PanelSyncManager mainPSM;
+    private @Nullable PanelSyncManager mainPSM;
     @Getter
-    private ModularContainerMenu menu;
+    private @Nullable ModularContainerMenu menu;
     @Getter
     private final boolean client;
     private State state = State.INIT;
