@@ -92,20 +92,20 @@ import java.util.function.Function;
 @Accessors(fluent = true)
 public class BaseSchemaRenderer implements IDrawable {
 
-    private static final DummyLightTexture lightTexture = new DummyLightTexture();
+    protected static final DummyLightTexture lightTexture = new DummyLightTexture();
 
     @Getter private final ISchema schema;
-    private final RenderLevel renderLevel;
-    private final Viewport viewport = new Viewport();
+    protected final RenderLevel renderLevel;
+    protected final Viewport viewport = new Viewport();
     @Getter private final Camera camera = new Camera();
     @Getter private @Nullable BlockHitResult lastRayTrace = null;
     @Getter private RenderFilter renderFilter = RenderFilter.ALL;
 
-    private @Nullable RenderCompileTask lastRenderCompileTask = null;
-    private final ChunkBufferBuilderPack chunkBufferBuilders;
-    private final AtomicReference<@Nullable CompileStatus> compileStatus = new AtomicReference<>();
-    private final AtomicReference<@Nullable RenderCompileResults> compiledRenderResult = new AtomicReference<>();
-    private boolean dirty = true;
+    protected @Nullable RenderCompileTask lastRenderCompileTask = null;
+    protected final ChunkBufferBuilderPack chunkBufferBuilders;
+    protected final AtomicReference<@Nullable CompileStatus> compileStatus = new AtomicReference<>();
+    protected final AtomicReference<@Nullable RenderCompileResults> compiledRenderResult = new AtomicReference<>();
+    protected boolean dirty = true;
 
     // projection * model view matrix
     @Getter private final Matrix4f projection = new Matrix4f();
@@ -113,7 +113,7 @@ public class BaseSchemaRenderer implements IDrawable {
     @Setter
     private boolean captureDebugInfo;
     @Getter private final Vector3f openGLMousePos = new Vector3f();
-    private final List<Vector3f> pos = new ArrayList<>();
+    protected final List<Vector3f> pos = new ArrayList<>();
 
     public BaseSchemaRenderer(ISchema schema) {
         this.schema = schema;
@@ -212,10 +212,14 @@ public class BaseSchemaRenderer implements IDrawable {
         context.getGraphics().flush();
         context.graphicsPose().pushPose();
 
-        Area area = context.getScreenArea();
-        int transformX = context.transformX(x, y) + area.x();
-        int transformY = context.transformY(x, y) + area.y();
-        this.viewport.calculateOpenGLViewportFromRectangle(transformX, transformY, width, height);
+        Matrix4f pose = context.getLastGraphicsPose();
+        Vector3f min = pose.transformPosition(x, y, 0, new Vector3f());
+        Vector3f max = pose.transformPosition(x + width, y + height, 0, new Vector3f());
+        int vx = Mth.floor(Math.min(min.x, max.x));
+        int vy = Mth.floor(Math.min(min.y, max.y));
+        int vw = Mth.ceil(Math.abs(max.x - min.x));
+        int vh = Mth.ceil(Math.abs(max.y - min.y));
+        this.viewport.calculateOpenGLViewportFromRectangle(vx, vy, vw, vh);
         this.viewport.applyViewport();
 
         onSetupCamera();
