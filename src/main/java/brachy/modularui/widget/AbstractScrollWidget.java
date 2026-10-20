@@ -16,7 +16,6 @@ import brachy.modularui.widget.scroll.VerticalScrollData;
 import brachy.modularui.widget.sizer.Area;
 
 import lombok.Getter;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -85,7 +84,7 @@ public abstract class AbstractScrollWidget<I extends IWidget, W extends Abstract
         this.scrollYActive = scrollYActive;
     }
 
-    private void applyAdditionalOffset(ScrollData data) {
+    private void applyAdditionalOffset(@Nullable ScrollData data) {
         if (data != null && data.isScrollBarActive(getScrollArea())) {
             getScrollArea().getScrollPadding().scrollPadding(data.getAxis().getOther(), data.isAxisStart(),
                     data.getThickness());
@@ -99,7 +98,7 @@ public abstract class AbstractScrollWidget<I extends IWidget, W extends Abstract
     }
 
     @Override
-    public @NonNull Result onMousePressed(int button) {
+    public Result onMousePressed(int button) {
         ModularGuiContext context = getContext();
         if (this.scroll.mouseClicked(context)) {
             return Result.SUCCESS;

@@ -57,7 +57,7 @@ public interface IWidget extends ITreeNode<IWidget> {
      * @return the parent of this widget
      */
     @Override
-    IWidget getParent();
+    @Nullable IWidget getParent();
 
     @Override
     default boolean hasParent() {
@@ -67,12 +67,12 @@ public interface IWidget extends ITreeNode<IWidget> {
     /**
      * @return the context the current screen
      */
-    ModularGuiContext getContext();
+    @Nullable ModularGuiContext getContext();
 
     /**
      * @return the panel this widget is in
      */
-    ModularPanel<?> getPanel();
+    @Nullable ModularPanel<?> getPanel();
 
     /**
      * @return the area this widget occupies
@@ -329,9 +329,9 @@ public interface IWidget extends ITreeNode<IWidget> {
     /**
      * @return resizer of this widget
      */
-    StandardResizer resizer();
+    @Nullable StandardResizer resizer();
 
-    default IWidget resizerBuilder(Consumer<StandardResizer> builder) {
+    default IWidget resizerBuilder(Consumer<@Nullable StandardResizer> builder) {
         builder.accept(resizer());
         return this;
     }
@@ -372,7 +372,7 @@ public interface IWidget extends ITreeNode<IWidget> {
         do {
             if (!parent.isEnabled()) return false;
             parent = parent.getParent();
-        } while (parent.hasParent());
+        } while (parent != null && parent.hasParent());
         return true;
     }
 
@@ -391,11 +391,11 @@ public interface IWidget extends ITreeNode<IWidget> {
         return name.equals(getName());
     }
 
-    default boolean isType(Class<? extends IWidget> type) {
+    default boolean isType(Class<? extends @Nullable IWidget> type) {
         return type.isAssignableFrom(getClass());
     }
 
-    default boolean isNameAndType(String name, Class<? extends IWidget> type) {
+    default boolean isNameAndType(String name, Class<? extends @Nullable IWidget> type) {
         return isName(name) && isType(type);
     }
 }

@@ -37,7 +37,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -362,7 +361,7 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
      * @return the tooltip object of this widget and creates a new one if there is currently none.
      */
     @Override
-    public @NonNull RichTooltip tooltip() {
+    public RichTooltip tooltip() {
         if (this.tooltip == null) {
             this.tooltip = new RichTooltip().parent(this);
         }
@@ -834,7 +833,7 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
      * @throws IllegalStateException if this widget has no sync handler ({@link #isSynced()} returns false)
      */
     @Override
-    public @NonNull SyncHandler<?> getSyncHandler() {
+    public SyncHandler<?> getSyncHandler() {
         if (this.syncHandler == null) {
             throw new IllegalStateException("Widget is not initialised or not synced!");
         }
@@ -862,7 +861,7 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
     }
 
     @MustBeInvokedByOverriders
-    protected void setSyncOrValue(@NonNull ISyncOrValue syncOrValue) {
+    protected void setSyncOrValue(ISyncOrValue syncOrValue) {
         if (!syncOrValue.isSyncHandler() && !syncOrValue.isValueHandler()) return;
         checkValidSyncOrValue(syncOrValue);
         if (syncOrValue instanceof SyncHandler<?> syncHandler) this.syncHandler = syncHandler;

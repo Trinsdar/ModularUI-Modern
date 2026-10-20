@@ -16,7 +16,7 @@ import org.jspecify.annotations.Nullable;
 
 public class DragHandle extends Widget<DragHandle> implements IDraggable, IViewport {
 
-    private IDraggable parentDraggable;
+    private @Nullable IDraggable parentDraggable;
 
     @Override
     public void onInit() {

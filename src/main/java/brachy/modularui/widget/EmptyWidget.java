@@ -10,7 +10,6 @@ import brachy.modularui.widget.sizer.StandardResizer;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -26,7 +25,7 @@ public class EmptyWidget implements IWidget {
     @Getter
     public boolean enabled = true;
     @Getter
-    private IWidget parent;
+    private @Nullable IWidget parent;
 
     @Override
     public ModularScreen getScreen() {
@@ -34,7 +33,7 @@ public class EmptyWidget implements IWidget {
     }
 
     @Override
-    public void initialise(@NonNull IWidget parent, boolean late) {
+    public void initialise(IWidget parent, boolean late) {
         this.parent = parent;
         getArea().z(parent.getArea().z() + 1);
     }
@@ -50,7 +49,7 @@ public class EmptyWidget implements IWidget {
     }
 
     @Override
-    public @NonNull ModularPanel<?> getPanel() {
+    public ModularPanel<?> getPanel() {
         return this.parent.getPanel();
     }
 
@@ -95,7 +94,7 @@ public class EmptyWidget implements IWidget {
     }
 
     @Override
-    public @NonNull StandardResizer resizer() {
+    public StandardResizer resizer() {
         return this.resizer;
     }
 

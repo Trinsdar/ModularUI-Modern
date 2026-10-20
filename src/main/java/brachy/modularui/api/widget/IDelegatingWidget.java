@@ -6,7 +6,7 @@ import org.jspecify.annotations.Nullable;
 
 public interface IDelegatingWidget extends IWidget, IVanillaSlot {
 
-    IWidget getDelegate();
+    @Nullable IWidget getDelegate();
 
     @Override
     default @Nullable Slot getVanillaSlot() {
