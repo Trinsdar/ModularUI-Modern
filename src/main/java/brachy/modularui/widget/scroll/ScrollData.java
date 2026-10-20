@@ -74,7 +74,7 @@ public abstract class ScrollData {
     @Getter
     @Setter
     private boolean cancelScrollEdge = true;
-    private IDrawable scrollbar;
+    private @Nullable IDrawable scrollbar;
 
     @Getter
     @Setter
