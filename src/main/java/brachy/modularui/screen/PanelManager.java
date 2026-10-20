@@ -192,6 +192,11 @@ public class PanelManager {
         openPanel(panel, true);
     }
 
+    @ApiStatus.Internal
+    public void removePanelHandler(IPanelHandler panelHandler) {
+        this.panelHandlerMap.values().removeIf(handler -> handler == panelHandler);
+    }
+
     public void closePanel(ModularPanel<?> panel) {
         if (!hasOpenPanel(panel)) {
             throw new IllegalArgumentException("Panel '" + panel.getName() + "' is open in this screen!");
