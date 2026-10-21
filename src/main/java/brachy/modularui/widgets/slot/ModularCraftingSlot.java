@@ -16,7 +16,6 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
@@ -33,10 +32,10 @@ import java.util.function.Consumer;
 @SuppressWarnings("unused")
 public class ModularCraftingSlot extends ModularSlot {
 
-    private CraftingContainerWrapper craftSlots;
+    private @Nullable CraftingContainerWrapper craftSlots;
     private int cols = 3, rows = 3;
     private int inputStartIndex;
-    private IItemHandlerModifiable inputInventory;
+    private @Nullable IItemHandlerModifiable inputInventory;
 
     private int amountCrafted;
     private final Consumer<Slot> slotChangeListener = this::updateCraftResult;
@@ -129,7 +128,7 @@ public class ModularCraftingSlot extends ModularSlot {
      * stack.
      */
     @Override
-    public @NonNull ItemStack remove(int amount) {
+    public ItemStack remove(int amount) {
         if (this.hasItem()) {
             this.amountCrafted += Math.min(amount, this.getItem().getCount());
         }
@@ -142,7 +141,7 @@ public class ModularCraftingSlot extends ModularSlot {
      * internal count then calls onCrafting(item).
      */
     @Override
-    protected void onQuickCraft(@NonNull ItemStack stack, int amount) {
+    protected void onQuickCraft(ItemStack stack, int amount) {
         this.amountCrafted += amount;
         this.checkTakeAchievements(stack);
     }
@@ -156,7 +155,7 @@ public class ModularCraftingSlot extends ModularSlot {
      * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood.
      */
     @Override
-    protected void checkTakeAchievements(@NonNull ItemStack stack) {
+    protected void checkTakeAchievements(ItemStack stack) {
         if (this.amountCrafted > 0) {
             stack.onCraftedBy(getPlayer().level(), getPlayer(), this.amountCrafted);
             ForgeEventFactory.firePlayerCraftingEvent(getPlayer(), stack, this.getCraftSlots());
@@ -177,7 +176,7 @@ public class ModularCraftingSlot extends ModularSlot {
     }
 
     @Override
-    public void onTake(@NonNull Player player, @NonNull ItemStack stack) {
+    public void onTake(Player player, ItemStack stack) {
         this.checkTakeAchievements(stack);
 
         ForgeHooks.setCraftingPlayer(player);
@@ -210,7 +209,7 @@ public class ModularCraftingSlot extends ModularSlot {
         updateCraftResult(null);
     }
 
-    protected void updateCraftResult(Slot slot) {
+    protected void updateCraftResult(@Nullable Slot slot) {
         // don't check possible crafting recipes if this is the slot that changed
         if (slot == this) return;
         // acts as a side check and a cast
