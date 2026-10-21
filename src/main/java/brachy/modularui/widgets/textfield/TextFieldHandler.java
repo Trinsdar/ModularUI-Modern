@@ -291,7 +291,7 @@ public class TextFieldHandler {
         onChanged();
     }
 
-    private Point insert(List<String> text, List<String> insertion) {
+    private @Nullable Point insert(List<String> text, List<String> insertion) {
         if (insertion.isEmpty() || (insertion.size() > 1 && text.size() + insertion.size() - 1 > this.maxLines)) {
             return null;
         }

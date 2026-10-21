@@ -15,7 +15,6 @@ import brachy.modularui.widget.sizer.Box;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import lombok.Getter;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -144,7 +143,7 @@ public class Grid extends AbstractScrollWidget<IWidget, Grid> implements ILayout
     }
 
     @Override
-    public @NonNull List<IWidget> getChildren() {
+    public List<IWidget> getChildren() {
         if (this.dirty) {
             makeFlatList();
             this.dirty = false;
@@ -233,7 +232,7 @@ public class Grid extends AbstractScrollWidget<IWidget, Grid> implements ILayout
         return this;
     }
 
-    public Grid row(@NonNull IWidget... row) {
+    public Grid row(IWidget... row) {
         Objects.requireNonNull(row);
         return row(new ArrayList<>(Arrays.asList(row)));
     }
@@ -517,13 +516,11 @@ public class Grid extends AbstractScrollWidget<IWidget, Grid> implements ILayout
 
     public interface GridPosMapper<I> {
 
-        @Nullable
-        I apply(int xIndex, int yIndex, int index);
+        @Nullable I apply(int xIndex, int yIndex, int index);
     }
 
     public interface GridPosElementMapper<T, I> {
 
-        @Nullable
-        I apply(int xIndex, int yIndex, int index, T element);
+        @Nullable I apply(int xIndex, int yIndex, int index, T element);
     }
 }
