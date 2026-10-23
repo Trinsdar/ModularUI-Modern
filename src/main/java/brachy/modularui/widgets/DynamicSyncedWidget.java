@@ -7,8 +7,6 @@ import brachy.modularui.value.sync.DynamicSyncHandler;
 import brachy.modularui.widget.Widget;
 import brachy.modularui.widgets.dynamic.IDynamicHandler;
 
-import org.jspecify.annotations.NonNull;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -22,19 +20,19 @@ public class DynamicSyncedWidget<W extends DynamicSyncedWidget<W>> extends Widge
     private IWidget child;
 
     @Override
-    public boolean isValidSyncOrValue(@NonNull ISyncOrValue syncOrValue) {
+    public boolean isValidSyncOrValue(ISyncOrValue syncOrValue) {
         return syncOrValue.isTypeOrEmpty(IDynamicHandler.class);
     }
 
     @Override
-    protected void setSyncOrValue(@NonNull ISyncOrValue syncOrValue) {
+    protected void setSyncOrValue(ISyncOrValue syncOrValue) {
         super.setSyncOrValue(syncOrValue);
         this.syncHandler = syncOrValue.castNullable(IDynamicHandler.class);
         if (this.syncHandler != null) this.syncHandler.attachDynamicWidgetListener(this::updateChild);
     }
 
     @Override
-    public @NonNull List<IWidget> getChildren() {
+    public List<IWidget> getChildren() {
         if (this.child == null) {
             return Collections.emptyList();
         } else {
@@ -55,7 +53,7 @@ public class DynamicSyncedWidget<W extends DynamicSyncedWidget<W>> extends Widge
         }
     }
 
-    public @NonNull IDynamicHandler getDynamicSyncHandler() {
+    public IDynamicHandler getDynamicSyncHandler() {
         return syncHandler;
     }
 
